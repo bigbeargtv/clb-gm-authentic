@@ -703,6 +703,74 @@ nav{
   display:inline-block;
 }
 
+
+/* ── BACKUP / RESTORE ── */
+.backup-btn{
+  display:none;align-items:center;gap:5px;
+  background:none;border:1.5px solid var(--bdr2);color:var(--text2);
+  padding:5px 11px;border-radius:20px;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .18s;
+  margin-left:6px;
+}
+.admin-mode .backup-btn{display:flex;}
+.backup-btn:hover{border-color:var(--green);color:var(--green);}
+
+#backup-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(80,90,120,.55);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+#backup-modal-overlay.on{display:flex;animation:fadeIn .2s ease;}
+#backup-modal{
+  background:var(--s1);border:1px solid var(--bdr2);border-radius:22px;
+  padding:24px 20px;width:calc(100% - 32px);max-width:380px;
+  box-shadow:0 8px 40px rgba(0,0,0,.18);animation:slideUp .22s ease;
+}
+.bk-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px;margin-bottom:4px;}
+.bk-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
+.bk-section{margin-bottom:16px;}
+.bk-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.bk-btn-export{
+  width:100%;padding:12px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--green),#2ecc8a);
+  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bk-btn-export:hover{opacity:.9;}
+.bk-drop{
+  border:2px dashed var(--bdr2);border-radius:12px;padding:16px;
+  text-align:center;cursor:pointer;transition:all .18s;
+  font-size:13px;color:var(--muted);font-weight:700;
+  background:var(--s2);position:relative;overflow:hidden;
+}
+.bk-drop:hover,.bk-drop.drag{border-color:var(--gold);color:var(--gold);background:#f0b4290a;}
+.bk-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.bk-snapshots{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;}
+.bk-snap{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  background:var(--s2);border:1px solid var(--bdr);border-radius:10px;
+}
+.bk-snap-info{flex:1;font-size:12px;}
+.bk-snap-time{font-weight:800;color:var(--text);}
+.bk-snap-meta{color:var(--muted);font-size:11px;margin-top:1px;}
+.bk-snap-restore{
+  padding:5px 12px;border:1.5px solid var(--gold);border-radius:8px;
+  background:transparent;color:var(--gold);font-size:12px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;
+}
+.bk-snap-restore:hover{background:var(--gold);color:#111;}
+.bk-snap-del{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;
+  border-radius:5px;transition:all .15s;
+}
+.bk-snap-del:hover{color:var(--red);}
+.bk-close{
+  width:100%;padding:10px;border:1.5px solid var(--bdr2);border-radius:12px;
+  background:transparent;color:var(--text2);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;margin-top:6px;
+}
+
 </style>
 </div>
 
@@ -719,6 +787,7 @@ nav{
     <span id="saveLabel">Đã lưu</span>
   </div>
   <button class="admin-lock-btn" id="adminBtn" onclick="toggleAdminModal()">🔒 Admin</button>
+  <button class="backup-btn" onclick="openBackup()">💾 Backup</button>
 </header>
 
 <nav>
@@ -840,6 +909,36 @@ nav{
     </div>
   </div>
   <div id="quy-content"><div class="empty"><span class="ei">💰</span>Chưa có dữ liệu quỹ.</div></div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div id="backup-modal-overlay" onclick="closeBackup(event)">
+  <div id="backup-modal">
+    <div class="bk-title">💾 Backup & Restore</div>
+    <div class="bk-sub">Xuất dữ liệu ra file hoặc khôi phục từ file backup / snapshot tự động.</div>
+
+    <div class="bk-section">
+      <div class="bk-label">📤 Xuất dữ liệu</div>
+      <button class="bk-btn-export" onclick="exportBackup()">⬇️ Tải file backup (.json)</button>
+    </div>
+
+    <div class="bk-section">
+      <div class="bk-label">📥 Nhập từ file backup</div>
+      <div class="bk-drop" id="bk-drop">
+        📂 Kéo thả hoặc bấm để chọn file .json
+        <input type="file" accept=".json" onchange="importBackup(this)">
+      </div>
+    </div>
+
+    <div class="bk-section">
+      <div class="bk-label">🕐 Snapshots tự động <span style="font-size:10px;font-weight:400;color:var(--muted)">(lưu mỗi khi có thay đổi, giữ 10 bản)</span></div>
+      <div class="bk-snapshots" id="bk-snapshots">
+        <div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">Chưa có snapshot nào.</div>
+      </div>
+    </div>
+
+    <button class="bk-close" onclick="closeBackup()">✕ Đóng</button>
+  </div>
 </div>
 
 <!-- EDIT MEMBER MODAL -->
@@ -1066,6 +1165,139 @@ function renderMembers(){
   ).join('');
 }
 
+
+
+// ─── BACKUP & RESTORE ───
+const SNAP_KEY = 'gma_snapshots';
+const MAX_SNAPS = 10;
+
+function getCurrentData(){
+  return { members, memberUid, matches, matchUid, tgt, cat, sessionDate,
+           exportedAt: new Date().toISOString(), version: 1 };
+}
+
+function exportBackup(){
+  const data = getCurrentData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const fname = 'gma-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
+  a.href=url; a.download=fname; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.members || !data.matches){ alert('File không hợp lệ!'); return; }
+      if(!confirm('Khôi phục từ file backup? Toàn bộ dữ liệu hiện tại sẽ bị thay thế!')) return;
+      saveSnapshot('Trước khi restore'); // auto-save current before restoring
+      applyBackupData(data);
+      alert('✅ Khôi phục thành công! ' + data.members.length + ' thành viên, ' + data.matches.length + ' trận.');
+      closeBackup();
+    }catch(err){ alert('Lỗi đọc file: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function applyBackupData(data){
+  members   = data.members   || [];
+  memberUid = data.memberUid || 1;
+  matches   = data.matches   || [];
+  matchUid  = data.matchUid  || 1;
+  tgt       = data.tgt       || 11;
+  cat       = data.cat       || 'nam';
+  sessionDate = data.sessionDate || '';
+  renderMembers(); renderMatches();
+  const dateEl = document.getElementById('sessionDate');
+  if(dateEl && sessionDate) dateEl.value = sessionDate;
+  save(); // push to Firebase
+}
+
+// ── Snapshots (localStorage) ──
+function saveSnapshot(label){
+  try{
+    const snaps = getSnapshots();
+    const snap = {
+      id: Date.now(),
+      label: label || 'Auto',
+      time: new Date().toLocaleString('vi-VN'),
+      memberCount: members.length,
+      matchCount: matches.filter(m=>m.saved).length,
+      data: getCurrentData()
+    };
+    snaps.unshift(snap);
+    if(snaps.length > MAX_SNAPS) snaps.splice(MAX_SNAPS);
+    localStorage.setItem(SNAP_KEY, JSON.stringify(snaps));
+  }catch(e){}
+}
+
+function getSnapshots(){
+  try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'[]'); }
+  catch(e){ return []; }
+}
+
+function deleteSnapshot(id){
+  const snaps = getSnapshots().filter(s=>s.id!==id);
+  localStorage.setItem(SNAP_KEY, JSON.stringify(snaps));
+  renderSnapshotList();
+}
+
+function restoreSnapshot(id){
+  const snap = getSnapshots().find(s=>s.id===id);
+  if(!snap) return;
+  if(!confirm('Khôi phục snapshot "'+snap.label+'" lúc '+snap.time+'? Dữ liệu hiện tại sẽ bị thay thế!')) return;
+  saveSnapshot('Trước khi restore snapshot');
+  applyBackupData(snap.data);
+  alert('✅ Đã khôi phục!');
+  closeBackup();
+}
+
+function renderSnapshotList(){
+  const snaps = getSnapshots();
+  const el = document.getElementById('bk-snapshots');
+  if(!el) return;
+  if(!snaps.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">Chưa có snapshot nào.</div>';
+    return;
+  }
+  el.innerHTML = snaps.map(s=>`
+    <div class="bk-snap">
+      <div class="bk-snap-info">
+        <div class="bk-snap-time">${xe(s.label)}</div>
+        <div class="bk-snap-meta">${xe(s.time)}  ·  ${s.memberCount} thành viên  ·  ${s.matchCount} trận</div>
+      </div>
+      <button class="bk-snap-restore" onclick="restoreSnapshot(${s.id})">↩ Khôi phục</button>
+      <button class="bk-snap-del" onclick="deleteSnapshot(${s.id})" title="Xóa snapshot">✕</button>
+    </div>
+  `).join('');
+}
+
+function openBackup(){
+  renderSnapshotList();
+  document.getElementById('backup-modal-overlay').classList.add('on');
+}
+function closeBackup(e){
+  if(e && e.target !== document.getElementById('backup-modal-overlay')) return;
+  document.getElementById('backup-modal-overlay').classList.remove('on');
+}
+
+// Auto-snapshot every save (throttled: max 1 per 5 min)
+let lastSnapTime = 0;
+const _origSave = save;
+async function save(){
+  await _origSave.call(this);
+  const now = Date.now();
+  if(isAdmin && now - lastSnapTime > 5*60*1000 && (members.length||matches.length)){
+    saveSnapshot('Auto save');
+    lastSnapTime = now;
+  }
+}
 
 // ─── EDIT MEMBER ───
 let editMemberId = null;
