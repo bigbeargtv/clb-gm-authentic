@@ -822,12 +822,6 @@ nav{
     <input type="date" class="date-inp" id="sessionDate">
   </div>
 
-  <div class="sl admin-only">Điểm chạm thắng</div>
-  <div class="trow admin-only">
-    <button class="tbtn on" id="t11" onclick="setTgt(11)">11</button>
-    <button class="tbtn" id="t15" onclick="setTgt(15)">15</button>
-  </div>
-
   <div class="sl admin-only">Loại trận mới</div>
   <div class="cats admin-only">
     <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')">👨 Đôi Nam</div>
@@ -1572,7 +1566,6 @@ function logoutAdmin(){
 }
 
 // ─── MATCH ───
-function setTgt(n){tgt=n;document.getElementById('t11').classList.toggle('on',n===11);document.getElementById('t15').classList.toggle('on',n===15);debounceSave();}
 function setCat(c){cat=c;['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});debounceSave();}
 
 function addMatch(){
@@ -1655,7 +1648,7 @@ function rEdit(m){
       </div>
     </div>
     <div class="score-area">
-      <div class="score-label">Tỉ số — chạm ${m.tgt}</div>
+      <div class="score-label">Tỉ số</div>
       <div class="srow">
         <input type="number" class="sb" min="0" max="30" placeholder="0" value="${m.s1}" oninput="upScore(${m.id},'s1',this.value)">
         <div class="sdash">:</div>
@@ -1710,7 +1703,7 @@ function rSaved(m){
       </div>
       <div class="sv-bottom">
         <div class="sv-score-big">${m.s1} : ${m.s2}</div>
-        <div class="sv-meta">Chạm ${m.tgt}<br>${fmtDate(m.date)}${m.bet?'<br><span class="bet-badge">🍃 '+m.bet+'/người</span>':''}</div>
+        <div class="sv-meta">${fmtDate(m.date)}${m.bet?'<br><span class="bet-badge">🍃 '+m.bet+'/người</span>':''}</div>
         <button class="edit-btn" onclick="editMatch(${m.id})">✏️ Sửa</button>
       </div>
     </div>
@@ -2111,7 +2104,7 @@ function renderHist(){
       </div>
       <div id="hday-${d}">`;
     // Livestream input (admin only)
-    html+=`<div class="hist-live-row admin-only">
+    html+=`<div class="hist-live-row admin-only-flex">
         <span style="font-size:14px;">📡</span>
         <input class="hist-live-inp" type="url" placeholder="Thêm link livestream (YouTube, Facebook...)" value="${xe(liveUrl)}" oninput="saveLiveUrl('${d}',this.value)">
         ${liveUrl?'<a class="hist-live-link" href="'+xe(liveUrl)+'" target="_blank">▶ Xem</a>':''}
@@ -2126,7 +2119,7 @@ function renderHist(){
         <div>
           <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${a(m.t1p1)}${xe(t1)}</div>
           <div class="ht ${!w1?'w':'l'}">${!w1?'🏅 ':''}${a(m.t2p1)}${xe(t2)}</div>
-          <div class="hm">${CL[m.cat]} · chạm ${m.tgt} ${betHtml}</div>
+          <div class="hm">${CL[m.cat]} ${betHtml}</div>
         </div>
         <div class="hs">${m.s1} : ${m.s2}</div>
       </div>`;
@@ -2170,8 +2163,6 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   dateEl.addEventListener('change',()=>{sessionDate=dateEl.value;debounceSave();});
   // Set cat/tgt buttons
   ['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
-  document.getElementById('t11').classList.toggle('on',tgt===11);
-  document.getElementById('t15').classList.toggle('on',tgt===15);
   renderMembers();
   renderMatches();
   // Hide loading overlay
