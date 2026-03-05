@@ -1349,6 +1349,19 @@ async function load(){
     cat       = data.cat       || 'nam';
     sessionDate = data.sessionDate || '';
     drawSessionsMeta = data.drawSessionsMeta || {};
+    if(data.drawDraft){
+      const dr = data.drawDraft;
+      drawSelected     = new Set(dr.selected||[]);
+      drawCustom       = dr.custom||[];
+      drawTeams        = dr.teams||[];
+      drawMatchCounts  = dr.matchCounts||{nam:0,mix:0,nu:0};
+      drawTeamCount    = dr.teamCount||2;
+      drawTeamNames    = dr.teamNames||['Đội A','Đội B','Đội C','Đội D'];
+      drawBet          = dr.bet||0;
+      drawWinner       = dr.winner||'';
+      drawMaxPerPerson = dr.maxPerPerson||0;
+      window._matchPairs = dr.pairs||[];
+    }
     setSaveDot(true);
     document.getElementById('saveLabel').textContent='Đã lưu ☁️';
   } else {
@@ -1369,11 +1382,24 @@ async function save(){
   isSyncing = true;
   setSaveDot(false);
   document.getElementById('saveLabel').textContent='Đang lưu...';
+  const drawDraft = {
+    selected: [...drawSelected],
+    custom: drawCustom,
+    teams: drawTeams,
+    matchCounts: drawMatchCounts,
+    teamCount: drawTeamCount,
+    teamNames: drawTeamNames,
+    bet: drawBet,
+    winner: drawWinner,
+    pairs: window._matchPairs||[],
+    maxPerPerson: drawMaxPerPerson
+  };
   const ok = await fbSet('/clb',{
     members, memberUid,
     matches, matchUid,
     tgt, cat, sessionDate,
-    drawSessionsMeta
+    drawSessionsMeta,
+    drawDraft
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
@@ -1409,9 +1435,13 @@ function goTab(id){
 }
 
 // ─── DATE ───
+function vnDateStr(date){
+  // Chuyển sang giờ Việt Nam (UTC+7) và trả về 'YYYY-MM-DD'
+  const vn = new Date(date.getTime() + 7*60*60*1000);
+  return vn.toISOString().slice(0,10);
+}
 function todayStr(){
-  const d=new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return vnDateStr(new Date());
 }
 function fmtDate(str){
   if(!str)return'Chưa chọn ngày';
@@ -1529,6 +1559,7 @@ function toggleSelectAllDraw(){
   renderDrawPool();
   renderDrawSizeBtns();
   updateDrawSpin();
+  debounceSave();
 }
 
 function toggleDrawMember(name){
@@ -1539,6 +1570,7 @@ function toggleDrawMember(name){
   renderDrawPool();
   renderDrawSizeBtns();
   updateDrawSpin();
+  debounceSave();
 }
 
 function addDrawCustom(){
@@ -1693,6 +1725,7 @@ let drawWinner = ''; // 'A' | 'B' | ''
 function setDrawBet(val){
   if(!isAdmin) return;
   drawBet = val;
+  debounceSave();
   [0,100,200,500,1000].forEach(v=>{
     const el=document.getElementById('dbp-'+v);
     if(el) el.classList.toggle('on', v===val);
@@ -1704,6 +1737,7 @@ function setDrawBet(val){
 }
 function setDrawBetCustom(val){
   if(!isAdmin) return;
+  debounceSave();
   drawBet = parseInt(val)||0;
   [0,100,200,500,1000].forEach(v=>{
     const el=document.getElementById('dbp-'+v);
@@ -2211,14 +2245,17 @@ function matchRowHtml(p, i){
 }
 
 function removeDrawMatch(idx){
+  if(!isAdmin) return;
   if(!window._matchPairs) return;
   window._matchPairs.splice(idx, 1);
   renderMatchPairs();
   checkSaveBtn();
+  debounceSave();
 }
 
 // Set winner by button (no score needed)
 function setMatchWinner(idx, side){
+  if(!isAdmin) return;
   const pairs = window._matchPairs||[];
   if(!pairs[idx]) return;
   // toggle off if same
@@ -2232,6 +2269,7 @@ function setMatchWinner(idx, side){
     }
   }
   checkSaveBtn();
+  debounceSave();
 }
 
 function renderMatchPairs(){
@@ -2280,6 +2318,7 @@ function renderMatchPairs(){
 }
 
 function setPairScore(idx,side,val){
+  if(!isAdmin) return;
   if(!window._matchPairs) return;
   window._matchPairs[idx]['s'+side]=val;
   const p=window._matchPairs[idx];
@@ -2318,7 +2357,7 @@ function saveDrawSession(){
   if(!isAdmin) return;
   const pairs=window._matchPairs||[];
   if(!pairs.length) return;
-  const today=new Date().toISOString().slice(0,10);
+  const today=vnDateStr(new Date());
   const sessionId = 'ds_'+Date.now(); // ID duy nhất cho sự kiện này
   const catMap={nam:'nam',mix:'mix',nu:'nu'};
 
@@ -2376,6 +2415,10 @@ function saveDrawSession(){
     totalMatches: pairs.length
   };
 
+  // Xóa draft sau khi lưu chính thức
+  window._matchPairs = [];
+  drawTeams = []; drawSelected = new Set(); drawCustom = [];
+  drawWinner = ''; drawBet = 0;
   save();
 
   // ── Build session summary card and append to log ──
@@ -3033,10 +3076,34 @@ function renderMatches(){
     });
   }
 
-  // ── Đã hoàn thành thường ──
+  // ── Đã hoàn thành thường — group theo ngày ──
   if(savedNormal.length){
-    html += '<div style="margin:'+(unsaved.length||drawSessionList.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 2px;">✅ Đã hoàn thành ('+savedNormal.length+')</div>';
-    html += savedNormal.map(m=>rSaved(m)).join('');
+    const gap = unsaved.length||drawSessionList.length ? '18' : '4';
+    html += `<div style="margin:${gap}px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 2px;">✅ Đã hoàn thành (${savedNormal.length})</div>`;
+
+    // Group theo ngày, giữ thứ tự newest first
+    const byDate = {};
+    savedNormal.forEach(m=>{
+      const d = m.date||'unknown';
+      if(!byDate[d]) byDate[d]=[];
+      byDate[d].push(m);
+    });
+    const dateKeys = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+
+    dateKeys.forEach((d,di)=>{
+      const ms = byDate[d];
+      const dayId = 'mday-'+d.replace(/-/g,'');
+      html += `<div style="margin-bottom:8px;border:1.5px solid var(--bdr2);border-radius:12px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--s2);cursor:pointer;font-weight:800;font-size:12px;" onclick="toggleDrawSession('${dayId}')">
+          <span>📅</span>
+          <span style="flex:1;">${fmtDate(d)} · ${ms.length} trận</span>
+          <span style="font-size:11px;color:var(--muted);" id="${dayId}-arrow">▼</span>
+        </div>
+        <div id="${dayId}" style="display:none;">
+          ${ms.map(m=>rSaved(m)).join('')}
+        </div>
+      </div>`;
+    });
   }
 
   el.innerHTML=html;
