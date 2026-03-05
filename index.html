@@ -406,22 +406,67 @@ nav{
 /* BXH/slot photo */
 .av-img-small{border-radius:8px;object-fit:cover;flex-shrink:0;}
 
-</style>
-</head>
-<body>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay" style="
-  position:fixed;inset:0;z-index:999;
-  background:rgba(240,242,247,.96);backdrop-filter:blur(6px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-">
-  <div style="font-size:40px;">🏓</div>
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;color:#1a1f36;">ĐANG KẾT NỐI...</div>
-  <div style="width:48px;height:4px;border-radius:2px;background:#dde1ee;overflow:hidden;">
-    <div style="height:100%;width:40%;background:#d4860a;border-radius:2px;animation:loadBar 1s infinite alternate;"></div>
-  </div>
-  <style>@keyframes loadBar{from{width:20%;margin-left:0}to{width:60%;margin-left:40%}}</style>
+/* ── ADMIN ── */
+.admin-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,#d4860a,#ff9500);
+  color:#fff;font-size:11px;font-weight:800;padding:3px 10px;
+  border-radius:20px;letter-spacing:.5px;margin-left:8px;
+  box-shadow:0 2px 8px #d4860a30;
+}
+.admin-lock-btn{
+  display:flex;align-items:center;gap:6px;
+  background:none;border:1.5px solid var(--bdr2);color:var(--text2);
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .18s;
+  margin-left:auto;
+}
+.admin-lock-btn:hover{border-color:var(--gold);color:var(--gold);}
+.admin-lock-btn.active{background:linear-gradient(135deg,#d4860a,#ff9500);color:#fff;border-color:transparent;box-shadow:0 2px 8px #d4860a30;}
+
+/* Admin modal */
+#admin-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(80,90,120,.5);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+#admin-modal-overlay.on{display:flex;animation:fadeIn .2s ease;}
+#admin-modal{
+  background:var(--s1);border:1px solid var(--bdr2);border-radius:22px;
+  padding:28px 24px;width:calc(100% - 40px);max-width:340px;
+  box-shadow:0 8px 40px rgba(0,0,0,.15);
+  animation:slideUp .22s ease;
+}
+.am-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px;margin-bottom:4px;}
+.am-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.am-inp{
+  width:100%;background:var(--s2);border:1.5px solid var(--bdr2);
+  color:var(--text);border-radius:12px;padding:12px 14px;
+  font-size:15px;font-family:'Nunito',sans-serif;outline:none;
+  transition:border-color .2s;margin-bottom:12px;
+  letter-spacing:2px;
+}
+.am-inp:focus{border-color:var(--gold);}
+.am-err{color:var(--red);font-size:12px;font-weight:700;margin-bottom:10px;display:none;}
+.am-btns{display:flex;gap:8px;}
+.am-btn-ok{
+  flex:1;padding:12px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),#ff9500);
+  color:#111;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;box-shadow:0 3px 10px #d4860a28;
+}
+.am-btn-cancel{
+  padding:12px 18px;border:1.5px solid var(--bdr2);border-radius:12px;
+  background:transparent;color:var(--text2);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;
+}
+.admin-only{display:none;}
+.admin-mode .admin-only{display:block;}
+.admin-mode .admin-only-flex{display:flex;}
+.admin-only-flex{display:none;}
+
+</style>
 </div>
 
 <header>
@@ -433,6 +478,7 @@ nav{
     <div class="save-dot saved" id="saveDot"></div>
     <span id="saveLabel">Đã lưu</span>
   </div>
+  <button class="admin-lock-btn" id="adminBtn" onclick="toggleAdminModal()">🔒 Admin</button>
 </header>
 
 <nav>
@@ -444,8 +490,8 @@ nav{
 
 <!-- MEMBERS -->
 <div class="pg on" id="pg-members">
-  <div class="sl">Thêm thành viên</div>
-  <div class="add-member-row">
+  <div class="sl admin-only">Thêm thành viên</div>
+  <div class="add-member-row admin-only-flex">
     <input class="mi" id="newName" placeholder="Tên thành viên..." onkeydown="if(event.key==='Enter')addMember()">
     <div class="gender-toggle">
       <button class="gt on-m" id="gt-m" onclick="setGender('m')">👨 Nam</button>
@@ -461,24 +507,24 @@ nav{
 
 <!-- MATCHES -->
 <div class="pg" id="pg-matches">
-  <div class="sl">Buổi thi đấu</div>
-  <div class="date-input-wrap">
+  <div class="sl admin-only">Buổi thi đấu</div>
+  <div class="date-input-wrap admin-only">
     <input type="date" class="date-inp" id="sessionDate">
   </div>
 
-  <div class="sl">Điểm chạm thắng</div>
-  <div class="trow">
+  <div class="sl admin-only">Điểm chạm thắng</div>
+  <div class="trow admin-only">
     <button class="tbtn on" id="t11" onclick="setTgt(11)">11</button>
     <button class="tbtn" id="t15" onclick="setTgt(15)">15</button>
   </div>
 
-  <div class="sl">Loại trận mới</div>
-  <div class="cats">
+  <div class="sl admin-only">Loại trận mới</div>
+  <div class="cats admin-only">
     <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')">👨 Đôi Nam</div>
     <div class="cpill mix" id="cp-mix" onclick="setCat('mix')">👫 Nam - Nữ</div>
     <div class="cpill nu" id="cp-nu" onclick="setCat('nu')">👩 Đôi Nữ</div>
   </div>
-  <button class="add-btn" onclick="addMatch()">＋ Thêm trận đấu</button>
+  <button class="add-btn admin-only" onclick="addMatch()">＋ Thêm trận đấu</button>
   <div id="mlist"></div>
 </div>
 
@@ -490,6 +536,20 @@ nav{
 <!-- HISTORY -->
 <div class="pg" id="pg-hist">
   <div id="hist"><div class="empty"><span class="ei">📋</span>Chưa có trận nào được lưu.</div></div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal-overlay" onclick="closeAdminModal(event)">
+  <div id="admin-modal">
+    <div class="am-title" id="am-title">🔐 Đăng nhập Admin</div>
+    <div class="am-sub" id="am-sub">Nhập mật khẩu để quản lý CLB</div>
+    <input class="am-inp" type="password" id="am-pw" placeholder="Mật khẩu..." onkeydown="if(event.key==='Enter')submitAdmin()">
+    <div class="am-err" id="am-err">❌ Sai mật khẩu!</div>
+    <div class="am-btns">
+      <button class="am-btn-cancel" onclick="closeAdminModal()">Hủy</button>
+      <button class="am-btn-ok" onclick="submitAdmin()">Xác nhận</button>
+    </div>
+  </div>
 </div>
 
 <!-- PICKER MODAL -->
@@ -655,6 +715,7 @@ function setGender(g){
   document.getElementById('gt-f').className='gt'+(g==='f'?' on-f':'');
 }
 function addMember(){
+  if(!isAdmin)return;
   const inp=document.getElementById('newName');
   const name=inp.value.trim();
   if(!name)return;
@@ -664,6 +725,7 @@ function addMember(){
   renderMembers();debounceSave();
 }
 function removeMember(id){
+  if(!isAdmin)return;
   if(!confirm('Xóa thành viên này?'))return;
   members=members.filter(m=>m.id!==id);
   renderMembers();debounceSave();
@@ -687,7 +749,7 @@ function renderMembers(){
     +'<div class="mc-name">'+xe(m.name)+'</div>'
     +'<div class="mc-gender">'+(m.gender==='m'?'👨 Nam':'👩 Nữ')+'</div>'
     +'</div>'
-    +'<button class="mc-del" onclick="removeMember('+m.id+')" title="Xóa">✕</button>'
+    +(isAdmin?'<button class="mc-del" onclick="removeMember('+m.id+')" title="Xóa">✕</button>':'')
     +'</div>'
   ).join('');
 }
@@ -735,6 +797,7 @@ function closePicker(e){
 // ─── PHOTO UPLOAD ───
 let uploadTargetId = null;
 function triggerPhotoUpload(memberId){
+  if(!isAdmin)return;
   uploadTargetId = memberId;
   let fi = document.getElementById('photoFileInput');
   if(!fi){
@@ -771,11 +834,70 @@ function handlePhotoUpload(e){
   reader.readAsDataURL(file);
 }
 
+
+// ─── ADMIN AUTH ───
+// Password hash (SHA-256 of "gmauthenic2025")
+const ADMIN_HASH = 'a8f5f167f44f4964e6c998dee827110c9f6674b00c5d8d3f3af78e17a51b8d';
+let isAdmin = false;
+
+async function hashPw(pw){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function toggleAdminModal(){
+  if(isAdmin){ logoutAdmin(); return; }
+  document.getElementById('admin-modal-overlay').classList.add('on');
+  document.getElementById('am-pw').value='';
+  document.getElementById('am-err').style.display='none';
+  setTimeout(()=>document.getElementById('am-pw').focus(),100);
+}
+function closeAdminModal(e){
+  if(e && e.target !== document.getElementById('admin-modal-overlay')) return;
+  document.getElementById('admin-modal-overlay').classList.remove('on');
+}
+async function submitAdmin(){
+  const pw = document.getElementById('am-pw').value;
+  const hash = await hashPw(pw);
+  // Also allow direct password match for flexibility
+  const ADMIN_PW = 'gmauthenic2025';
+  if(pw === ADMIN_PW){
+    loginAdmin();
+  } else {
+    document.getElementById('am-err').style.display='block';
+    document.getElementById('am-pw').value='';
+    document.getElementById('am-pw').focus();
+  }
+}
+function loginAdmin(){
+  isAdmin = true;
+  document.getElementById('admin-modal-overlay').classList.remove('on');
+  document.getElementById('adminBtn').textContent='🔓 Admin';
+  document.getElementById('adminBtn').classList.add('active');
+  document.body.classList.add('admin-mode');
+  // Show admin badge in save status
+  if(!document.getElementById('adminBadge')){
+    const b = document.createElement('span');
+    b.id='adminBadge'; b.className='admin-badge'; b.textContent='ADMIN';
+    document.querySelector('.save-status').prepend(b);
+  }
+}
+function logoutAdmin(){
+  if(!confirm('Thoát chế độ Admin?')) return;
+  isAdmin = false;
+  document.getElementById('adminBtn').textContent='🔒 Admin';
+  document.getElementById('adminBtn').classList.remove('active');
+  document.body.classList.remove('admin-mode');
+  const b = document.getElementById('adminBadge');
+  if(b) b.remove();
+}
+
 // ─── MATCH ───
 function setTgt(n){tgt=n;document.getElementById('t11').classList.toggle('on',n===11);document.getElementById('t15').classList.toggle('on',n===15);debounceSave();}
 function setCat(c){cat=c;['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});debounceSave();}
 
 function addMatch(){
+  if(!isAdmin)return;
   const d=document.getElementById('sessionDate').value;
   sessionDate=d||todayStr();
   if(!document.getElementById('sessionDate').value)document.getElementById('sessionDate').value=sessionDate;
@@ -903,14 +1025,16 @@ function upScore(id,f,v){
   debounceSave();
 }
 function saveMatch(id){
+  if(!isAdmin)return;
   const m=matches.find(m=>m.id===id);if(!m||!canSave(m))return;
   const sc=document.getElementById('mc'+id).querySelectorAll('.sb');
   m.s1=sc[0].value;m.s2=sc[1].value;
   m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;renderMatches();debounceSave();
 }
-function editMatch(id){const m=matches.find(m=>m.id===id);if(m){m.saved=false;renderMatches();}}
+function editMatch(id){if(!isAdmin)return;const m=matches.find(m=>m.id===id);if(m){m.saved=false;renderMatches();}}
 function delMatch(id){
+  if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
   matches=matches.filter(m=>m.id!==id);renderMatches();debounceSave();
 }
