@@ -3278,6 +3278,7 @@ function renderQuy(){
       <div class="quy-stat"><div class="quy-stat-num">${sorted.length}</div><div class="quy-stat-lbl">Người</div></div>
     </div>
   </div>`;
+  // ── BXH tổng ──
   html += '<div class="sl" style="margin-top:0">BXH nộp quỹ nhiều nhất</div>';
   html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
   sorted.forEach((p,i)=>{
@@ -3295,7 +3296,67 @@ function renderQuy(){
       <div class="quy-debt">${fmtNum(p.total)}🍃</div>
     </div>`;
   });
+
+  // ── Chi tiết theo sự kiện (chỉ admin) ──
+  if(isAdmin){
+    const betEntries = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0);
+    if(betEntries.length){
+      // Group theo drawSessionId+date
+      const groups = {};
+      betEntries.forEach(m=>{
+        const key = m.drawSessionId || ('manual_'+m.date);
+        if(!groups[key]) groups[key]={key, date:m.date, sessionId:m.drawSessionId||null, entries:[], total:0};
+        groups[key].entries.push(m);
+        groups[key].total += +m.bet;
+      });
+      const groupList = Object.values(groups).sort((a,b)=>b.date.localeCompare(a.date));
+
+      html += '<div class="sl" style="margin-top:18px;">🗂 Chi tiết quỹ theo sự kiện</div>';
+      groupList.forEach((g,gi)=>{
+        const gDomId = 'qgrp-'+gi;
+        const delBtnG = `<button class="del-btn" onclick="event.stopPropagation();delBetGroup('${g.key}')" style="font-size:12px;padding:3px 8px;" title="Xóa nhóm này">🗑</button>`;
+        html += `<div style="border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:8px;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--s2);font-weight:800;font-size:13px;" onclick="toggleDrawSession('${gDomId}')">
+            <span>📅</span>
+            <span style="flex:1;">${fmtDate(g.date)} · ${g.entries.length} người · ${fmtNum(g.total)}🍃</span>
+            <span id="${gDomId}-arrow" style="font-size:11px;color:var(--muted);">▼</span>
+            ${delBtnG}
+          </div>
+          <div id="${gDomId}" style="display:none;">
+            ${g.entries.map(m=>`
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bdr);">
+                <span style="flex:1;font-size:13px;font-weight:700;">${xe(m.t2p1)}</span>
+                <span style="color:#e55;font-weight:800;font-size:13px;">-${fmtNum(m.bet)}🍃</span>
+                <button class="del-btn" onclick="delBetEntry(${m.id})" style="font-size:13px;padding:3px 7px;" title="Xóa dòng này">🗑</button>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      });
+    }
+  }
+
   el.innerHTML = html;
+}
+
+function delBetGroup(key){
+  if(!isAdmin) return;
+  if(!confirm('Xóa toàn bộ quỹ của sự kiện này?')) return;
+  if(key.startsWith('manual_')){
+    const date = key.replace('manual_','');
+    matches = matches.filter(m=>!(m.isBetEntry&&m.date===date&&!m.drawSessionId));
+  } else {
+    matches = matches.filter(m=>!(m.isBetEntry&&m.drawSessionId===key));
+  }
+  renderQuy();
+  debounceSave();
+}
+
+function delBetEntry(id){
+  if(!isAdmin) return;
+  if(!confirm('Xóa dòng quỹ này?')) return;
+  matches = matches.filter(m=>m.id!==id);
+  renderQuy();
+  debounceSave();
 }
 
 // ─── BXH ───
