@@ -1923,7 +1923,7 @@ function renderDrawResult(){
       +'</div>';
     if(drawTeams.length===2) html += '<div id="draw-loser-area"></div>';
 
-    html += '<button class="draw-session-save" id="draw-save-btn" onclick="saveDrawSession()" disabled>💾 Lưu vào Lịch sử</button>';
+    html += '<button class="draw-session-save" id="draw-save-btn" onclick="saveDrawSession()">💾 Lưu Sự Kiện</button>';
     html += '<button class="draw-reshuffle" onclick="doDrawSpin()">🔀 Bốc lại tất cả</button>';
     resultEl.innerHTML = html;
     if(drawTeams.length===2) renderLoserCalc();
@@ -2344,86 +2344,56 @@ function checkSaveBtn(){
   const btn=document.getElementById('draw-save-btn');
   if(!btn) return;
   const pairs=window._matchPairs||[];
-  const allDone=pairs.length>0&&pairs.every(p=>{
-    // Done if: winner button set, OR both scores entered
-    const hasWinner = p.winner==='A'||p.winner==='B';
-    const hasScores = p.sa!==''&&p.sa!==undefined&&p.sb!==''&&p.sb!==undefined;
-    return hasWinner||hasScores;
-  });
-  btn.disabled=!allDone;
+  btn.disabled = pairs.length===0;
 }
 
-// ── Save session to History ──
+// ── Save session (active – chưa cần điền xong) ──
 function saveDrawSession(){
   if(!isAdmin) return;
   const pairs=window._matchPairs||[];
   if(!pairs.length) return;
   const today=vnDateStr(new Date());
-  const sessionId = 'ds_'+Date.now(); // ID duy nhất cho sự kiện này
+  const sessionId = 'ds_'+Date.now();
   const catMap={nam:'nam',mix:'mix',nu:'nu'};
 
-  // 1. Lưu từng trận — bet=0, chỉ ghi kết quả thi đấu
+  // Lưu từng cặp với status active (chưa có kết quả)
   pairs.forEach(p=>{
-    let s1=p.sa||'', s2=p.sb||'';
-    const w = p.winner || (s1!==''&&s2!==''&&s1!==s2?(parseInt(s1)>parseInt(s2)?'A':'B'):'');
-    if((!s1||!s2)&&w){ s1=w==='A'?'1':'0'; s2=w==='B'?'1':'0'; }
-    let t1p1=p.a1,t1p2=p.a2||'',t2p1=p.b1,t2p2=p.b2||'',rs1=s1,rs2=s2;
-    if(w==='B'){
-      t1p1=p.b1;t1p2=p.b2||'';t2p1=p.a1;t2p2=p.a2||'';
-      rs1=s2;rs2=s1;
-      if(rs1===rs2&&rs1!==''){rs1='1';rs2='0';}
-    } else if(w==='A'){
-      if(rs1===rs2&&rs1!==''){rs1='1';rs2='0';}
-    }
-    matches.push({id:matchUid++,cat:catMap[p.cat]||'nam',date:today,
-      t1p1,t1p2,t2p1,t2p2,s1:rs1,s2:rs2,
-      bet:0,saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:''});
-  });
-
-  // 2. Quỹ cược: mỗi người đội thua nộp 1 lần duy nhất.
-  //    Tạo 1 entry riêng per người (t2p1=tên, t2p2='')
-  //    → renderQuy: losers=[t2p1].filter(Boolean) = [tên] → cộng đúng 1 lần
-  const loserIdx = drawWinner==='A'?1:drawWinner==='B'?0:-1;
-  const loserTeam = loserIdx>=0 ? drawTeams[loserIdx] : null;
-  const loserPlayers = loserTeam ? loserTeam.players : [];
-  const betPerPerson = (drawBet&&loserPlayers.length)
-    ? Math.round(drawBet/loserPlayers.length) : 0;
-
-  if(betPerPerson){
-    loserPlayers.forEach(name=>{
-      matches.push({id:matchUid++,cat:'nam',date:today,
-        t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
-        s1:'1',s2:'0',
-        bet:betPerPerson,
-        saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:'',isBetEntry:true});
+    matches.push({
+      id:matchUid++,
+      cat:catMap[p.cat]||'nam',
+      date:today,
+      t1p1:p.a1||'', t1p2:p.a2||'',
+      t2p1:p.b1||'', t2p2:p.b2||'',
+      s1:'', s2:'',
+      winner:'',
+      bet:0,
+      saved:true,
+      fromDraw:true,
+      drawSessionId:sessionId,
+      drawStatus:'active',  // active = chưa hoàn thành
+      liveUrl:''
     });
-  }
-
-  // Lưu metadata sự kiện
-  const teamNames = drawTeams.map(t=>t.name);
-  const captains = drawTeams.map(t=>t.captain||'');
-  const teamWins = {};
-  drawTeams.forEach(t=>{ teamWins[t.id]=0; });
-  pairs.forEach(p=>{
-    const w = p.winner||(p.sa!==''&&p.sb!==''&&p.sa!==p.sb?(parseInt(p.sa)>parseInt(p.sb)?'A':'B'):'');
-    if(w) teamWins[w]=(teamWins[w]||0)+1;
   });
+
+  // Lưu metadata
   drawSessionsMeta[sessionId] = {
-    name: '',  // có thể đổi sau
+    name: '',
     date: today,
-    teams: drawTeams.map(t=>({id:t.id, name:t.name, captain:t.captain||'', wins:teamWins[t.id]||0, players:t.players})),
-    winner: drawWinner,
+    status: 'active',
+    teams: drawTeams.map(t=>({id:t.id, name:t.name, captain:t.captain||'', wins:0, players:t.players})),
+    winner: '',
+    bet: drawBet,
     totalMatches: pairs.length
   };
 
-  // Xóa draft sau khi lưu chính thức
+  // Reset draw tab
   window._matchPairs = [];
   drawTeams = []; drawSelected = new Set(); drawCustom = [];
   drawWinner = ''; drawBet = 0;
   save();
 
-  // ── Build session summary card and append to log ──
-  appendSessionCard(drawTeams, pairs, drawWinner, drawBet);
+  // Chuyển sang tab Trận Đấu
+  goTab('pg-matches');
 
   // Show new-event button, clear result
   const newBtn = document.getElementById('draw-new-event-btn');
@@ -3001,6 +2971,185 @@ function addMatch(){
   setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);
 }
 
+
+function renderActiveSession(sess){
+  const meta = drawSessionsMeta[sess.id] || {};
+  const sessName = meta.name || ('Sự kiện bốc thăm · ' + fmtDate(sess.date));
+  const domId = 'active-sess-'+sess.id.replace(/[^a-z0-9]/gi,'_');
+  const isOpen = window._openDays && window._openDays.has(domId);
+
+  const renameBtnHtml = isAdmin
+    ? `<button onclick="event.stopPropagation();renameDrawSession('${sess.id}')" style="background:none;border:none;cursor:pointer;font-size:13px;padding:3px 6px;color:var(--muted);" title="Đổi tên">✏️</button>`
+    : '';
+  const delBtnHtml = isAdmin
+    ? `<button class="del-btn" onclick="event.stopPropagation();delDrawSession('${sess.id}')" style="font-size:12px;padding:3px 7px;" title="Xóa">🗑</button>`
+    : '';
+
+  // Rows cho từng trận
+  const matchRows = sess.matches.map((m,i)=>{
+    const tA = [m.t1p1,m.t1p2].filter(Boolean);
+    const tB = [m.t2p1,m.t2p2].filter(Boolean);
+    const av = n=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+    const wA = m.winner==='A'||(m.winner===''&&+m.s1>+m.s2&&m.s1!=='');
+    const wB = m.winner==='B'||(m.winner===''&&+m.s2>+m.s1&&m.s2!=='');
+    const badge = `<span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>`;
+    return `<div style="padding:10px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        ${badge}
+        <span style="font-size:11px;font-weight:700;color:var(--muted);">Trận ${i+1}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;${wA?'':'opacity:.6'}">
+            ${tA.map(n=>av(n)).join('')}
+            <span style="font-size:12px;font-weight:${wA?800:600};">${tA.map(n=>xe(n)).join(' & ')||'?'}</span>
+            ${wA?'<span>🏅</span>':''}
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;${wB?'':'opacity:.6'}">
+            ${tB.map(n=>av(n)).join('')}
+            <span style="font-size:12px;font-weight:${wB?800:600};">${tB.map(n=>xe(n)).join(' & ')||'?'}</span>
+            ${wB?'<span>🏅</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <input type="number" min="0" max="99" value="${m.s1}" placeholder="-"
+            style="width:38px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;border:1.5px solid var(--bdr2);border-radius:8px;padding:4px;background:var(--s2);color:var(--text);"
+            oninput="updateActiveMatchScore(${m.id},'s1',this.value)">
+          <span style="font-size:10px;color:var(--muted);">:</span>
+          <input type="number" min="0" max="99" value="${m.s2}" placeholder="-"
+            style="width:38px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;border:1.5px solid var(--bdr2);border-radius:8px;padding:4px;background:var(--s2);color:var(--text);"
+            oninput="updateActiveMatchScore(${m.id},'s2',this.value)">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <button onclick="updateActiveMatchWinner(${m.id},'A')"
+            style="font-size:10px;padding:4px 6px;border-radius:6px;border:1.5px solid ${wA?'var(--green)':'var(--bdr2)'};background:${wA?'var(--green)':'transparent'};color:${wA?'#fff':'var(--muted)'};cursor:pointer;font-weight:800;">A✓</button>
+          <button onclick="updateActiveMatchWinner(${m.id},'B')"
+            style="font-size:10px;padding:4px 6px;border-radius:6px;border:1.5px solid ${wB?'var(--green)':'var(--bdr2)'};background:${wB?'var(--green)':'transparent'};color:${wB?'#fff':'var(--muted)'};cursor:pointer;font-weight:800;">B✓</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Quỹ và hoàn thành
+  const currentBet = meta.bet||0;
+  const finishBtn = isAdmin ? `<button onclick="finishDrawSession('${sess.id}')"
+    style="width:100%;padding:10px;background:var(--green);color:#fff;font-weight:800;font-size:13px;border:none;border-radius:10px;cursor:pointer;margin-top:8px;">✅ Hoàn thành sự kiện</button>` : '';
+  const betSection = isAdmin ? `<div style="padding:10px 12px;background:var(--s2);border-top:1px solid var(--bdr);">
+    <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;">🍃 Quỹ cược (tổng / đội thua)</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+      ${[0,100,200,500,1000].map(v=>`<span onclick="updateSessionBet('${sess.id}',${v})"
+        style="padding:4px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:1.5px solid ${currentBet===v?'var(--gold)':'var(--bdr2)'};background:${currentBet===v?'#f0b42920':'transparent'};color:${currentBet===v?'var(--gold)':'var(--muted)'};">${v===0?'Không':v+'🍃'}</span>`).join('')}
+      <input type="number" min="0" placeholder="Khác..." value="${currentBet&&![0,100,200,500,1000].includes(currentBet)?currentBet:''}"
+        style="width:80px;padding:4px 8px;border:1.5px solid var(--bdr2);border-radius:8px;font-size:12px;background:var(--s1);color:var(--text);"
+        oninput="updateSessionBet('${sess.id}',parseInt(this.value)||0)">
+    </div>
+    ${finishBtn}
+  </div>` : '';
+
+  return `<div class="mc" style="padding:0;overflow:hidden;margin-bottom:8px;border:2px solid #e5555540;">
+    <div style="display:flex;align-items:center;gap:8px;padding:11px 14px;background:#e5555510;cursor:pointer;border-bottom:1px solid #e5555530;"
+      onclick="toggleMatchDay('${domId}')">
+      <span style="font-size:14px;">🔴</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:800;font-size:13px;display:flex;align-items:center;gap:4px;">
+          ${xe(sessName)}${renameBtnHtml}
+        </div>
+        <div style="font-size:11px;color:#e55;margin-top:1px;">${sess.matches.length} trận · chưa hoàn thành</div>
+      </div>
+      <span style="font-size:11px;color:var(--muted);flex-shrink:0;" id="${domId}-arrow">${isOpen?'▲':'▼'}</span>
+      ${delBtnHtml}
+    </div>
+    <div id="${domId}" style="display:${isOpen?'block':'none'};">
+      ${matchRows}
+      ${betSection}
+    </div>
+  </div>`;
+}
+
+function updateActiveMatchScore(matchId, field, val){
+  if(!isAdmin) return;
+  const m = matches.find(m=>m.id===matchId);
+  if(!m) return;
+  m[field] = val;
+  debounceSave();
+  // Update winner indicator without re-render
+  if(m.s1!==''&&m.s2!==''&&m.s1!==m.s2&&!m.winner){
+    m.winner = +m.s1>+m.s2?'A':'B';
+  }
+}
+
+function updateActiveMatchWinner(matchId, side){
+  if(!isAdmin) return;
+  const m = matches.find(m=>m.id===matchId);
+  if(!m) return;
+  m.winner = m.winner===side ? '' : side;
+  if(m.winner==='A'&&m.s1===''){ m.s1='1'; m.s2='0'; }
+  if(m.winner==='B'&&m.s2===''){ m.s1='0'; m.s2='1'; }
+  debounceSave();
+  renderMatches();
+}
+
+function updateSessionBet(sessionId, val){
+  if(!isAdmin) return;
+  if(!drawSessionsMeta[sessionId]) drawSessionsMeta[sessionId]={};
+  drawSessionsMeta[sessionId].bet = val;
+  debounceSave();
+  renderMatches();
+}
+
+function finishDrawSession(sessionId){
+  if(!isAdmin) return;
+  const meta = drawSessionsMeta[sessionId];
+  if(!meta) return;
+  const sessMatches = matches.filter(m=>m.fromDraw&&m.drawSessionId===sessionId&&!m.isBetEntry);
+
+  // Tính winner team từ số trận thắng
+  const teamWins = {};
+  if(meta.teams) meta.teams.forEach(t=>{ teamWins[t.id]=0; });
+  sessMatches.forEach(m=>{
+    // Đội thắng = s1>s2 → t1 (A), ngược lại t2 (B) — dùng match winner field
+    const w = m.winner || (+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':'');
+    if(w && meta.teams){
+      // map 'A'/'B' to team id qua vị trí
+      const teamIdx = w==='A'?0:1;
+      if(meta.teams[teamIdx]) teamWins[meta.teams[teamIdx].id]=(teamWins[meta.teams[teamIdx].id]||0)+1;
+    }
+  });
+
+  // Cập nhật wins vào teams
+  if(meta.teams) meta.teams.forEach(t=>{ t.wins = teamWins[t.id]||0; });
+
+  // Tìm đội thắng tổng
+  let overallWinner = '';
+  if(meta.teams&&meta.teams.length>=2){
+    overallWinner = meta.teams[0].wins > meta.teams[1].wins ? meta.teams[0].id
+      : meta.teams[1].wins > meta.teams[0].wins ? meta.teams[1].id : '';
+  }
+  meta.winner = overallWinner;
+  meta.status = 'done';
+
+  // Thêm bet entries nếu có quỹ
+  const bet = meta.bet||0;
+  if(bet>0&&overallWinner){
+    const loserTeam = meta.teams.find(t=>t.id!==overallWinner);
+    const loserPlayers = loserTeam ? loserTeam.players : [];
+    const betPerPerson = loserPlayers.length ? Math.round(bet/loserPlayers.length) : 0;
+    const today = sessMatches[0]?sessMatches[0].date:vnDateStr(new Date());
+    if(betPerPerson){
+      loserPlayers.forEach(name=>{
+        matches.push({id:matchUid++,cat:'nam',date:today,
+          t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
+          s1:'1',s2:'0',
+          bet:betPerPerson,
+          saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:'',isBetEntry:true});
+      });
+    }
+  }
+
+  save();
+  renderMatches();
+}
+
 function renderMatches(){
   const el=document.getElementById('mlist');
   const unsaved = matches.filter(m=>!m.saved);
@@ -3029,9 +3178,19 @@ function renderMatches(){
   }
 
   // ── Sự kiện bốc thăm ──
-  if(drawSessionList.length){
-    html += '<div style="margin:'+(unsaved.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">🎲 Sự kiện bốc thăm ('+drawSessionList.length+')</div>';
-    drawSessionList.forEach((sess,si)=>{
+  const activeSessions = drawSessionList.filter(s=>(drawSessionsMeta[s.id]||{}).status==='active');
+  const doneSessions   = drawSessionList.filter(s=>(drawSessionsMeta[s.id]||{}).status!=='active');
+
+  if(activeSessions.length){
+    const gap0 = unsaved.length ? '18' : '4';
+    html += `<div style="margin:${gap0}px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:#e55;text-transform:uppercase;padding:4px 2px;">🔴 Đang diễn ra · Sự kiện bốc thăm (${activeSessions.length})</div>`;
+    activeSessions.forEach(sess=>{ html += renderActiveSession(sess); });
+  }
+
+  if(doneSessions.length){
+    const gap1 = (unsaved.length||activeSessions.length) ? '18' : '4';
+    html += `<div style="margin:${gap1}px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">🎲 Sự kiện bốc thăm (${doneSessions.length})</div>`;
+    doneSessions.forEach((sess,si)=>{
       const domId='dsess-'+sess.id.replace(/[^a-z0-9]/gi,'_');
       const meta = drawSessionsMeta[sess.id] || {};
       const sessName = meta.name || ('Sự kiện bốc thăm · ' + fmtDate(sess.date));
@@ -3041,8 +3200,6 @@ function renderMatches(){
       const renameBtnHtml = isAdmin
         ? `<button onclick="event.stopPropagation();renameDrawSession('${sess.id}')" style="background:none;border:none;cursor:pointer;font-size:13px;padding:3px 6px;color:var(--muted);" title="Đổi tên">✏️</button>`
         : '';
-
-      // Team score summary từ meta
       let teamSummaryHtml = '';
       if(meta.teams && meta.teams.length >= 2){
         const tA = meta.teams[0], tB = meta.teams[1];
@@ -3056,7 +3213,6 @@ function renderMatches(){
           ${winnerName?`<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;">🏆 ${xe(winnerName)}</span>`:''}
         </div>`;
       }
-
       html += `<div class="mc" style="padding:0;overflow:hidden;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:var(--s2);border-bottom:1px solid var(--bdr);" onclick="toggleDrawSession('${domId}')">
           <span style="font-size:16px;">🎲</span>
