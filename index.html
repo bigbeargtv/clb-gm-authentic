@@ -1896,6 +1896,7 @@ function renderDrawResult(){
       +'<button class="draw-mode-tab'+(window._pairMode==='manual'?' on':'')+'" onclick="setPairMode(&quot;manual&quot;)">✏️ Tự chọn</button>'
       +'</div>';
     html += '<div id="draw-match-section"></div>';
+    // (renderMatchPairs sẽ được gọi sau khi set innerHTML)
 
     // Winner pick (only for 2 teams)
     if(drawTeams.length===2){
@@ -3093,13 +3094,18 @@ function renderMatches(){
     dateKeys.forEach((d,di)=>{
       const ms = byDate[d];
       const dayId = 'mday-'+d.replace(/-/g,'');
+      const isOpen = window._openDays && window._openDays.has(dayId);
+      const delDayBtn = isAdmin
+        ? `<button class="del-btn" onclick="event.stopPropagation();delDay('${d}')" style="font-size:12px;padding:3px 7px;margin-left:4px;" title="Xóa cả ngày">🗑</button>`
+        : '';
       html += `<div style="margin-bottom:8px;border:1.5px solid var(--bdr2);border-radius:12px;overflow:hidden;">
-        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--s2);cursor:pointer;font-weight:800;font-size:12px;" onclick="toggleDrawSession('${dayId}')">
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--s2);cursor:pointer;font-weight:800;font-size:12px;" onclick="toggleMatchDay('${dayId}')">
           <span>📅</span>
           <span style="flex:1;">${fmtDate(d)} · ${ms.length} trận</span>
-          <span style="font-size:11px;color:var(--muted);" id="${dayId}-arrow">▼</span>
+          <span style="font-size:11px;color:var(--muted);" id="${dayId}-arrow">${isOpen?'▲':'▼'}</span>
+          ${delDayBtn}
         </div>
-        <div id="${dayId}" style="display:none;">
+        <div id="${dayId}" style="display:${isOpen?'block':'none'};">
           ${ms.map(m=>rSaved(m)).join('')}
         </div>
       </div>`;
@@ -3128,6 +3134,19 @@ function toggleDrawSession(id){
   el.style.display=open?'':'none';
   const arrow=document.getElementById(id+'-arrow');
   if(arrow) arrow.textContent=open?'▲':'▼';
+}
+
+// Track trạng thái mở/đóng accordion ngày — để ko bị reset khi xóa trận
+if(!window._openDays) window._openDays = new Set();
+function toggleMatchDay(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  const arrow=document.getElementById(id+'-arrow');
+  if(arrow) arrow.textContent=open?'▲':'▼';
+  if(open) window._openDays.add(id);
+  else window._openDays.delete(id);
 }
 
 function rSavedWithDel(m){
@@ -3319,7 +3338,17 @@ function editMatch(id){if(!isAdmin)return;const m=matches.find(m=>m.id===id);if(
 function delMatch(id){
   if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
-  matches=matches.filter(m=>m.id!==id);renderMatches();debounceSave();
+  matches=matches.filter(m=>m.id!==id);
+  renderMatches();
+  debounceSave();
+}
+
+function delDay(date){
+  if(!isAdmin) return;
+  if(!confirm('Xóa tất cả trận ngày '+fmtDate(date)+'?')) return;
+  matches = matches.filter(m=>!(m.saved&&!m.fromDraw&&!m.isBetEntry&&m.date===date));
+  renderMatches();
+  debounceSave();
 }
 
 
@@ -3872,6 +3901,11 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   ['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
   renderMembers();
   renderMatches();
+  // Nếu có draft bốc thăm đang dở, hiện draw-result ngay
+  if(drawTeams.length || (window._matchPairs||[]).length){
+    const resultEl = document.getElementById('draw-result');
+    if(resultEl) resultEl.classList.add('on');
+  }
   // Khôi phục tab cuối cùng
   try{
     const savedTab = localStorage.getItem('activeTab');
