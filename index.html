@@ -1126,7 +1126,7 @@ nav{
 
   <!-- Player pool -->
   <div class="draw-section">
-    <div class="draw-section-title">👥 Chọn người tham gia <span class="draw-count-badge" id="draw-count">0</span></div>
+    <div class="draw-section-title" style="display:flex;align-items:center;justify-content:space-between;"><span>👥 Chọn người tham gia <span class="draw-count-badge" id="draw-count">0</span></span><button onclick="toggleSelectAllDraw()" id="draw-select-all-btn" style="background:none;border:1.5px solid var(--bdr2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);font-family:'Nunito',sans-serif;">Chọn tất cả</button></div>
     <div class="draw-pool" id="draw-member-pool"></div>
     <div style="margin:12px 0 6px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">Thêm tên tự do</div>
     <div class="draw-add-row">
@@ -1505,6 +1505,27 @@ function renderDrawPool(){
     </div>`;
   }).join('') || '<span style="color:var(--muted);font-size:13px;">Chưa có thành viên CLB.</span>';
   updateDrawCount();
+  // Cập nhật label nút chọn tất cả
+  const btn = document.getElementById('draw-select-all-btn');
+  if(btn){
+    const allSelected = members.length > 0 && members.every(m=>drawSelected.has(m.name));
+    btn.textContent = allSelected ? 'Bỏ tất cả' : 'Chọn tất cả';
+    btn.style.color = allSelected ? 'var(--red)' : 'var(--muted)';
+    btn.style.borderColor = allSelected ? 'var(--red)' : 'var(--bdr2)';
+  }
+}
+
+function toggleSelectAllDraw(){
+  const allNames = members.map(m=>m.name);
+  const allSelected = allNames.every(n=>drawSelected.has(n));
+  if(allSelected){
+    allNames.forEach(n=>drawSelected.delete(n));
+  } else {
+    allNames.forEach(n=>drawSelected.add(n));
+  }
+  renderDrawPool();
+  renderDrawSizeBtns();
+  updateDrawSpin();
 }
 
 function toggleDrawMember(name){
