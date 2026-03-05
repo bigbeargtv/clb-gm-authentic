@@ -1216,10 +1216,13 @@ async function loadLogo(){
 // Password hash (SHA-256 of "gmauthenic2025")
 const ADMIN_HASH = 'a8f5f167f44f4964e6c998dee827110c9f6674b00c5d8d3f3af78e17a51b8d';
 let isAdmin = false;
+const ADMIN_SESSION_KEY = 'gma_admin_session';
 
-async function hashPw(pw){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+function checkSavedAdminSession(){
+  try{
+    const saved = localStorage.getItem(ADMIN_SESSION_KEY);
+    if(saved === 'true'){ loginAdmin(true); }
+  }catch(e){}
 }
 
 function toggleAdminModal(){
@@ -1235,8 +1238,6 @@ function closeAdminModal(e){
 }
 async function submitAdmin(){
   const pw = document.getElementById('am-pw').value;
-  const hash = await hashPw(pw);
-  // Also allow direct password match for flexibility
   const ADMIN_PW = 'mimo2026';
   if(pw === ADMIN_PW){
     loginAdmin();
@@ -1246,18 +1247,21 @@ async function submitAdmin(){
     document.getElementById('am-pw').focus();
   }
 }
-function loginAdmin(){
+function loginAdmin(silent){
   isAdmin = true;
-  document.getElementById('admin-modal-overlay').classList.remove('on');
+  if(!silent) document.getElementById('admin-modal-overlay').classList.remove('on');
   document.getElementById('adminBtn').textContent='🔓 Admin';
   document.getElementById('adminBtn').classList.add('active');
   document.body.classList.add('admin-mode');
-  // Show admin badge in save status
   if(!document.getElementById('adminBadge')){
     const b = document.createElement('span');
     b.id='adminBadge'; b.className='admin-badge'; b.textContent='ADMIN';
     document.querySelector('.save-status').prepend(b);
   }
+  // Remember on this device
+  try{ localStorage.setItem(ADMIN_SESSION_KEY,'true'); }catch(e){}
+  renderMembers();
+  renderMatches();
 }
 function logoutAdmin(){
   if(!confirm('Thoát chế độ Admin?')) return;
@@ -1267,6 +1271,9 @@ function logoutAdmin(){
   document.body.classList.remove('admin-mode');
   const b = document.getElementById('adminBadge');
   if(b) b.remove();
+  try{ localStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+  renderMembers();
+  renderMatches();
 }
 
 // ─── MATCH ───
@@ -1280,17 +1287,28 @@ function addMatch(){
   if(!document.getElementById('sessionDate').value)document.getElementById('sessionDate').value=sessionDate;
   matches.push({id:matchUid++,cat,tgt,date:sessionDate,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',bet:0,saved:false});
   renderMatches();debounceSave();
-  setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),60);
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);
 }
 
 function renderMatches(){
   const el=document.getElementById('mlist');
-  const saved=matches.filter(m=>m.saved).length;
   if(!matches.length){
     el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chọn loại đôi rồi nhấn<br>"＋ Thêm trận đấu"</div>';
     return;
   }
-  el.innerHTML=matches.map(m=>m.saved?rSaved(m):rEdit(m)).join('');
+  // Unsaved (active) on top, saved below newest-first
+  const unsaved = matches.filter(m=>!m.saved);
+  const saved   = matches.filter(m=>m.saved).slice().reverse();
+  let html='';
+  if(unsaved.length){
+    html += '<div style="margin-bottom:6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">⚡ Đang diễn ra ('+unsaved.length+')</div>';
+    html += unsaved.map(m=>rEdit(m)).join('');
+  }
+  if(saved.length){
+    html += '<div style="margin:'+(unsaved.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 2px;">✅ Đã hoàn thành ('+saved.length+')</div>';
+    html += saved.map(m=>rSaved(m)).join('');
+  }
+  el.innerHTML=html;
 }
 
 function mbOf(name){return members.find(m=>m.name===name);}
@@ -1471,7 +1489,7 @@ function renderQuy(){
   let html = `<div class="quy-summary">
     <div class="quy-total-block">
       <div class="quy-total-label">Tổng quỹ</div>
-      <div class="quy-total-num">🍃 ${totalLeaf}</div>
+      <div class="quy-total-num">🍃 ${fmtNum(totalLeaf)}</div>
       <div class="quy-total-sub">${totalMatches} trận có cược · ${sorted.length} người nợ</div>
     </div>
     <div class="quy-stats">
@@ -1493,7 +1511,7 @@ function renderQuy(){
       <div class="rk">${rk}</div>
       <div class="quy-player">${avHtml}<span class="quy-nm">${xe(p.name)}</span></div>
       <div class="quy-matches">${p.matches}</div>
-      <div class="quy-debt">${p.total}🍃</div>
+      <div class="quy-debt">${fmtNum(p.total)}🍃</div>
     </div>`;
   });
   el.innerHTML = html;
@@ -1696,6 +1714,7 @@ function renderHist(){
 }
 
 // ─── UTILS ───
+function fmtNum(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.length>1?p[p.length-1][0]:name[0]).toUpperCase();}
 function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1705,6 +1724,7 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   document.getElementById('saveLabel').textContent='Đang tải...';
   await load();
   await loadLogo();
+  checkSavedAdminSession();
   // Set date input
   const dateEl=document.getElementById('sessionDate');
   dateEl.value=sessionDate||todayStr();
