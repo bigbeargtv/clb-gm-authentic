@@ -1404,6 +1404,8 @@ function goTab(id){
   if(id==='pg-hist')renderHist();
   if(id==='pg-quy')renderQuy();
   if(id==='pg-draw')initDrawTab();
+  // Lưu tab hiện tại để F5 giữ nguyên
+  try{ localStorage.setItem('activeTab', id); }catch(e){}
 }
 
 // ─── DATE ───
@@ -1516,6 +1518,7 @@ function renderDrawPool(){
 }
 
 function toggleSelectAllDraw(){
+  if(!isAdmin) return;
   const allNames = members.map(m=>m.name);
   const allSelected = allNames.every(n=>drawSelected.has(n));
   if(allSelected){
@@ -1529,6 +1532,7 @@ function toggleSelectAllDraw(){
 }
 
 function toggleDrawMember(name){
+  if(!isAdmin) return;
   name = name.replace(/&#39;/g,"'");
   if(drawSelected.has(name)) drawSelected.delete(name);
   else drawSelected.add(name);
@@ -1538,6 +1542,7 @@ function toggleDrawMember(name){
 }
 
 function addDrawCustom(){
+  if(!isAdmin) return;
   const inp = document.getElementById('draw-custom-inp');
   const name = inp.value.trim();
   if(!name) return;
@@ -1686,6 +1691,7 @@ let drawTeamA = [], drawTeamB = [];
 let drawWinner = ''; // 'A' | 'B' | ''
 
 function setDrawBet(val){
+  if(!isAdmin) return;
   drawBet = val;
   [0,100,200,500,1000].forEach(v=>{
     const el=document.getElementById('dbp-'+v);
@@ -1697,6 +1703,7 @@ function setDrawBet(val){
   if(drawWinner) renderLoserCalc();
 }
 function setDrawBetCustom(val){
+  if(!isAdmin) return;
   drawBet = parseInt(val)||0;
   [0,100,200,500,1000].forEach(v=>{
     const el=document.getElementById('dbp-'+v);
@@ -1781,6 +1788,7 @@ let drawTeams = []; // [{name,color,players,captain}]
 let drawSessionsMeta = {}; // {sessionId: {name,teamA,teamB,captainA,captainB,winner,date}}
 
 function doDrawSpin(){
+  if(!isAdmin) return;
   if(getAllDrawPlayers().length < 2) return;
   drawCaptainA=''; drawCaptainB=''; drawWinner='';
   window._matchPairs=[];
@@ -2307,6 +2315,7 @@ function checkSaveBtn(){
 
 // ── Save session to History ──
 function saveDrawSession(){
+  if(!isAdmin) return;
   const pairs=window._matchPairs||[];
   if(!pairs.length) return;
   const today=new Date().toISOString().slice(0,10);
@@ -3155,33 +3164,28 @@ function avSpan(name,sz=24,fsz=11){
 
 function rSaved(m){
   const w1=+m.s1>+m.s2;
-  const t1names=[m.t1p1,m.t1p2].filter(Boolean);
-  const t2names=[m.t2p1,m.t2p2].filter(Boolean);
-  function teamRow(names,won){
-    const avs=names.map(n=>avSpan(n)).join('');
-    const label=names.map(n=>xe(n)).join(' & ')||'Đội';
-    return `<div class="sv-team-row${won?' winner':''}">
-      <div class="sv-avatars">${avs}</div>
-      <span class="sv-name ${won?'w':'l'}">${label}</span>
-      ${won?'<span class="sv-medal">🏅</span>':''}
-    </div>`;
-  }
-  return `<div class="mc" id="mc${m.id}" style="padding:0;overflow:hidden;">
-    <div style="padding:12px 14px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bdr);">
-      <span class="mc-num" style="flex:1;">TRẬN #${m.id}</span>
-      <span class="cbadge ${CB[m.cat]}">${CL[m.cat]}</span>
+  const t1=[m.t1p1,m.t1p2].filter(Boolean);
+  const t2=[m.t2p1,m.t2p2].filter(Boolean);
+  const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+  const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
+    ${names.map(n=>av(n)).join('')}
+    <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
+    ${won?'<span style="font-size:11px;">🏅</span>':''}
+  </div>`;
+  return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
+    <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+    <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+      ${teamHtml(t1,w1)}
+      ${teamHtml(t2,!w1)}
     </div>
-    <div class="sv-card" style="border-radius:0;border:none;margin:0;">
-      <div class="sv-teams">
-        ${teamRow(t1names,w1)}
-        ${teamRow(t2names,!w1)}
-      </div>
-      <div class="sv-bottom">
-        <div class="sv-score-big">${m.s1} : ${m.s2}</div>
-        <div class="sv-meta">${fmtDate(m.date)}${m.bet?'<br><span class="bet-badge">🍃 '+m.bet+'/người</span>':''}</div>
-        <button class="edit-btn" onclick="editMatch(${m.id})">✏️ Sửa</button>
-        <button class="del-btn admin-only" style="padding:6px 10px;font-size:13px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
-      </div>
+    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--text)'};">${m.s1}</span>
+      <span style="font-size:9px;color:var(--muted);line-height:1;">:</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--text)'};">${m.s2}</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-shrink:0;">
+      <button class="edit-btn" style="padding:4px 8px;font-size:11px;" onclick="editMatch(${m.id})">✏️</button>
+      <button class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
     </div>
   </div>`;
 }
@@ -3395,7 +3399,7 @@ function renderQuy(){
         html += `<div style="border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:8px;overflow:hidden;">
           <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--s2);font-weight:800;font-size:13px;" onclick="toggleDrawSession('${gDomId}')">
             <span>📅</span>
-            <span style="flex:1;">${fmtDate(g.date)} · ${g.entries.length} người · ${fmtNum(g.total)}🍃</span>
+            <span style="flex:1;">${(drawSessionsMeta[g.key]||{}).name || fmtDate(g.date)} · ${g.entries.length} người · ${fmtNum(g.total)}🍃</span>
             <span id="${gDomId}-arrow" style="font-size:11px;color:var(--muted);">▼</span>
             ${delBtnG}
           </div>
@@ -3713,19 +3717,30 @@ function renderHist(){
 
     // Draw matches → gom vào 1 accordion
     if(drawMs.length){
-      const drawId='hdraw-'+d;
-      html+=`<div style="border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:6px;overflow:hidden;">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);font-weight:800;font-size:13px;">
-          <span style="flex:1;cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="toggleHistDay('${drawId}')">
-            <span>🎲</span>
-            <span>Sự kiện bốc thăm · ${drawMs.length} trận</span>
-            <span style="font-size:11px;color:var(--muted);" id="${drawId}-arrow">▼</span>
-          </span>
-          <button class="del-btn admin-only" onclick="delDrawSession('${d}')" title="Xóa sự kiện" style="font-size:13px;padding:4px 8px;">🗑 Xóa</button>
-        </div>
-        <div id="${drawId}" style="display:none;">`;
-      drawMs.forEach(m=>{ html+=matchRow(m, true); });
-      html+=`</div></div>`;
+      // Group draw matches theo drawSessionId
+      const drawGroups = {};
+      drawMs.forEach(m=>{
+        const sid = m.drawSessionId || ('legacy_'+d);
+        if(!drawGroups[sid]) drawGroups[sid] = {sid, matches:[]};
+        drawGroups[sid].matches.push(m);
+      });
+      Object.entries(drawGroups).forEach(([sid, grp], gi)=>{
+        const drawId = 'hdraw-'+d+'-'+gi;
+        const meta = drawSessionsMeta[sid] || {};
+        const sessName = meta.name || ('Sự kiện bốc thăm · ' + fmtDate(d));
+        html+=`<div style="border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:6px;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);font-weight:800;font-size:13px;">
+            <span style="flex:1;cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="toggleHistDay('${drawId}')">
+              <span>🎲</span>
+              <span>${xe(sessName)} · ${grp.matches.length} trận</span>
+              <span style="font-size:11px;color:var(--muted);" id="${drawId}-arrow">▼</span>
+            </span>
+            <button class="del-btn admin-only" onclick="delDrawSession('${sid}')" title="Xóa sự kiện" style="font-size:13px;padding:4px 8px;">🗑 Xóa</button>
+          </div>
+          <div id="${drawId}" style="display:none;">`;
+        grp.matches.forEach(m=>{ html+=matchRow(m, true); });
+        html+=`</div></div>`;
+      });
     }
 
     // Normal matches → hiện như cũ
@@ -3790,6 +3805,11 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   ['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
   renderMembers();
   renderMatches();
+  // Khôi phục tab cuối cùng
+  try{
+    const savedTab = localStorage.getItem('activeTab');
+    if(savedTab && document.getElementById(savedTab)) goTab(savedTab);
+  }catch(e){}
   // Hide loading overlay
   const ov = document.getElementById('loadingOverlay');
   if(ov) ov.style.display='none';
