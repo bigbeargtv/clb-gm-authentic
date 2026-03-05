@@ -2964,8 +2964,8 @@ function rEdit(m){
     </div>
     <div class="score-area">
       <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <button class="wl-btn${m._winner==='A'?' win':m._winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')">🏆 Đội A thắng</button>
-        <button class="wl-btn${m._winner==='B'?' win':m._winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')">🏆 Đội B thắng</button>
+        <button class="wl-btn${m.winner==='A'?' win':m.winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')">🏆 Đội A thắng</button>
+        <button class="wl-btn${m.winner==='B'?' win':m.winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')">🏆 Đội B thắng</button>
       </div>
       <div class="score-label">Tỉ số (không bắt buộc)</div>
       <div class="srow">
@@ -3033,14 +3033,14 @@ function rSaved(m){
 function canSave(m){return !!(m.t1p1&&m.t2p1);}
 function setWinner(id, side){
   const m=matches.find(m=>m.id===id);if(!m)return;
-  m._winner = m._winner===side ? '' : side;
+  m.winner = m.winner===side ? '' : side;
   // Luôn update score khi score còn là auto (rỗng, hoặc chỉ là 0/1)
   const isAutoScore = (m.s1===''&&m.s2==='')
     || (m.s1==='1'&&m.s2==='0')
     || (m.s1==='0'&&m.s2==='1');
   if(isAutoScore){
-    if(m._winner==='A'){ m.s1='1'; m.s2='0'; }
-    else if(m._winner==='B'){ m.s1='0'; m.s2='1'; }
+    if(m.winner==='A'){ m.s1='1'; m.s2='0'; }
+    else if(m.winner==='B'){ m.s1='0'; m.s2='1'; }
     else { m.s1=''; m.s2=''; }
   }
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
@@ -3051,15 +3051,15 @@ function upScore(id,f,v){
   m[f]=v;
   // auto-set winner from scores
   const s1=parseInt(m.s1)||0, s2=parseInt(m.s2)||0;
-  if(m.s1!==''&&m.s2!==''&&s1!==s2) m._winner=s1>s2?'A':'B';
+  if(m.s1!==''&&m.s2!==''&&s1!==s2) m.winner=s1>s2?'A':'B';
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
   // update winner highlight live
   const mc=document.getElementById('mc'+id);
   if(mc){
     mc.querySelectorAll('.wl-btn').forEach(btn=>{
       const side=btn.dataset.side;
-      btn.classList.toggle('win', m._winner===side);
-      btn.classList.toggle('lose', m._winner&&m._winner!==side);
+      btn.classList.toggle('win', m.winner===side);
+      btn.classList.toggle('lose', m.winner&&m.winner!==side);
     });
   }
   debounceSave();
@@ -3068,13 +3068,13 @@ function saveMatch(id){
   if(!isAdmin)return;
   const m=matches.find(m=>m.id===id);if(!m||!canSave(m))return;
   const sc=document.getElementById('mc'+id).querySelectorAll('.sb');
-  // Score: dùng input nếu có, không thì xem _winner, cuối cùng default 0:0
+  
   if(sc[0].value!==''||sc[1].value!==''){
     m.s1 = sc[0].value!=='' ? sc[0].value : '0';
     m.s2 = sc[1].value!=='' ? sc[1].value : '0';
-  } else if(m._winner){
-    m.s1 = m._winner==='A' ? '1' : '0';
-    m.s2 = m._winner==='B' ? '1' : '0';
+  } else if(m.winner){
+    m.s1 = m.winner==='A' ? '1' : '0';
+    m.s2 = m.winner==='B' ? '1' : '0';
   } else {
     m.s1 = '0'; m.s2 = '0';
   }
