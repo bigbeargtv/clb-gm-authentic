@@ -3034,7 +3034,7 @@ function canSave(m){return !!(m.t1p1&&m.t2p1);}
 function setWinner(id, side){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m.winner = m.winner===side ? '' : side;
-  // Luôn update score khi score còn là auto (rỗng, hoặc chỉ là 0/1)
+  // Luôn update score khi còn là auto (rỗng hoặc 1:0 / 0:1)
   const isAutoScore = (m.s1===''&&m.s2==='')
     || (m.s1==='1'&&m.s2==='0')
     || (m.s1==='0'&&m.s2==='1');
@@ -3043,8 +3043,19 @@ function setWinner(id, side){
     else if(m.winner==='B'){ m.s1='0'; m.s2='1'; }
     else { m.s1=''; m.s2=''; }
   }
+  // Update UI không re-render toàn bộ
+  const mc=document.getElementById('mc'+id);
+  if(mc){
+    mc.querySelectorAll('.wl-btn').forEach(btn=>{
+      btn.classList.toggle('win',  m.winner===btn.dataset.side);
+      btn.classList.toggle('lose', m.winner&&m.winner!==btn.dataset.side);
+    });
+    const sbs=mc.querySelectorAll('.sb');
+    if(sbs[0]) sbs[0].value=m.s1;
+    if(sbs[1]) sbs[1].value=m.s2;
+  }
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
-  renderMatches();
+  debounceSave(); // ← quan trọng: lưu lên Firebase
 }
 function upScore(id,f,v){
   const m=matches.find(m=>m.id===id);if(!m)return;
@@ -3067,16 +3078,12 @@ function upScore(id,f,v){
 function saveMatch(id){
   if(!isAdmin)return;
   const m=matches.find(m=>m.id===id);if(!m||!canSave(m))return;
-  const sc=document.getElementById('mc'+id).querySelectorAll('.sb');
-  
-  if(sc[0].value!==''||sc[1].value!==''){
-    m.s1 = sc[0].value!=='' ? sc[0].value : '0';
-    m.s2 = sc[1].value!=='' ? sc[1].value : '0';
-  } else if(m.winner){
-    m.s1 = m.winner==='A' ? '1' : '0';
-    m.s2 = m.winner==='B' ? '1' : '0';
-  } else {
-    m.s1 = '0'; m.s2 = '0';
+  // m.s1/m.s2 đã được upScore/setWinner cập nhật real-time
+  // Chỉ default khi cả 2 rỗng
+  if(m.s1===''&&m.s2===''){
+    if(m.winner==='A'){ m.s1='1'; m.s2='0'; }
+    else if(m.winner==='B'){ m.s1='0'; m.s2='1'; }
+    else { m.s1='0'; m.s2='0'; }
   }
   m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;renderMatches();debounceSave();
