@@ -602,6 +602,67 @@ nav{
 .pk-name-sm{font-size:12px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .pk-check-sm{color:var(--gold);font-size:14px;flex-shrink:0;}
 
+
+/* ── BET / QUỸ ── */
+.bet-area{
+  background:var(--s1);border:1px solid var(--bdr);
+  border-radius:14px;padding:12px 14px;margin-bottom:12px;
+}
+.bet-label{font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--green);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.bet-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.bet-pill{
+  padding:7px 14px;border-radius:20px;border:1.5px solid var(--bdr2);
+  background:var(--s2);color:var(--muted);font-size:13px;font-weight:800;
+  cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;
+}
+.bet-pill.on{border-color:var(--green);color:var(--green);background:#1a9e6015;}
+.bet-custom-row{display:flex;gap:8px;align-items:center;}
+.bet-inp{
+  flex:1;background:var(--s2);border:1.5px solid var(--bdr2);color:var(--text);
+  border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Nunito',sans-serif;
+  outline:none;transition:border-color .2s;
+}
+.bet-inp:focus{border-color:var(--green);}
+.bet-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#1a9e6018;border:1px solid #1a9e6040;
+  color:var(--green);font-size:12px;font-weight:800;
+  padding:3px 10px;border-radius:20px;
+}
+
+/* Quỹ tab */
+.quy-summary{
+  background:linear-gradient(135deg,#0e1428,#131a30);
+  border:1px solid var(--bdr2);border-radius:16px;
+  padding:18px;margin-bottom:16px;
+  display:flex;gap:14px;align-items:center;
+}
+.quy-total-block{flex:1;}
+.quy-total-label{font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.quy-total-num{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:var(--green);line-height:1;}
+.quy-total-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.quy-stats{display:flex;gap:8px;}
+.quy-stat{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;text-align:center;min-width:60px;}
+.quy-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--gold);line-height:1;}
+.quy-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.quy-row{
+  display:grid;grid-template-columns:28px 1fr 80px 80px;gap:6px;
+  align-items:center;padding:10px 12px;
+  background:var(--s2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:5px;
+  transition:all .15s;
+}
+.quy-row:hover{border-color:var(--bdr2);transform:translateX(2px);}
+.quy-row.r1{border-color:#f5c842;background:linear-gradient(135deg,#fff8e0,#fffdf5);}
+.quy-row.r2{border-color:#c5cad8;}
+.quy-row.r3{border-color:#d4b888;}
+.quy-h{display:grid;grid-template-columns:28px 1fr 80px 80px;gap:6px;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
+.quy-debt{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--red);text-align:right;}
+.quy-matches{font-size:12px;color:var(--muted);text-align:center;}
+.quy-player{display:flex;align-items:center;gap:8px;}
+.quy-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.quy-nm{font-size:13px;font-weight:700;}
+
 </style>
 </div>
 
@@ -625,6 +686,7 @@ nav{
   <button class="nt" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
   <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
+  <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
 </nav>
 
 <!-- MEMBERS -->
@@ -710,6 +772,11 @@ nav{
       <button class="am-btn-ok" onclick="submitAdmin()">Xác nhận</button>
     </div>
   </div>
+</div>
+
+<!-- QUỸ -->
+<div class="pg" id="pg-quy">
+  <div id="quy-content"><div class="empty"><span class="ei">💰</span>Chưa có dữ liệu quỹ.</div></div>
 </div>
 
 <!-- EDIT MEMBER MODAL -->
@@ -868,10 +935,11 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3'};
+  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4'};
   document.getElementById(map[id]).classList.add('on');
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
+  if(id==='pg-quy')renderQuy();
 }
 
 // ─── DATE ───
@@ -1210,7 +1278,7 @@ function addMatch(){
   const d=document.getElementById('sessionDate').value;
   sessionDate=d||todayStr();
   if(!document.getElementById('sessionDate').value)document.getElementById('sessionDate').value=sessionDate;
-  matches.push({id:matchUid++,cat,tgt,date:sessionDate,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',saved:false});
+  matches.push({id:matchUid++,cat,tgt,date:sessionDate,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',bet:0,saved:false});
   renderMatches();debounceSave();
   setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),60);
 }
@@ -1281,6 +1349,16 @@ function rEdit(m){
         <input type="number" class="sb" min="0" max="30" placeholder="0" value="${m.s2}" oninput="upScore(${m.id},'s2',this.value)">
       </div>
     </div>
+    <div class="bet-area">
+      <div class="bet-label">🍃 Tiền cược (mỗi người thua trả)</div>
+      <div class="bet-pills">
+        ${[50,100,200,500].map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${v}🍃</span>`).join('')}
+      </div>
+      <div class="bet-custom-row">
+        <input type="number" class="bet-inp" min="0" placeholder="Số khác..." value="${m.bet&&![50,100,200,500].includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">🍃/người</span>
+      </div>
+    </div>
     <button class="save-btn" id="sb${m.id}" onclick="saveMatch(${m.id})" ${canSave(m)?'':'disabled'}>✅ Lưu kết quả</button>
   </div>`;
 }
@@ -1319,7 +1397,7 @@ function rSaved(m){
       </div>
       <div class="sv-bottom">
         <div class="sv-score-big">${m.s1} : ${m.s2}</div>
-        <div class="sv-meta">Chạm ${m.tgt}<br>${fmtDate(m.date)}</div>
+        <div class="sv-meta">Chạm ${m.tgt}<br>${fmtDate(m.date)}${m.bet?'<br><span class="bet-badge">🍃 '+m.bet+'/người</span>':''}</div>
         <button class="edit-btn" onclick="editMatch(${m.id})">✏️ Sửa</button>
       </div>
     </div>
@@ -1346,6 +1424,79 @@ function delMatch(id){
   if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
   matches=matches.filter(m=>m.id!==id);renderMatches();debounceSave();
+}
+
+
+// ─── BET ───
+function setBet(matchId, val){
+  if(!isAdmin) return;
+  const m=matches.find(m=>m.id===matchId);
+  if(!m) return;
+  m.bet = m.bet===val ? 0 : val; // toggle off if same
+  renderMatches(); debounceSave();
+}
+function setBetCustom(matchId, val){
+  if(!isAdmin) return;
+  const m=matches.find(m=>m.id===matchId);
+  if(!m) return;
+  m.bet = val===''? 0 : parseInt(val)||0;
+  debounceSave();
+}
+
+// ─── QUỸ ───
+function renderQuy(){
+  const saved = matches.filter(m=>m.saved && m.bet && m.bet>0);
+  const el = document.getElementById('quy-content');
+  if(!saved.length){
+    el.innerHTML='<div class="empty"><span class="ei">💰</span>Chưa có trận nào đặt cược.<br>Thêm tiền cược vào từng trận nhé!</div>';
+    return;
+  }
+  // Calculate debt per person
+  const debt={};
+  let totalLeaf=0, totalMatches=saved.length;
+  saved.forEach(m=>{
+    const bet=+m.bet||0;
+    const w1=+m.s1>+m.s2;
+    const losers=[...(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2])].filter(Boolean);
+    losers.forEach(name=>{
+      if(!debt[name]) debt[name]={name, total:0, matches:0};
+      debt[name].total += bet;
+      debt[name].matches += 1;
+      totalLeaf += bet;
+    });
+  });
+  const sorted = Object.values(debt).sort((a,b)=>b.total-a.total);
+  // Summary
+  const topDebtor = sorted[0];
+  let html = `<div class="quy-summary">
+    <div class="quy-total-block">
+      <div class="quy-total-label">Tổng quỹ</div>
+      <div class="quy-total-num">🍃 ${totalLeaf}</div>
+      <div class="quy-total-sub">${totalMatches} trận có cược · ${sorted.length} người nợ</div>
+    </div>
+    <div class="quy-stats">
+      <div class="quy-stat"><div class="quy-stat-num">${totalMatches}</div><div class="quy-stat-lbl">Trận</div></div>
+      <div class="quy-stat"><div class="quy-stat-num">${sorted.length}</div><div class="quy-stat-lbl">Người</div></div>
+    </div>
+  </div>`;
+  html += '<div class="sl" style="margin-top:0">BXH nộp quỹ nhiều nhất</div>';
+  html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Nợ 🍃</div></div>';
+  sorted.forEach((p,i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const mb=mbOf(p.name);
+    const avHtml = (mb&&mb.photo)
+      ? '<img class="av-img-small" src="'+mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
+      : '<div class="quy-av '+(mb?AVC[mb.color]:'')+'" '+(mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
+    const rk = medal || (i+1);
+    html += `<div class="quy-row ${rc}">
+      <div class="rk">${rk}</div>
+      <div class="quy-player">${avHtml}<span class="quy-nm">${xe(p.name)}</span></div>
+      <div class="quy-matches">${p.matches}</div>
+      <div class="quy-debt">${p.total}🍃</div>
+    </div>`;
+  });
+  el.innerHTML = html;
 }
 
 // ─── BXH ───
