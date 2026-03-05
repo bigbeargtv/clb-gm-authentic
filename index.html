@@ -15,7 +15,7 @@
   --nam-c:#2c6fca;--mix-c:#c07a00;--nu-c:#c9357a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;font-size:18px;}
 
 /* LIGHT BG */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
@@ -466,12 +466,127 @@ nav{
 .admin-mode .admin-only-flex{display:flex;}
 .admin-only-flex{display:none;}
 
+
+/* ── EDIT MEMBER MODAL ── */
+#edit-member-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(80,90,120,.5);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+#edit-member-overlay.on{display:flex;animation:fadeIn .2s ease;}
+#edit-member-box{
+  background:var(--s1);border:1px solid var(--bdr2);border-radius:22px;
+  padding:24px 20px;width:calc(100% - 40px);max-width:340px;
+  box-shadow:0 8px 40px rgba(0,0,0,.15);
+  animation:slideUp .22s ease;
+}
+.em-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;letter-spacing:1px;margin-bottom:16px;}
+.em-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.em-inp{
+  width:100%;background:var(--s2);border:1.5px solid var(--bdr2);
+  color:var(--text);border-radius:12px;padding:11px 14px;
+  font-size:14px;font-family:'Nunito',sans-serif;outline:none;
+  transition:border-color .2s;margin-bottom:14px;
+}
+.em-inp:focus{border-color:var(--gold);}
+.em-gender-row{display:flex;gap:8px;margin-bottom:18px;}
+.em-gender-btn{
+  flex:1;padding:10px;border-radius:10px;border:2px solid var(--bdr2);
+  background:var(--s2);font-size:13px;font-weight:700;cursor:pointer;
+  font-family:'Nunito',sans-serif;color:var(--muted);transition:all .15s;
+}
+.em-gender-btn.on-m{border-color:var(--blue);color:var(--blue);background:#4a90e214;}
+.em-gender-btn.on-f{border-color:var(--pink);color:var(--pink);background:#e879b014;}
+.em-btns{display:flex;gap:8px;}
+.em-btn-save{
+  flex:1;padding:12px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),#ff9500);
+  color:#111;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;
+}
+.em-btn-cancel{
+  padding:12px 18px;border:1.5px solid var(--bdr2);border-radius:12px;
+  background:transparent;color:var(--text2);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;
+}
+
+
+/* ── LOGO UPLOAD ── */
+.logo-icon-wrap{position:relative;flex-shrink:0;}
+.logo-icon-wrap .logo-edit{
+  position:absolute;inset:0;border-radius:10px;
+  background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .18s;cursor:pointer;font-size:13px;
+  border:none;width:100%;
+}
+.logo-icon-wrap:hover .logo-edit{opacity:1;}
+.logo-img{width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 3px 10px #d4860a35;}
+
+
+/* ── BXH TABS ── */
+.bxh-tabs{
+  display:flex;gap:6px;margin-bottom:16px;
+  background:var(--s2);border:1px solid var(--bdr);
+  border-radius:14px;padding:5px;
+}
+.bxh-tab{
+  flex:1;padding:9px 4px;border:none;border-radius:10px;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  letter-spacing:.3px;cursor:pointer;background:transparent;
+  color:var(--muted);transition:all .18s;text-align:center;line-height:1.3;
+}
+.bxh-tab.on-nam{background:linear-gradient(135deg,#dceeff,#eef5ff);color:var(--nam-c);box-shadow:0 2px 8px #4a90e220;}
+.bxh-tab.on-mix{background:linear-gradient(135deg,#fff3d0,#fffaec);color:var(--mix-c);box-shadow:0 2px 8px #f0b42920;}
+.bxh-tab.on-nu{background:linear-gradient(135deg,#fce4f0,#fff0f8);color:var(--nu-c);box-shadow:0 2px 8px #e879b020;}
+
+
+/* ── BXH FILTER ── */
+.bxh-filter{
+  background:var(--s1);border:1px solid var(--bdr);border-radius:14px;
+  padding:12px 14px;margin-bottom:14px;
+}
+.bxh-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.bxh-filter-row:last-child{margin-bottom:0;}
+.fpill{
+  padding:7px 13px;border-radius:20px;font-size:12px;font-weight:800;
+  cursor:pointer;border:1.5px solid var(--bdr2);background:var(--s2);
+  color:var(--muted);transition:all .15s;font-family:'Nunito',sans-serif;
+  white-space:nowrap;
+}
+.fpill.on{border-color:var(--gold);color:var(--gold);background:#f0b42914;}
+.fpill.on-blue{border-color:var(--blue);color:var(--blue);background:#4a90e214;}
+.bxh-filter-custom{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.bxh-filter-custom.on{display:flex;}
+.filter-date-inp{
+  flex:1;min-width:120px;background:var(--s2);border:1.5px solid var(--bdr2);
+  color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;
+  font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s;
+}
+.filter-date-inp:focus{border-color:var(--gold);}
+.filter-sep{color:var(--muted);font-weight:700;font-size:13px;}
+.filter-apply{
+  padding:8px 16px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#ff9500);
+  color:#111;font-size:13px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;white-space:nowrap;
+}
+.bxh-filter-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.bxh-result-label{
+  font-size:12px;color:var(--text2);font-weight:700;
+  margin-bottom:10px;padding:6px 10px;
+  background:var(--s2);border-radius:8px;border:1px solid var(--bdr);
+  display:inline-block;
+}
+
 </style>
 </div>
 
 <header>
   <div class="logo-wrap">
-    <div class="logo-icon">🏓</div>
+    <div class="logo-icon-wrap">
+      <div class="logo-icon" id="logoIcon">🏓</div>
+      <button class="logo-edit" onclick="triggerLogoUpload()" title="Đổi logo">📷</button>
+    </div>
     <div class="logo-text"><span>GM</span><em> AUTHENTIC</em></div>
   </div>
   <div class="save-status">
@@ -483,7 +598,7 @@ nav{
 
 <nav>
   <button class="nt on" onclick="goTab('pg-members')" id="nt0"><span class="ic">👥</span>Thành viên</button>
-  <button class="nt" onclick="goTab('pg-matches')" id="nt1"><span class="ic">🏸</span>Trận đấu</button>
+  <button class="nt" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
   <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
 </nav>
@@ -530,7 +645,28 @@ nav{
 
 <!-- BXH -->
 <div class="pg" id="pg-bxh">
-  <div id="bxh"><div class="empty"><span class="ei">🏆</span>Chưa có kết quả.<br>Nhập tỉ số để xem bảng xếp hạng!</div></div>
+  <div class="bxh-tabs">
+    <button class="bxh-tab on-nam" id="btab-nam" onclick="switchBxhTab('nam')">👨 Đôi Nam</button>
+    <button class="bxh-tab" id="btab-mix" onclick="switchBxhTab('mix')">👫 Nam Nữ</button>
+    <button class="bxh-tab" id="btab-nu" onclick="switchBxhTab('nu')">👩 Đôi Nữ</button>
+  </div>
+
+  <div class="bxh-filter">
+    <div class="bxh-filter-label">📅 Thời gian</div>
+    <div class="bxh-filter-row" id="filter-quick"></div>
+    <div class="bxh-filter-row" id="filter-months"></div>
+    <div class="bxh-filter-custom" id="filter-custom">
+      <input type="date" class="filter-date-inp" id="filter-from">
+      <span class="filter-sep">→</span>
+      <input type="date" class="filter-date-inp" id="filter-to">
+      <button class="filter-apply" onclick="applyCustomFilter()">Xem</button>
+    </div>
+  </div>
+
+  <div id="bxh-result-label"></div>
+  <div id="bxh-nam"></div>
+  <div id="bxh-mix" style="display:none"></div>
+  <div id="bxh-nu" style="display:none"></div>
 </div>
 
 <!-- HISTORY -->
@@ -548,6 +684,24 @@ nav{
     <div class="am-btns">
       <button class="am-btn-cancel" onclick="closeAdminModal()">Hủy</button>
       <button class="am-btn-ok" onclick="submitAdmin()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MEMBER MODAL -->
+<div id="edit-member-overlay" onclick="closeEditMember(event)">
+  <div id="edit-member-box">
+    <div class="em-title">✏️ Chỉnh sửa thành viên</div>
+    <div class="em-label">Tên</div>
+    <input class="em-inp" id="em-name" placeholder="Tên thành viên...">
+    <div class="em-label">Giới tính</div>
+    <div class="em-gender-row">
+      <button class="em-gender-btn on-m" id="em-gm" onclick="setEditGender('m')">👨 Nam</button>
+      <button class="em-gender-btn" id="em-gf" onclick="setEditGender('f')">👩 Nữ</button>
+    </div>
+    <div class="em-btns">
+      <button class="em-btn-cancel" onclick="closeEditMember()">Hủy</button>
+      <button class="em-btn-save" onclick="saveEditMember()">💾 Lưu</button>
     </div>
   </div>
 </div>
@@ -749,9 +903,63 @@ function renderMembers(){
     +'<div class="mc-name">'+xe(m.name)+'</div>'
     +'<div class="mc-gender">'+(m.gender==='m'?'👨 Nam':'👩 Nữ')+'</div>'
     +'</div>'
-    +(isAdmin?'<button class="mc-del" onclick="removeMember('+m.id+')" title="Xóa">✕</button>':'')
+    +(isAdmin?'<div style="position:absolute;top:7px;right:8px;display:flex;gap:4px;">'
+      +'<button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:5px;transition:all .15s;" onclick="openEditMember('+m.id+')" title="Sửa">✏️</button>'
+      +'<button class="mc-del" style="position:static;" onclick="removeMember('+m.id+')" title="Xóa">✕</button>'
+      +'</div>':'')
     +'</div>'
   ).join('');
+}
+
+
+// ─── EDIT MEMBER ───
+let editMemberId = null;
+let editGender = 'm';
+
+function openEditMember(id){
+  if(!isAdmin) return;
+  const m = members.find(m=>m.id===id);
+  if(!m) return;
+  editMemberId = id;
+  editGender = m.gender;
+  document.getElementById('em-name').value = m.name;
+  setEditGender(m.gender);
+  document.getElementById('edit-member-overlay').classList.add('on');
+  setTimeout(()=>document.getElementById('em-name').focus(), 100);
+}
+function closeEditMember(e){
+  if(e && e.target !== document.getElementById('edit-member-overlay')) return;
+  document.getElementById('edit-member-overlay').classList.remove('on');
+  editMemberId = null;
+}
+function setEditGender(g){
+  editGender = g;
+  document.getElementById('em-gm').className = 'em-gender-btn'+(g==='m'?' on-m':'');
+  document.getElementById('em-gf').className = 'em-gender-btn'+(g==='f'?' on-f':'');
+}
+function saveEditMember(){
+  if(!editMemberId) return;
+  const name = document.getElementById('em-name').value.trim();
+  if(!name){ document.getElementById('em-name').focus(); return; }
+  // Check duplicate (excluding self)
+  if(members.find(m=>m.id!==editMemberId && m.name.toLowerCase()===name.toLowerCase())){
+    alert('Tên này đã có rồi!'); return;
+  }
+  const m = members.find(m=>m.id===editMemberId);
+  if(!m) return;
+  const oldName = m.name;
+  m.name = name;
+  m.gender = editGender;
+  // Update name in all matches
+  matches.forEach(match=>{
+    ['t1p1','t1p2','t2p1','t2p2'].forEach(f=>{
+      if(match[f]===oldName) match[f]=name;
+    });
+  });
+  closeEditMember();
+  renderMembers();
+  renderMatches();
+  debounceSave();
 }
 
 // ─── PICKER ───
@@ -834,6 +1042,56 @@ function handlePhotoUpload(e){
   reader.readAsDataURL(file);
 }
 
+
+
+// ─── LOGO UPLOAD ───
+function triggerLogoUpload(){
+  if(!isAdmin) return;
+  let fi = document.getElementById('logoFileInput');
+  if(!fi){
+    fi=document.createElement('input');
+    fi.type='file'; fi.accept='image/*'; fi.id='logoFileInput';
+    fi.style='display:none'; document.body.appendChild(fi);
+    fi.addEventListener('change', handleLogoUpload);
+  }
+  fi.value=''; fi.click();
+}
+function handleLogoUpload(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      const SIZE = 120;
+      canvas.width=SIZE; canvas.height=SIZE;
+      const ctx = canvas.getContext('2d');
+      // Crop center square
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width-min)/2, sy = (img.height-min)/2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, SIZE, SIZE);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      applyLogo(dataUrl);
+      // Save logo to Firebase separately
+      fbSet('/clb_logo', {logo: dataUrl});
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function applyLogo(dataUrl){
+  const icon = document.getElementById('logoIcon');
+  if(!dataUrl){ icon.innerHTML='🏓'; icon.style.backgroundImage=''; return; }
+  icon.innerHTML='';
+  icon.style.cssText='width:36px;height:36px;border-radius:10px;overflow:hidden;background:none;box-shadow:0 3px 10px #d4860a35;padding:0;';
+  const imgEl = document.createElement('img');
+  imgEl.src=dataUrl; imgEl.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
+  icon.appendChild(imgEl);
+}
+async function loadLogo(){
+  const data = await fbGet('/clb_logo');
+  if(data && data.logo) applyLogo(data.logo);
+}
 
 // ─── ADMIN AUTH ───
 // Password hash (SHA-256 of "gmauthenic2025")
@@ -1040,10 +1298,117 @@ function delMatch(id){
 }
 
 // ─── BXH ───
+// ─── BXH FILTER ───
+let activeBxhTab = 'nam';
+let bxhFilter = { mode: 'all', from: '', to: '' }; // mode: all | year | month | custom
+
+function initBxhFilter(){
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth(); // 0-based
+
+  // Quick pills: Tất cả + các năm có dữ liệu
+  const years = [...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  let quickHtml = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
+  years.forEach(y=>{
+    const on = bxhFilter.mode==='year' && bxhFilter.from===y;
+    quickHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+  });
+  quickHtml += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓 Tùy chọn</span>';
+  document.getElementById('filter-quick').innerHTML = quickHtml;
+
+  // Month pills: 12 tháng của năm đang chọn (hoặc năm hiện tại)
+  const activeYear = (bxhFilter.mode==='year') ? bxhFilter.from : String(curYear);
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  let monthHtml = '';
+  for(let i=0;i<12;i++){
+    const mon = String(i+1).padStart(2,'0');
+    const key = activeYear+'-'+mon;
+    const hasData = matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const on = bxhFilter.mode==='month' && bxhFilter.from===key;
+    if(hasData){
+      monthHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    }
+  }
+  document.getElementById('filter-months').innerHTML = monthHtml;
+
+  // Custom filter
+  const customEl = document.getElementById('filter-custom');
+  customEl.classList.toggle('on', bxhFilter.mode==='custom');
+}
+
+function setBxhFilter(mode, val){
+  if(mode==='all'){ bxhFilter={mode:'all',from:'',to:''}; }
+  else if(mode==='year'){ bxhFilter={mode:'year',from:val,to:''}; }
+  else if(mode==='month'){ bxhFilter={mode:'month',from:val,to:''}; }
+  document.getElementById('filter-custom').classList.remove('on');
+  initBxhFilter();
+  renderBXH();
+}
+
+function toggleCustomFilter(){
+  const el = document.getElementById('filter-custom');
+  el.classList.toggle('on');
+  if(el.classList.contains('on')){
+    // Set default dates: first and last day of current month
+    const now = new Date();
+    const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0');
+    document.getElementById('filter-from').value = y+'-'+m+'-01';
+    const last = new Date(y, now.getMonth()+1, 0);
+    document.getElementById('filter-to').value = y+'-'+m+'-'+String(last.getDate()).padStart(2,'0');
+  }
+}
+
+function applyCustomFilter(){
+  const from = document.getElementById('filter-from').value;
+  const to   = document.getElementById('filter-to').value;
+  if(!from||!to){ alert('Vui lòng chọn đủ ngày bắt đầu và kết thúc!'); return; }
+  if(from>to){ alert('Ngày bắt đầu phải trước ngày kết thúc!'); return; }
+  bxhFilter = {mode:'custom', from, to};
+  initBxhFilter();
+  renderBXH();
+}
+
+function getFilteredMatches(){
+  const saved = matches.filter(m=>m.saved && m.date);
+  if(bxhFilter.mode==='all') return saved;
+  if(bxhFilter.mode==='year') return saved.filter(m=>m.date.startsWith(bxhFilter.from));
+  if(bxhFilter.mode==='month') return saved.filter(m=>m.date.startsWith(bxhFilter.from));
+  if(bxhFilter.mode==='custom') return saved.filter(m=>m.date>=bxhFilter.from && m.date<=bxhFilter.to);
+  return saved;
+}
+
+function getFilterLabel(){
+  if(bxhFilter.mode==='all') return '📊 Toàn thời gian';
+  if(bxhFilter.mode==='year') return '📅 Năm '+bxhFilter.from;
+  if(bxhFilter.mode==='month'){
+    const [y,m] = bxhFilter.from.split('-');
+    return '📅 Tháng '+parseInt(m)+' năm '+y;
+  }
+  if(bxhFilter.mode==='custom') return '📅 '+fmtDate(bxhFilter.from)+' → '+fmtDate(bxhFilter.to);
+  return '';
+}
+
+function switchBxhTab(ct){
+  activeBxhTab = ct;
+  ['nam','mix','nu'].forEach(t=>{
+    document.getElementById('bxh-'+t).style.display = t===ct ? 'block' : 'none';
+    const btn = document.getElementById('btab-'+t);
+    btn.className = 'bxh-tab' + (t===ct ? ' on-'+t : '');
+  });
+}
+
 function renderBXH(){
-  const saved=matches.filter(m=>m.saved);
-  const el=document.getElementById('bxh');
-  if(!saved.length){el.innerHTML='<div class="empty"><span class="ei">🏆</span>Chưa có kết quả.<br>Nhập tỉ số để xem bảng xếp hạng!</div>';return;}
+  initBxhFilter();
+  const saved = getFilteredMatches();
+  const emptyHtml = '<div class="empty"><span class="ei">🏆</span>Chưa có kết quả.<br>Nhập tỉ số để xem bảng xếp hạng!</div>';
+  // Update result label
+  const labelEl = document.getElementById('bxh-result-label');
+  if(labelEl) labelEl.innerHTML = saved.length ? '<span class="bxh-result-label">'+getFilterLabel()+' · '+saved.length+' trận</span>' : '';
+  if(!saved.length){
+    ['nam','mix','nu'].forEach(ct=>{ document.getElementById('bxh-'+ct).innerHTML=emptyHtml; });
+    return;
+  }
   const stats={};
   function addP(ct,name,pf,pa,won){
     if(!name||!name.trim())return;
@@ -1059,28 +1424,20 @@ function renderBXH(){
   });
   const all=Object.values(stats);
   const srt=(a,b)=>{if(b.w!==a.w)return b.w-a.w;const da=a.pf-a.pa,db=b.pf-b.pa;if(db!==da)return db-da;return b.pf-a.pf;};
-  const icons={nam:'👨',mix:'👫',nu:'👩'};
-  let html='';
   ['nam','mix','nu'].forEach(ct=>{
+    const el = document.getElementById('bxh-'+ct);
     const players=all.filter(p=>p.cat===ct).sort(srt);
-    if(!players.length)return;
-    html+=`<div class="bxh-block">
-      <div class="bxh-head ${ct}">
-        <span class="bxh-icon">${icons[ct]}</span>
-        <span class="bxh-title">${CL[ct]}</span>
-        <span class="bxh-count">${players.length} người</span>
-      </div>
-      <div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">Hiệu số</div><div class="nc">Điểm</div></div>`;
+    if(!players.length){ el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chưa có trận '+CL[ct]+' nào.</div>'; return; }
+    let h = '<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">Hiệu số</div><div class="nc">Điểm</div></div>';
     players.forEach((p,i)=>{
       const diff=p.pf-p.pa,ds=(diff>0?'+':'')+diff,dc=diff>=0?'dp':'dn';
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
       const avcls=p.mb?AVC[p.mb.color]:'';
-      const avbg=p.mb?'':`style="background:var(--muted)"`;
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       const bxhAv = (p.mb&&p.mb.photo)
         ? '<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
         : '<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
-      html+=`<div class="tbl-r ${rc}">
+      h+=`<div class="tbl-r ${rc}">
         <div class="rk">${medal||i+1}</div>
         <div class="bxh-player">${bxhAv}<span class="bxh-nm">${xe(p.name)}</span></div>
         <div class="nc wc">${p.w}</div>
@@ -1089,9 +1446,10 @@ function renderBXH(){
         <div class="pc">${p.pf}</div>
       </div>`;
     });
-    html+='</div>';
+    el.innerHTML = h;
   });
-  el.innerHTML=html;
+  // Restore active tab visibility
+  switchBxhTab(activeBxhTab);
 }
 
 // ─── HISTORY ───
@@ -1144,6 +1502,7 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   // Show loading state
   document.getElementById('saveLabel').textContent='Đang tải...';
   await load();
+  await loadLogo();
   // Set date input
   const dateEl=document.getElementById('sessionDate');
   dateEl.value=sessionDate||todayStr();
