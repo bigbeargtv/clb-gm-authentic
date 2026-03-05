@@ -1348,6 +1348,7 @@ async function load(){
     tgt       = data.tgt       || 11;
     cat       = data.cat       || 'nam';
     sessionDate = data.sessionDate || '';
+    drawSessionsMeta = data.drawSessionsMeta || {};
     setSaveDot(true);
     document.getElementById('saveLabel').textContent='Đã lưu ☁️';
   } else {
@@ -1371,7 +1372,8 @@ async function save(){
   const ok = await fbSet('/clb',{
     members, memberUid,
     matches, matchUid,
-    tgt, cat, sessionDate
+    tgt, cat, sessionDate,
+    drawSessionsMeta
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
@@ -1755,6 +1757,7 @@ function renderLoserCalc(){
 
 // All teams stored as array
 let drawTeams = []; // [{name,color,players,captain}]
+let drawSessionsMeta = {}; // {sessionId: {name,teamA,teamB,captainA,captainB,winner,date}}
 
 function doDrawSpin(){
   if(getAllDrawPlayers().length < 2) return;
@@ -2325,6 +2328,23 @@ function saveDrawSession(){
         saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:'',isBetEntry:true});
     });
   }
+
+  // Lưu metadata sự kiện
+  const teamNames = drawTeams.map(t=>t.name);
+  const captains = drawTeams.map(t=>t.captain||'');
+  const teamWins = {};
+  drawTeams.forEach(t=>{ teamWins[t.id]=0; });
+  pairs.forEach(p=>{
+    const w = p.winner||(p.sa!==''&&p.sb!==''&&p.sa!==p.sb?(parseInt(p.sa)>parseInt(p.sb)?'A':'B'):'');
+    if(w) teamWins[w]=(teamWins[w]||0)+1;
+  });
+  drawSessionsMeta[sessionId] = {
+    name: '',  // có thể đổi sau
+    date: today,
+    teams: drawTeams.map(t=>({id:t.id, name:t.name, captain:t.captain||'', wins:teamWins[t.id]||0, players:t.players})),
+    winner: drawWinner,
+    totalMatches: pairs.length
+  };
 
   save();
 
@@ -2939,17 +2959,41 @@ function renderMatches(){
     html += '<div style="margin:'+(unsaved.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">🎲 Sự kiện bốc thăm ('+drawSessionList.length+')</div>';
     drawSessionList.forEach((sess,si)=>{
       const domId='dsess-'+sess.id.replace(/[^a-z0-9]/gi,'_');
+      const meta = drawSessionsMeta[sess.id] || {};
+      const sessName = meta.name || ('Sự kiện bốc thăm · ' + fmtDate(sess.date));
       const delBtnHtml = isAdmin
-        ? `<button class="del-btn" onclick="event.stopPropagation();delDrawSession('${sess.id}')" title="Xóa sự kiện" style="font-size:13px;padding:4px 8px;margin-left:4px;">🗑 Xóa</button>`
+        ? `<button class="del-btn" onclick="event.stopPropagation();delDrawSession('${sess.id}')" title="Xóa sự kiện" style="font-size:12px;padding:3px 7px;margin-left:4px;">🗑</button>`
         : '';
+      const renameBtnHtml = isAdmin
+        ? `<button onclick="event.stopPropagation();renameDrawSession('${sess.id}')" style="background:none;border:none;cursor:pointer;font-size:13px;padding:3px 6px;color:var(--muted);" title="Đổi tên">✏️</button>`
+        : '';
+
+      // Team score summary từ meta
+      let teamSummaryHtml = '';
+      if(meta.teams && meta.teams.length >= 2){
+        const tA = meta.teams[0], tB = meta.teams[1];
+        const winnerName = meta.winner ? (meta.teams.find(t=>t.id===meta.winner)||{}).name : '';
+        teamSummaryHtml = `<div style="display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;">
+          <span style="font-weight:800;color:${meta.winner===tA.id?'var(--green)':'var(--muted)'};">${xe(tA.name)}</span>
+          ${tA.captain?`<span style="font-size:10px;color:var(--gold);">👑${xe(tA.captain)}</span>`:''}
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--gold);padding:0 4px;">${tA.wins} – ${tB.wins}</span>
+          ${tB.captain?`<span style="font-size:10px;color:var(--gold);">👑${xe(tB.captain)}</span>`:''}
+          <span style="font-weight:800;color:${meta.winner===tB.id?'var(--green)':'var(--muted)'};">${xe(tB.name)}</span>
+          ${winnerName?`<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;">🏆 ${xe(winnerName)}</span>`:''}
+        </div>`;
+      }
+
       html += `<div class="mc" style="padding:0;overflow:hidden;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:var(--s2);border-bottom:1px solid var(--bdr);" onclick="toggleDrawSession('${domId}')">
           <span style="font-size:16px;">🎲</span>
-          <div style="flex:1;">
-            <div style="font-weight:800;font-size:13px;">Sự kiện bốc thăm · ${fmtDate(sess.date)}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${sess.matches.length} trận</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:13px;display:flex;align-items:center;gap:4px;">
+              ${xe(sessName)}${renameBtnHtml}
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px;">${sess.matches.length} trận</div>
+            ${teamSummaryHtml}
           </div>
-          <span style="font-size:11px;color:var(--muted);" id="${domId}-arrow">▼</span>
+          <span style="font-size:11px;color:var(--muted);flex-shrink:0;" id="${domId}-arrow">▼</span>
           ${delBtnHtml}
         </div>
         <div id="${domId}" style="display:none;">
@@ -2966,6 +3010,18 @@ function renderMatches(){
   }
 
   el.innerHTML=html;
+}
+
+function renameDrawSession(sessionId){
+  if(!isAdmin) return;
+  const meta = drawSessionsMeta[sessionId] || {};
+  const current = meta.name || '';
+  const newName = prompt('Tên sự kiện:', current);
+  if(newName === null) return; // cancelled
+  if(!drawSessionsMeta[sessionId]) drawSessionsMeta[sessionId] = {};
+  drawSessionsMeta[sessionId].name = newName.trim();
+  renderMatches();
+  debounceSave();
 }
 
 function toggleDrawSession(id){
