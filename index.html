@@ -13,11 +13,11 @@
   <meta property="og:description" content="Bảng Xếp Hạng và Thống Kê CLB">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bigbeargtv.github.io/clb-gm-authentic/">
-  <meta property="og:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png">
+  <meta property="og:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png">
+  <meta name="twitter:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png?v=2">
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -795,6 +795,196 @@ nav{
   cursor:pointer;font-family:'Nunito',sans-serif;margin-top:6px;
 }
 
+
+/* ── BỐC THĂM ── */
+.draw-mode-tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:5px;}
+.draw-mode-tab{flex:1;padding:9px 4px;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:transparent;color:var(--muted);transition:all .18s;text-align:center;}
+.draw-mode-tab.on{background:linear-gradient(135deg,#1a1f36,#252c4a);color:var(--gold);box-shadow:0 2px 8px #00000030;}
+
+.draw-section{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:12px;}
+.draw-section-title{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+
+/* Player chips */
+.draw-pool{display:flex;flex-wrap:wrap;gap:7px;min-height:44px;}
+.draw-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px 6px 7px;border-radius:20px;
+  border:1.5px solid var(--bdr2);background:var(--s2);
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.draw-chip:hover{border-color:var(--gold);}
+.draw-chip.on{border-color:var(--gold);background:#f0b42915;color:var(--gold);}
+.draw-chip .dav{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;}
+.draw-chip-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 0 0 4px;line-height:1;transition:color .15s;}
+.draw-chip-del:hover{color:var(--red);}
+
+/* Custom name input */
+.draw-add-row{display:flex;gap:8px;margin-top:10px;}
+.draw-name-inp{flex:1;background:var(--s2);border:1.5px solid var(--bdr2);color:var(--text);border-radius:10px;padding:9px 12px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s;}
+.draw-name-inp:focus{border-color:var(--gold);}
+.draw-add-btn{padding:9px 16px;border:none;border-radius:10px;background:var(--gold);color:#111;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* Mode: equal teams */
+.draw-size-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.draw-size-lbl{font-size:13px;font-weight:700;color:var(--text2);}
+.draw-size-btn{padding:7px 16px;border:1.5px solid var(--bdr2);border-radius:20px;background:var(--s2);color:var(--muted);font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.draw-size-btn.on{border-color:var(--gold);color:var(--gold);background:#f0b42915;}
+
+/* Spin button */
+.draw-spin-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),#ff9500);
+  color:#111;font-size:16px;font-weight:900;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;
+  transition:all .2s;box-shadow:0 4px 16px #d4860a30;margin-bottom:14px;
+}
+.draw-spin-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px #d4860a40;}
+.draw-spin-btn:disabled{background:var(--bdr);color:var(--muted);cursor:default;transform:none;box-shadow:none;}
+
+/* Result */
+.draw-result{display:none;}
+.draw-result.on{display:block;animation:fadeIn .3s ease;}
+.draw-team-card{
+  background:var(--s2);border:1.5px solid var(--bdr);border-radius:14px;
+  padding:14px;margin-bottom:10px;transition:all .2s;
+}
+/* ── DRAG & DROP TEAMS ── */
+.draw-teams-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.draw-team-drag{
+  min-height:60px;border-radius:10px;padding:4px;
+  transition:background .15s;
+}
+.draw-team-drag.drag-over{background:#f0b42920;border:2px dashed var(--gold);}
+.draw-player-tag{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 10px 6px 6px;border-radius:10px;
+  font-size:13px;font-weight:700;background:var(--s1);border:1px solid var(--bdr);
+  cursor:grab;user-select:none;transition:all .15s;margin-bottom:5px;
+}
+.draw-player-tag:active{cursor:grabbing;opacity:.7;}
+.draw-player-tag.captain{border-color:var(--gold);background:#f0b42912;}
+.draw-player-tag.dragging{opacity:.4;}
+.draw-captain-btn{
+  margin-left:auto;background:none;border:1.5px solid var(--bdr2);
+  border-radius:8px;padding:2px 7px;font-size:11px;font-weight:800;
+  cursor:pointer;color:var(--muted);font-family:'Nunito',sans-serif;transition:all .15s;
+}
+.draw-captain-btn.on{border-color:var(--gold);color:var(--gold);background:#f0b42912;}
+
+/* ── INTRA-TEAM PAIRS (A1+A2 vs B1+B2) ── */
+.draw-match-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.draw-match-row{
+  background:var(--s2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 12px;display:flex;align-items:center;gap:8px;
+}
+.draw-match-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--muted);min-width:28px;}
+.draw-match-side{flex:1;display:flex;flex-direction:column;gap:4px;}
+.draw-match-vs{font-weight:900;color:var(--muted);font-size:13px;padding:0 2px;}
+.draw-match-score{display:flex;gap:6px;align-items:center;margin-top:4px;}
+.draw-score-inp{
+  width:46px;text-align:center;
+  background:var(--s1);border:1.5px solid var(--bdr2);color:var(--text);
+  border-radius:8px;padding:5px 4px;font-size:15px;font-weight:800;
+  font-family:'Barlow Condensed',sans-serif;outline:none;transition:border-color .2s;
+}
+.draw-score-inp:focus{border-color:var(--gold);}
+.draw-score-sep{font-size:16px;font-weight:900;color:var(--muted);}
+.draw-match-row.won-left  .draw-match-side:first-child .draw-player-tag{border-color:var(--green);background:#1a9e6015;}
+.draw-match-row.won-right .draw-match-side:last-child  .draw-player-tag{border-color:var(--green);background:#1a9e6015;}
+.wl-btn{flex:1;padding:7px 0;border-radius:10px;border:1.5px solid var(--bdr2);background:var(--s2);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:var(--muted);}
+.wl-btn.win{border-color:var(--green);background:#1a9e6015;color:var(--green);}
+.wl-btn.lose{border-color:#e55;background:#e5555510;color:#e55;}
+.dm-wl-btn{flex:1;padding:5px 0;border-radius:8px;border:1.5px solid var(--bdr2);background:var(--s2);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:var(--muted);white-space:nowrap;}
+.dm-wl-btn.win{border-color:var(--green);background:#1a9e6015;color:var(--green);}
+.dm-wl-btn.lose{border-color:#e55;background:#e5555515;color:#e55;}
+.dm-score-row{display:flex;align-items:center;gap:4px;margin-top:4px;}
+.dm-center-col{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px;}
+
+/* ── SESSION SAVE ── */
+.draw-sessions-log{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.draw-session-card{background:var(--s1);border:1.5px solid var(--bdr2);border-radius:14px;padding:10px 14px;font-size:13px;}
+.draw-session-card-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-weight:800;}
+.draw-session-card-teams{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:900;}
+.draw-session-card-score{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gold);padding:0 6px;}
+.draw-session-card-win{color:var(--green);}
+.draw-session-card-lose{color:var(--muted);font-weight:700;}
+.draw-session-card-matches{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.draw-session-mini-match{font-size:11px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:3px 8px;font-weight:700;color:var(--text2);}
+.draw-session-mini-match.won{border-color:var(--green);color:var(--green);background:#1a9e6015;}
+.draw-session-mini-match.lost{border-color:#e55;color:#e55;background:#e5555510;}
+.draw-session-new-btn{width:100%;padding:13px;border-radius:14px;border:2px dashed var(--bdr2);background:transparent;font-size:14px;font-weight:800;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;margin-bottom:8px;}
+.draw-session-new-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--s1);}
+.draw-session-save{
+  width:100%;padding:12px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--green),#2ecc8a);
+  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;margin-top:4px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.draw-session-save:disabled{background:var(--bdr);color:var(--muted);cursor:default;}
+.draw-saved-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#1a9e6015;border:1.5px solid var(--green);border-radius:10px;font-size:13px;font-weight:800;color:var(--green);margin-bottom:10px;}
+
+/* Bet row */
+.draw-bet-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.draw-bet-lbl{font-size:13px;font-weight:700;color:var(--text2);}
+.draw-bet-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--bdr2);background:var(--s2);color:var(--muted);font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.draw-bet-pill.on{border-color:var(--green);color:var(--green);background:#1a9e6015;}
+.draw-bet-inp{width:80px;background:var(--s2);border:1.5px solid var(--bdr2);color:var(--text);border-radius:10px;padding:6px 10px;font-size:13px;font-family:'Nunito',sans-serif;outline:none;}
+.draw-bet-inp:focus{border-color:var(--green);}
+
+/* Winner pick */
+.draw-winner-row{display:flex;gap:8px;margin-bottom:12px;}
+.draw-winner-btn{flex:1;padding:10px;border-radius:12px;border:2px solid var(--bdr2);background:var(--s2);font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:var(--text2);}
+.draw-winner-btn.A.on{border-color:#4a90e2;background:#dceeff;color:#2c6fca;}
+.draw-winner-btn.B.on{border-color:#e879b0;background:#fce4f0;color:#c9357a;}
+.draw-loser-result{padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,#fff8e0,#fffdf5);border:1px solid #f5c842;font-size:14px;font-weight:700;color:#7a5800;margin-bottom:10px;text-align:center;}
+
+/* Pairs result */
+.draw-pairs{display:flex;flex-direction:column;gap:8px;}
+.draw-pair-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px;
+}
+.draw-pair-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--muted);min-width:24px;}
+.draw-pair-team{flex:1;display:flex;flex-direction:column;gap:5px;}
+.draw-pair-vs{font-weight:900;color:var(--muted);font-size:13px;padding:0 4px;}
+.draw-reshuffle{
+  width:100%;padding:10px;border:1.5px solid var(--bdr2);border-radius:12px;
+  background:transparent;color:var(--text2);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;transition:all .15s;
+}
+.draw-reshuffle:hover{border-color:var(--gold);color:var(--gold);}
+.draw-count-badge{background:var(--gold);color:#111;font-size:11px;font-weight:900;padding:2px 8px;border-radius:10px;margin-left:6px;}
+
+
+/* Match count config */
+.draw-match-type-row{display:flex;flex-direction:column;gap:10px;}
+.draw-match-type-item{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.draw-match-type-lbl{font-size:13px;font-weight:700;color:var(--text2);min-width:72px;}
+.draw-match-type-btns{display:flex;gap:6px;}
+.draw-match-cnt-btn{padding:5px 13px;border:1.5px solid var(--bdr2);border-radius:16px;background:var(--s2);color:var(--muted);font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.draw-match-cnt-btn.on{border-color:var(--gold);color:var(--gold);background:#f0b42915;}
+
+/* Multi-team grid */
+.draw-teams-grid{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;}
+.draw-team-card{background:var(--s2);border:1.5px solid var(--bdr);border-radius:14px;padding:12px;min-width:140px;flex:1;}
+.draw-team-card.teamA{border-color:#4a90e2;background:linear-gradient(135deg,#dceeff,#f0f8ff);}
+.draw-team-card.teamB{border-color:#e879b0;background:linear-gradient(135deg,#fce4f0,#fff0f8);}
+.draw-team-card.teamC{border-color:#2ecc71;background:linear-gradient(135deg,#e0faf0,#f0fff8);}
+.draw-team-card.teamD{border-color:#e67e22;background:linear-gradient(135deg,#fef0e0,#fffaf5);}
+
+/* Swap chip inside pair */
+.draw-swap-btn{background:none;border:1.5px solid var(--bdr2);border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap;}
+.draw-swap-btn:hover{border-color:var(--gold);color:var(--gold);}
+.draw-match-row .draw-player-tag{cursor:default;}
+
+.draw-swap-select{
+  background:var(--s2);border:1.5px solid var(--bdr2);color:var(--text2);
+  border-radius:8px;padding:3px 6px;font-size:11px;font-weight:700;
+  font-family:'Nunito',sans-serif;cursor:pointer;outline:none;
+  transition:border-color .15s;max-width:72px;
+}
+.draw-swap-select:focus{border-color:var(--gold);}
 </style>
 </div>
 
@@ -820,6 +1010,7 @@ nav{
   <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
+  <button class="nt" onclick="goTab('pg-draw')" id="nt5"><span class="ic">🎲</span>Bốc thăm</button>
 </nav>
 
 <!-- MEMBERS -->
@@ -927,6 +1118,66 @@ nav{
     </div>
   </div>
   <div id="quy-content"><div class="empty"><span class="ei">💰</span>Chưa có dữ liệu quỹ.</div></div>
+</div>
+
+
+<!-- BỐC THĂM -->
+<div class="pg" id="pg-draw">
+
+  <!-- Player pool -->
+  <div class="draw-section">
+    <div class="draw-section-title">👥 Chọn người tham gia <span class="draw-count-badge" id="draw-count">0</span></div>
+    <div class="draw-pool" id="draw-member-pool"></div>
+    <div style="margin:12px 0 6px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">Thêm tên tự do</div>
+    <div class="draw-add-row">
+      <input class="draw-name-inp" id="draw-custom-inp" placeholder="Nhập tên..." onkeydown="if(event.key==='Enter')addDrawCustom()">
+      <button class="draw-add-btn" onclick="addDrawCustom()">＋</button>
+    </div>
+    <div class="draw-pool" id="draw-custom-pool" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- Team count config (equal mode) -->
+  <div id="draw-equal-cfg" class="draw-section">
+    <div class="draw-section-title">⚙️ Chia thành bao nhiêu team?</div>
+    <div class="draw-size-row" id="draw-size-btns"></div>
+    <div id="draw-team-names" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- Match count config (equal mode) -->
+  <div id="draw-match-cfg" class="draw-section">
+    <div class="draw-section-title">🗓 Số lượt trận</div>
+    <div class="draw-match-type-row">
+      <div class="draw-match-type-item">
+        <span class="draw-match-type-lbl">👨 Đôi Nam</span>
+        <div class="draw-match-type-btns" id="dmc-nam"></div>
+      </div>
+      <div class="draw-match-type-item">
+        <span class="draw-match-type-lbl">👫 Nam Nữ</span>
+        <div class="draw-match-type-btns" id="dmc-mix"></div>
+      </div>
+      <div class="draw-match-type-item">
+        <span class="draw-match-type-lbl">👩 Đôi Nữ</span>
+        <div class="draw-match-type-btns" id="dmc-nu"></div>
+      </div>
+      <div class="draw-match-type-item" style="margin-top:4px;border-top:1px solid var(--bdr);padding-top:10px;">
+        <span class="draw-match-type-lbl" style="color:var(--gold);">⚡ Tối đa / người</span>
+        <div class="draw-match-type-btns" id="dmc-maxpp"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spin -->
+  <button class="draw-spin-btn" id="draw-spin-btn" onclick="doDrawSpin()" disabled>🎲 Bốc thăm ngẫu nhiên!</button>
+
+  <!-- Session log (previous events) -->
+  <div id="draw-sessions-log" class="draw-sessions-log"></div>
+
+  <!-- New event button (shown after first save) -->
+  <button class="draw-session-new-btn" id="draw-new-event-btn" style="display:none;" onclick="startNewDrawEvent()">🎲 Tạo sự kiện tiếp theo</button>
+
+  <!-- Result -->
+  <div class="draw-result" id="draw-result"></div>
+
 </div>
 
 <!-- BACKUP MODAL -->
@@ -1115,11 +1366,12 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4'};
+  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5'};
   document.getElementById(map[id]).classList.add('on');
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
   if(id==='pg-quy')renderQuy();
+  if(id==='pg-draw')initDrawTab();
 }
 
 // ─── DATE ───
@@ -1185,6 +1437,1022 @@ function renderMembers(){
 
 
 
+
+// ─── BỐC THĂM ───
+let drawMode = 'equal';       // 'equal' | 'pairs'
+let drawSelected = new Set(); // member names selected
+let drawCustom = [];          // free-text names
+
+function setDrawMode(mode){
+  drawMode = 'equal'; // only equal mode remains
+}
+
+function initDrawTab(){
+  renderDrawPool();
+  renderDrawSizeBtns();
+  renderMatchCountBtns();
+  setDrawMode(drawMode);
+  renderDrawResult();
+}
+
+function setPairModeGlobal(mode){
+  window._pairMode=mode;
+  renderDrawResult();
+}
+
+function renderDrawPool(){
+  const pool = document.getElementById('draw-member-pool');
+  if(!pool) return;
+  pool.innerHTML = members.map(mb => {
+    const on = drawSelected.has(mb.name);
+    const avHtml = mb.photo
+      ? `<img src="${mb.photo}" style="width:22px;height:22px;border-radius:7px;">`
+      : `<div class="dav ${AVC[mb.color]}">${ini(mb.name)}</div>`;
+    return `<div class="draw-chip${on?' on':''}" onclick="toggleDrawMember('${mb.name.replace(/'/g,"&#39;")}')">
+      ${avHtml}<span>${xe(mb.name)}</span>
+    </div>`;
+  }).join('') || '<span style="color:var(--muted);font-size:13px;">Chưa có thành viên CLB.</span>';
+  updateDrawCount();
+}
+
+function toggleDrawMember(name){
+  name = name.replace(/&#39;/g,"'");
+  if(drawSelected.has(name)) drawSelected.delete(name);
+  else drawSelected.add(name);
+  renderDrawPool();
+  renderDrawSizeBtns();
+  updateDrawSpin();
+}
+
+function addDrawCustom(){
+  const inp = document.getElementById('draw-custom-inp');
+  const name = inp.value.trim();
+  if(!name) return;
+  if(drawCustom.includes(name)||[...drawSelected].includes(name)){ inp.value=''; return; }
+  drawCustom.push(name);
+  inp.value='';
+  renderCustomPool();
+  renderDrawSizeBtns();
+  updateDrawSpin();
+}
+
+function removeDrawCustom(name){
+  drawCustom = drawCustom.filter(n=>n!==name);
+  renderCustomPool();
+  renderDrawSizeBtns();
+  updateDrawSpin();
+}
+
+function renderCustomPool(){
+  const pool = document.getElementById('draw-custom-pool');
+  if(!pool) return;
+  pool.innerHTML = drawCustom.map(name =>
+    `<div class="draw-chip on">
+      <div class="dav" style="background:var(--muted)">${ini(name)}</div>
+      <span>${xe(name)}</span>
+      <button class="draw-chip-del" onclick="removeDrawCustom('${name.replace(/'/g,"&#39;")}')">✕</button>
+    </div>`
+  ).join('');
+  updateDrawCount();
+}
+
+function getAllDrawPlayers(){
+  return [...drawSelected, ...drawCustom];
+}
+
+function updateDrawCount(){
+  const el = document.getElementById('draw-count');
+  if(el) el.textContent = getAllDrawPlayers().length;
+}
+
+// Team count: 2, 3, 4
+let drawTeamCount = 2;
+// Match counts per type
+let drawMatchCounts = {nam:0, mix:0, nu:0};
+
+// Team custom names
+let drawTeamNames = ['Đội A','Đội B','Đội C','Đội D'];
+
+function renderDrawSizeBtns(){
+  const container = document.getElementById('draw-size-btns');
+  if(!container) return;
+  let html = '';
+  [2,3,4].forEach(n=>{
+    html += '<button class="draw-size-btn'+(drawTeamCount===n?' on':'')+'" onclick="setDrawTeamCount('+n+')">'+n+' team</button>';
+  });
+  container.innerHTML = html;
+  renderTeamNameInputs();
+  renderMatchCountBtns();
+}
+
+function setDrawTeamCount(n){
+  drawTeamCount = n;
+  renderDrawSizeBtns();
+  updateDrawSpin();
+}
+
+function renderTeamNameInputs(){
+  const el = document.getElementById('draw-team-names');
+  if(!el) return;
+  const colors = ['#4a90e2','#e879b0','#2ecc71','#e67e22'];
+  let html = '';
+  for(let i=0;i<drawTeamCount;i++){
+    html += '<div style="display:flex;align-items:center;gap:6px;">'
+      +'<span style="width:10px;height:10px;border-radius:50%;background:'+colors[i]+';display:inline-block;"></span>'
+      +'<input class="draw-name-inp" style="width:100px;padding:6px 10px;font-size:13px;" '
+        +'value="'+xe(drawTeamNames[i]||('Đội '+String.fromCharCode(65+i)))+'" '
+        +'placeholder="Tên đội '+(i+1)+'..." '
+        +'oninput="drawTeamNames['+i+']=this.value">'
+      +'</div>';
+  }
+  el.innerHTML = html;
+}
+
+let drawMaxPerPerson = 0; // 0 = unlimited
+
+function renderMatchCountBtns(){
+  ['nam','mix','nu'].forEach(type=>{
+    const el = document.getElementById('dmc-'+type);
+    if(!el) return;
+    let html = '';
+    for(let n=0;n<=10;n++){
+      html += '<button class="draw-match-cnt-btn'+(drawMatchCounts[type]===n?' on':'')+'" onclick="setMatchCount(&quot;'+type+'&quot;,'+n+')">'+n+'</button>';
+    }
+    el.innerHTML = html;
+  });
+  // Max per person: 0 (unlimited), 1-10
+  const mpEl = document.getElementById('dmc-maxpp');
+  if(mpEl){
+    let html = '<button class="draw-match-cnt-btn'+(drawMaxPerPerson===0?' on':'')+'" onclick="setMaxPerPerson(0)">∞</button>';
+    for(let n=1;n<=10;n++){
+      html += '<button class="draw-match-cnt-btn'+(drawMaxPerPerson===n?' on':'')+'" onclick="setMaxPerPerson('+n+')">'+n+'</button>';
+    }
+    mpEl.innerHTML = html;
+  }
+}
+
+function setMatchCount(type, n){
+  drawMatchCounts[type] = n;
+  renderMatchCountBtns();
+  updateDrawSpin();
+}
+
+function setMaxPerPerson(n){
+  drawMaxPerPerson = n;
+  renderMatchCountBtns();
+}
+
+function updateDrawBetInfo(){
+  const el = document.getElementById('draw-bet-info');
+  if(!el) return;
+  const total = getAllDrawPlayers().length;
+  if(!drawBet || !total){ el.innerHTML=''; return; }
+  const perPerson = Math.round(drawBet / total);
+  el.innerHTML = '<span style="color:var(--green);font-weight:700;">Tổng '+fmtNum(drawBet)+'🍃 / '+total+' người = <strong>'+fmtNum(perPerson)+'🍃/người</strong></span>';
+}
+
+function updateDrawSpin(){
+  const btn = document.getElementById('draw-spin-btn');
+  if(!btn) return;
+  const total = getAllDrawPlayers().length;
+  btn.disabled = total < 2;
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let drawBet = 0;
+let drawCaptainA = '', drawCaptainB = '';
+let drawTeamA = [], drawTeamB = [];
+let drawWinner = ''; // 'A' | 'B' | ''
+
+function setDrawBet(val){
+  drawBet = val;
+  [0,100,200,500,1000].forEach(v=>{
+    const el=document.getElementById('dbp-'+v);
+    if(el) el.classList.toggle('on', v===val);
+  });
+  const customInp = document.getElementById('draw-bet-custom');
+  if(customInp) customInp.value = (val&&![100,200,500,1000].includes(val)) ? val : '';
+  updateDrawBetInfo();
+  if(drawWinner) renderLoserCalc();
+}
+function setDrawBetCustom(val){
+  drawBet = parseInt(val)||0;
+  [0,100,200,500,1000].forEach(v=>{
+    const el=document.getElementById('dbp-'+v);
+    if(el) el.classList.remove('on');
+  });
+  updateDrawBetInfo();
+  if(drawWinner) renderLoserCalc();
+}
+
+function toggleCaptain(side, name){
+  // Update in drawTeams array (source of truth)
+  const t = drawTeams.find(t=>t.id===side);
+  if(t) t.captain = (t.captain===name ? '' : name);
+  // backwards compat
+  if(side==='A') drawCaptainA = t?t.captain:'';
+  if(side==='B') drawCaptainB = t?t.captain:'';
+  // Re-render only the team cards, not the whole result (avoids losing match section)
+  drawTeams.forEach(team=>{
+    const card = document.querySelector('.draw-team-card.team'+team.id);
+    if(card) card.outerHTML = renderTeamCard(team.id, team.name, team.players, team.captain);
+  });
+  // Re-init drag after DOM change
+  initDragDrop();
+}
+
+function pickWinner(side){
+  drawWinner = drawWinner===side ? '' : side;
+  renderLoserCalc();
+}
+
+function renderLoserCalc(){
+  const el = document.getElementById('draw-loser-area');
+  if(!el) return;
+  document.querySelectorAll('.draw-winner-btn').forEach(b=>{
+    b.classList.toggle('on', b.dataset.side===drawWinner);
+  });
+  if(!drawWinner){ el.innerHTML=''; return; }
+
+  const winnerIdx = drawWinner==='A' ? 0 : 1;
+  const loserIdx  = drawWinner==='A' ? 1 : 0;
+  const winTeam   = drawTeams[winnerIdx];
+  const loserTeam = drawTeams[loserIdx];
+  const loserPlayers = loserTeam ? loserTeam.players : [];
+  const loserCount   = loserPlayers.length || 1;
+  const winName  = winTeam  ? winTeam.name  : 'Đội '+(drawWinner);
+  const loseName = loserTeam ? loserTeam.name : 'Đội '+(drawWinner==='A'?'B':'A');
+
+  if(!drawBet){
+    el.innerHTML='<div class="draw-loser-result">🏆 <strong>'+xe(winName)+'</strong> thắng!</div>';
+    return;
+  }
+
+  const perPerson = Math.round(drawBet / loserCount);
+
+  // Build member rows
+  const memberRows = loserPlayers.map(name=>{
+    const mb = mbOf(name);
+    const avHtml = (mb&&mb.photo)
+      ? '<img src="'+mb.photo+'" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;">'
+      : '<div class="dav '+(mb?AVC[mb.color]:'')+'" style="'+(mb?'':'background:var(--muted)')+'">'+ini(name)+'</div>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bdr);">'
+      +avHtml
+      +'<span style="flex:1;font-size:13px;font-weight:700;">'+xe(name)+'</span>'
+      +'<span style="font-size:13px;font-weight:800;color:#e55;">-'+fmtNum(perPerson)+'🍃</span>'
+      +'</div>';
+  }).join('');
+
+  el.innerHTML = '<div class="draw-loser-result" style="text-align:left;">'
+    +'<div style="text-align:center;margin-bottom:10px;">'
+      +'🏆 <strong>'+xe(winName)+'</strong> thắng!'
+      +' <span style="font-size:12px;font-weight:700;color:#e55;">← '+xe(loseName)+' nộp quỹ</span>'
+    +'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">'
+      +'Tổng <strong>'+fmtNum(drawBet)+'🍃</strong> ÷ '+loserCount+' người thua = <strong style="color:#e55;">'+fmtNum(perPerson)+'🍃/người</strong>'
+    +'</div>'
+    +memberRows
+    +'</div>';
+}
+
+// All teams stored as array
+let drawTeams = []; // [{name,color,players,captain}]
+
+function doDrawSpin(){
+  if(getAllDrawPlayers().length < 2) return;
+  drawCaptainA=''; drawCaptainB=''; drawWinner='';
+  window._matchPairs=[];
+
+  {
+    const n = drawTeamCount || 2;
+    const colors = ['A','B','C','D'];
+    drawTeams = [];
+
+    // Gender-balanced split: interleave males & females shuffled, then round-robin into teams
+    const allP = getAllDrawPlayers();
+    const mbMap = {};
+    members.forEach(m=>mbMap[m.name]=m);
+    const males   = shuffle(allP.filter(nm=>{ const m=mbMap[nm]; return m&&m.gender==='m'; }));
+    const females = shuffle(allP.filter(nm=>{ const m=mbMap[nm]; return m&&m.gender==='f'; }));
+    const customs = shuffle(allP.filter(nm=>!mbMap[nm])); // free-text names → no gender info
+
+    // initialise n empty teams
+    const teamPlayers = Array.from({length:n},()=>({males:[],females:[],customs:[]}));
+
+    // round-robin males
+    males.forEach((p,i)=>teamPlayers[i%n].males.push(p));
+    // round-robin females
+    females.forEach((p,i)=>teamPlayers[i%n].females.push(p));
+    // round-robin customs
+    customs.forEach((p,i)=>teamPlayers[i%n].customs.push(p));
+
+    for(let i=0;i<n;i++){
+      const nm = drawTeamNames[i] || ('Đội '+String.fromCharCode(65+i));
+      // store males/females separately for display
+      drawTeams.push({
+        id:colors[i], name:nm,
+        players:[...teamPlayers[i].males,...teamPlayers[i].females,...teamPlayers[i].customs],
+        males:teamPlayers[i].males,
+        females:teamPlayers[i].females,
+        customs:teamPlayers[i].customs,
+        captain:''
+      });
+    }
+    window._drawLeftover = [];
+    window._matchPairs = [];
+    window._manualPairs = [];
+    window._pairMode = window._pairMode||'random';
+    drawTeamA = drawTeams[0]?drawTeams[0].players:[];
+    drawTeamB = drawTeams[1]?drawTeams[1].players:[];
+  }
+
+  const resultEl = document.getElementById('draw-result');
+  resultEl.classList.remove('on');
+  renderDrawResult();
+  setTimeout(()=>resultEl.classList.add('on'), 30);
+}
+
+function renderDrawResult(){
+  const resultEl = document.getElementById('draw-result');
+  if(!resultEl) return;
+
+  if(drawMode==='equal'){
+    if(!drawTeams.length){ resultEl.innerHTML=''; return; }
+    let html = '<div style="margin-bottom:10px;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">🎉 Kết quả chia đội <span style="font-size:10px;font-weight:600;text-transform:none;color:var(--muted)">— kéo thả để đổi chỗ</span></div>';
+    html += '<div class="draw-teams-grid">';
+    drawTeams.forEach(t=>{ html += renderTeamCard(t.id, t.name, t.players, t.captain); });
+    html += '</div>';
+    if((window._drawLeftover||[]).length){
+      html += '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;">⚠️ Còn lại: '+(window._drawLeftover).map(n=>xe(n)).join(', ')+'</div>';
+    }
+
+    // Match pairs section — 2 tabs: Random | Tự chọn
+    html += '<div class="draw-mode-tabs" style="margin-bottom:8px;">'
+      +'<button class="draw-mode-tab'+(window._pairMode!=='manual'?' on':'')+'" onclick="setPairMode(&quot;random&quot;)">🎲 Random cặp</button>'
+      +'<button class="draw-mode-tab'+(window._pairMode==='manual'?' on':'')+'" onclick="setPairMode(&quot;manual&quot;)">✏️ Tự chọn</button>'
+      +'</div>';
+    html += '<div id="draw-match-section"></div>';
+
+    // Winner pick (only for 2 teams)
+    if(drawTeams.length===2){
+      html += '<div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;margin-top:4px;">🏆 Chọn đội thắng</div>';
+      html += '<div class="draw-winner-row">';
+      html += '<button class="draw-winner-btn A'+(drawWinner==="A"?" on":"")+'" data-side="A" onclick="pickWinner(&quot;A&quot;)">🏅 Đội A thắng</button>';
+      html += '<button class="draw-winner-btn B'+(drawWinner==="B"?" on":"")+'" data-side="B" onclick="pickWinner(&quot;B&quot;)">🏅 Đội B thắng</button>';
+      html += '</div>';
+    }
+
+    // Bet section — moved here
+    html += '<div class="draw-section" style="margin-bottom:10px;">'
+      +'<div class="draw-section-title">🍃 Quỹ cược (chia đều cho mọi người)</div>'
+      +'<div class="draw-bet-row">'
+      +'<span class="draw-bet-lbl">Tổng:</span>'
+      +'<span class="draw-bet-pill'+(drawBet===0?' on':'')+'" onclick="setDrawBet(0)">Không</span>'
+      +'<span class="draw-bet-pill'+(drawBet===100?' on':'')+'" onclick="setDrawBet(100)">100🍃</span>'
+      +'<span class="draw-bet-pill'+(drawBet===200?' on':'')+'" onclick="setDrawBet(200)">200🍃</span>'
+      +'<span class="draw-bet-pill'+(drawBet===500?' on':'')+'" onclick="setDrawBet(500)">500🍃</span>'
+      +'<span class="draw-bet-pill'+(drawBet===1000?' on':'')+'" onclick="setDrawBet(1000)">1k🍃</span>'
+      +'<input class="draw-bet-inp" type="number" id="draw-bet-custom2" placeholder="Khác..." min="0" value="'+(drawBet&&![0,100,200,500,1000].includes(drawBet)?drawBet:'')+'" oninput="setDrawBetCustom(this.value)">'
+      +'</div>'
+      +'<div id="draw-bet-info"></div>'
+      +'</div>';
+    if(drawTeams.length===2) html += '<div id="draw-loser-area"></div>';
+
+    html += '<button class="draw-session-save" id="draw-save-btn" onclick="saveDrawSession()" disabled>💾 Lưu vào Lịch sử</button>';
+    html += '<button class="draw-reshuffle" onclick="doDrawSpin()">🔀 Bốc lại tất cả</button>';
+    resultEl.innerHTML = html;
+    if(drawTeams.length===2) renderLoserCalc();
+    initDragDrop();
+    renderMatchSection();
+  } else {
+    if(!(window._drawPairs||[]).length){ resultEl.innerHTML=''; return; }
+    let html = '<div style="margin-bottom:10px;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">🎉 Kết quả ghép đôi</div>';
+    html += '<div class="draw-pairs">';
+    (window._drawPairs||[]).forEach((p,i)=>{
+      html += '<div class="draw-pair-row">'
+        +'<div class="draw-pair-num">#'+(i+1)+'</div>'
+        +'<div class="draw-pair-team">'+p.a.map(n=>playerTag(n,'A')).join('')+'</div>'
+        +'<div class="draw-pair-vs">VS</div>'
+        +'<div class="draw-pair-team">'+p.b.map(n=>playerTag(n,'B')).join('')+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+    if((window._drawLeftover||[]).length){
+      html += '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;">⚠️ Còn lại: '+(window._drawLeftover).map(n=>xe(n)).join(', ')+'</div>';
+    }
+    html += '<button class="draw-reshuffle" onclick="doDrawSpin()">🔀 Bốc lại</button>';
+    resultEl.innerHTML = html;
+  }
+}
+
+// ── Drag & Drop ──
+let dragSrc = null;
+function initDragDrop(){
+  document.querySelectorAll('.draw-player-tag[draggable]').forEach(el=>{
+    el.addEventListener('dragstart', e=>{
+      dragSrc = el;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain', el.dataset.name+'|'+el.dataset.team);
+    });
+    el.addEventListener('dragend', ()=>el.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.draw-team-drag').forEach(zone=>{
+    zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', ()=>zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e=>{
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const [srcName, srcTeam] = e.dataTransfer.getData('text/plain').split('|');
+      const destTeam = zone.dataset.team;
+      if(srcTeam===destTeam) return;
+      // Move in drawTeams array
+      const src = drawTeams.find(t=>t.id===srcTeam);
+      const dst = drawTeams.find(t=>t.id===destTeam);
+      if(src&&dst){
+        // Remove from src
+        src.players = src.players.filter(n=>n!==srcName);
+        src.males   = (src.males||[]).filter(n=>n!==srcName);
+        src.females = (src.females||[]).filter(n=>n!==srcName);
+        src.customs = (src.customs||[]).filter(n=>n!==srcName);
+        if(src.captain===srcName) src.captain='';
+        // Add to dst — detect gender
+        const mbMap2={}; members.forEach(m=>mbMap2[m.name]=m);
+        const mbDrag = mbMap2[srcName];
+        dst.players.push(srcName);
+        if(mbDrag&&mbDrag.gender==='m') dst.males=(dst.males||[]).concat(srcName);
+        else if(mbDrag&&mbDrag.gender==='f') dst.females=(dst.females||[]).concat(srcName);
+        else dst.customs=(dst.customs||[]).concat(srcName);
+      }
+      // backwards compat
+      drawTeamA = drawTeams[0]?drawTeams[0].players:[];
+      drawTeamB = drawTeams[1]?drawTeams[1].players:[];
+      window._matchPairs=[];
+      renderDrawResult();
+    });
+  });
+}
+
+// ── Random match pairs ──
+function randomMatchPairs(){
+  if(drawTeams.length<2){ alert('Cần ít nhất 2 đội!'); return; }
+
+  const teamPairs = [];
+  for(let i=0;i<drawTeams.length;i++)
+    for(let j=i+1;j<drawTeams.length;j++)
+      teamPairs.push([i,j]);
+
+  // app[player] = số trận đã được assign trong lần random này
+  const app = {};
+  drawTeams.flatMap(t=>t.players).forEach(p=>app[p]=0);
+
+  // Pick `needed` players from pool.
+  // Strict: never pick someone already at limit unless absolutely no choice.
+  // Shuffles within same-count tier for fairness.
+  // app[player][cat] = số trận của người đó ở nội dung đó
+  // Tổng app[p] = tổng tất cả nội dung
+  const appCat = {}; // p -> {nam:0,mix:0,nu:0}
+  drawTeams.flatMap(t=>t.players).forEach(p=>{ appCat[p]={nam:0,mix:0,nu:0}; });
+  const totalApp = p => (appCat[p]?Object.values(appCat[p]).reduce((a,b)=>a+b,0):0);
+  const catApp   = (p,cat) => appCat[p]?appCat[p][cat]||0:0;
+
+  // Pick needed players from pool.
+  // "spreadFirst": prefer players with catApp[cat]==0 (haven't played this cat yet),
+  // then fewest total appearances, shuffle within same tier.
+  function pick(pool, needed, cat){
+    if(!pool||!pool.length) return [];
+    const s = shuffle([...pool]);
+    // Sort: 1st by catApp (0 first), 2nd by totalApp, shuffle handles ties
+    s.sort((a,b)=>{
+      const ca = catApp(a,cat), cb = catApp(b,cat);
+      if(ca!==cb) return ca-cb;
+      return totalApp(a)-totalApp(b);
+    });
+    if(drawMaxPerPerson===0) return s.slice(0,needed);
+    const under = s.filter(p=>totalApp(p)<drawMaxPerPerson);
+    const result = under.slice(0,needed);
+    if(result.length<needed){
+      s.filter(p=>!result.includes(p)).slice(0,needed-result.length).forEach(p=>result.push(p));
+    }
+    return result;
+  }
+
+  function markUsed(ps, cat){
+    ps.filter(Boolean).forEach(p=>{
+      if(!appCat[p]) appCat[p]={nam:0,mix:0,nu:0};
+      appCat[p][cat]=(appCat[p][cat]||0)+1;
+    });
+  }
+
+  // Validate
+  const warnings = [];
+  const minMalesPerTeam = Math.min(...drawTeams.map(t=>(t.males||[]).length));
+  const minFemsPerTeam  = Math.min(...drawTeams.map(t=>(t.females||[]).length));
+  if(drawMaxPerPerson>0){
+    const maxNam = minMalesPerTeam>0?Math.floor(minMalesPerTeam*drawMaxPerPerson/2):0;
+    const maxMix = Math.min(minMalesPerTeam,minFemsPerTeam)*drawMaxPerPerson;
+    const maxNu  = minFemsPerTeam>0?Math.floor(minFemsPerTeam*drawMaxPerPerson/2):0;
+    if((drawMatchCounts.nam||0)>maxNam&&maxNam>=0)
+      warnings.push('⚠️ Đôi Nam: '+drawMatchCounts.nam+' trận nhưng tối đa '+maxNam+' trận với giới hạn '+drawMaxPerPerson+'/người.');
+    if((drawMatchCounts.mix||0)>maxMix&&maxMix>=0)
+      warnings.push('⚠️ Nam Nữ: '+drawMatchCounts.mix+' trận nhưng tối đa '+maxMix+' trận với giới hạn '+drawMaxPerPerson+'/người.');
+    if((drawMatchCounts.nu||0)>maxNu&&maxNu>=0)
+      warnings.push('⚠️ Đôi Nữ: '+drawMatchCounts.nu+' trận nhưng tối đa '+maxNu+' trận với giới hạn '+drawMaxPerPerson+'/người.');
+  }
+
+  const pairs = [];
+
+  // ── ĐÔI NAM ──
+  for(let m=0;m<(drawMatchCounts.nam||0);m++){
+    const [ti,tj] = teamPairs[m % teamPairs.length];
+    const pA = pick(drawTeams[ti].males||[], 2, 'nam');
+    const pB = pick(drawTeams[tj].males||[], 2, 'nam');
+    markUsed([...pA,...pB], 'nam');
+    pairs.push({ cat:'nam', label:'👨 Đôi Nam',
+      teamA:drawTeams[ti].id, teamB:drawTeams[tj].id,
+      a1:pA[0]||'', a2:pA[1]||'', b1:pB[0]||'', b2:pB[1]||'', sa:'',sb:'',winner:'' });
+  }
+
+  // ── NAM NỮ ──
+  for(let m=0;m<(drawMatchCounts.mix||0);m++){
+    const [ti,tj] = teamPairs[m % teamPairs.length];
+    const mA=pick(drawTeams[ti].males||[],1,'mix'), fA=pick(drawTeams[ti].females||[],1,'mix');
+    const mB=pick(drawTeams[tj].males||[],1,'mix'), fB=pick(drawTeams[tj].females||[],1,'mix');
+    markUsed([mA[0],fA[0],mB[0],fB[0]], 'mix');
+    pairs.push({ cat:'mix', label:'👫 Nam Nữ',
+      teamA:drawTeams[ti].id, teamB:drawTeams[tj].id,
+      a1:mA[0]||'', a2:fA[0]||'', b1:mB[0]||'', b2:fB[0]||'', sa:'',sb:'',winner:'' });
+  }
+
+  // ── ĐÔI NỮ ──
+  for(let m=0;m<(drawMatchCounts.nu||0);m++){
+    const [ti,tj] = teamPairs[m % teamPairs.length];
+    const pA = pick(drawTeams[ti].females||[], 2, 'nu');
+    const pB = pick(drawTeams[tj].females||[], 2, 'nu');
+    markUsed([...pA,...pB], 'nu');
+    pairs.push({ cat:'nu', label:'👩 Đôi Nữ',
+      teamA:drawTeams[ti].id, teamB:drawTeams[tj].id,
+      a1:pA[0]||'', a2:pA[1]||'', b1:pB[0]||'', b2:pB[1]||'', sa:'',sb:'',winner:'' });
+  }
+
+  // fallback
+  if(!pairs.length){
+    teamPairs.forEach(([ti,tj])=>{
+      const tA=shuffle([...drawTeams[ti].players]), tB=shuffle([...drawTeams[tj].players]);
+      pairs.push({ cat:'nam', label:'👨 Đôi Nam',
+        teamA:drawTeams[ti].id, teamB:drawTeams[tj].id,
+        a1:tA[0]||'', a2:tA[1]||'', b1:tB[0]||'', b2:tB[1]||'', sa:'',sb:'',winner:'' });
+    });
+  }
+
+  // Show warnings in match section if any
+  window._matchPairs = pairs;
+  window._matchWarnings = warnings;
+  renderMatchPairs();
+}
+
+window._pairMode = 'random';
+
+function setPairMode(mode){
+  window._pairMode = mode;
+  renderDrawResult();
+}
+
+function renderMatchSection(){
+  const el = document.getElementById('draw-match-section');
+  if(!el) return;
+  if(window._pairMode==='manual'){
+    renderManualPairBuilder();
+  } else {
+    // If no pairs yet and there are match counts configured → auto-random
+    const totalCnt = (drawMatchCounts.nam||0)+(drawMatchCounts.mix||0)+(drawMatchCounts.nu||0);
+    if(!(window._matchPairs||[]).length && totalCnt>0){
+      randomMatchPairs(); // generates and calls renderMatchPairs internally
+    } else {
+      renderMatchPairs();
+    }
+  }
+}
+
+function renderManualPairBuilder(){
+  const el = document.getElementById('draw-match-section');
+  if(!el||!drawTeams.length) return;
+  const catOpts = [
+    {v:'nam',l:'👨 Đôi Nam'},{v:'mix',l:'👫 Nam Nữ'},{v:'nu',l:'👩 Đôi Nữ'}
+  ];
+  const allPlayers = drawTeams.flatMap(t=>t.players.map(p=>({name:p,team:t.id})));
+  const manualPairs = window._manualPairs||[];
+
+  let html = '<div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">✏️ Tự chọn cặp trận</div>';
+
+  // Existing pairs
+  html += '<div class="draw-match-list" id="manual-pair-list">';
+  manualPairs.forEach((p,i)=>{
+    const catSel = '<select class="draw-swap-select" onchange="updateManualPair('+i+',&quot;cat&quot;,this.value)">'
+      +catOpts.map(c=>'<option value="'+c.v+'"'+(p.cat===c.v?' selected':'')+'>'+c.l+'</option>').join('')
+      +'</select>';
+    const mkSel = (slot,placeholder) => '<select class="draw-swap-select" style="max-width:none;width:100%;" onchange="updateManualPair('+i+',&quot;'+slot+'&quot;,this.value)">'
+      +'<option value="">'+placeholder+'</option>'
+      +allPlayers.map(pl=>'<option value="'+xe(pl.name)+'"'+(p[slot]===pl.name?' selected':'')+'>'+xe(pl.name)+' ('+pl.team+')</option>').join('')
+      +'</select>';
+    html += '<div class="draw-match-row" style="flex-wrap:wrap;gap:8px;">'
+      +'<div class="draw-match-num">#'+(i+1)+'</div>'
+      +catSel
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex:1;">'
+        +mkSel('a1','Chọn...')+mkSel('a2','(Không)')
+      +'</div>'
+      +'<div class="draw-match-vs">VS</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex:1;">'
+        +mkSel('b1','Chọn...')+mkSel('b2','(Không)')
+      +'</div>'
+      +'<div class="draw-match-score">'
+        +'<input class="draw-score-inp" type="number" min="0" max="99" value="'+xe(p.sa||'')+'" placeholder="-" oninput="setManualScore('+i+',&quot;a&quot;,this.value)">'
+        +'<span class="draw-score-sep">:</span>'
+        +'<input class="draw-score-inp" type="number" min="0" max="99" value="'+xe(p.sb||'')+'" placeholder="-" oninput="setManualScore('+i+',&quot;b&quot;,this.value)">'
+      +'</div>'
+      +'<button onclick="removeManualPair('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>'
+    +'</div>';
+  });
+  html += '</div>';
+  html += '<button class="draw-reshuffle" style="margin-bottom:6px;" onclick="addManualPair()">＋ Thêm cặp trận</button>';
+  el.innerHTML = html;
+  // sync to _matchPairs
+  window._matchPairs = manualPairs;
+  checkSaveBtn();
+}
+
+function addManualPair(){
+  if(!window._manualPairs) window._manualPairs=[];
+  window._manualPairs.push({cat:'nam',label:'',teamA:'A',teamB:'B',a1:'',a2:'',b1:'',b2:'',sa:'',sb:''});
+  renderManualPairBuilder();
+}
+function removeManualPair(i){
+  window._manualPairs.splice(i,1);
+  renderManualPairBuilder();
+}
+function updateManualPair(i,field,val){
+  if(!window._manualPairs||!window._manualPairs[i]) return;
+  window._manualPairs[i][field]=val;
+  // update label
+  const catMap={nam:'👨 Đôi Nam',mix:'👫 Nam Nữ',nu:'👩 Đôi Nữ'};
+  window._manualPairs[i].label = catMap[window._manualPairs[i].cat]||'';
+  window._matchPairs = window._manualPairs;
+  checkSaveBtn();
+}
+function setManualScore(i,side,val){
+  if(!window._manualPairs||!window._manualPairs[i]) return;
+  window._manualPairs[i]['s'+side]=val;
+  window._matchPairs = window._manualPairs;
+  checkSaveBtn();
+}
+
+function matchRowHtml(p, i){
+  // winner: 'A' | 'B' | '' (can be set without scores)
+  const sA=parseInt(p.sa)||0, sB=parseInt(p.sb)||0;
+  // determine winner: explicit p.winner takes priority, else derive from scores
+  const winner = p.winner || (p.sa!==''&&p.sb!==''&&p.sa!==p.sb ? (sA>sB?'A':'B') : '');
+  const wonL = winner==='A', wonR = winner==='B';
+  const sideA = p.teamA||'A', sideB = p.teamB||'B';
+  const tA = drawTeams.find(t=>t.id===sideA);
+  const tB = drawTeams.find(t=>t.id===sideB);
+  const poolA = tA ? tA.players.filter(n=>n!==p.a1&&n!==p.a2) : [];
+  const poolB = tB ? tB.players.filter(n=>n!==p.b1&&n!==p.b2) : [];
+  const mkSwap = (slot,pool) => pool.length
+    ? '<select class="draw-swap-select" onchange="swapPairMember('+i+',&quot;'+slot+'&quot;,this.value)"><option value="">↔</option>'
+      +pool.map(n=>'<option value="'+xe(n)+'">'+xe(n)+'</option>').join('')+'</select>'
+    : '';
+  const tNameA = tA?tA.name:sideA;
+  const tNameB = tB?tB.name:sideB;
+  return '<div class="draw-match-row'+(wonL?' won-left':wonR?' won-right':'')+'">'
+    +'<div class="draw-match-num">#'+(i+1)+'</div>'
+    +'<div class="draw-match-side">'
+      +'<div style="display:flex;align-items:center;gap:3px;">'+playerTag(p.a1,sideA)+mkSwap('a1',poolA)+'</div>'
+      +(p.a2?'<div style="display:flex;align-items:center;gap:3px;">'+playerTag(p.a2,sideA)+mkSwap('a2',poolA)+'</div>':'')
+    +'</div>'
+    // ── Center: W/L buttons + optional score ──
+    +'<div class="dm-center-col">'
+      +'<div style="display:flex;gap:4px;width:100%;">'
+        +'<button class="dm-wl-btn'+(wonL?' win':wonR?' lose':'')+'" onclick="setMatchWinner('+i+',&quot;A&quot;)">🏆 '+xe(tNameA)+'</button>'
+        +'<button class="dm-wl-btn'+(wonR?' win':wonL?' lose':'')+'" onclick="setMatchWinner('+i+',&quot;B&quot;)">🏆 '+xe(tNameB)+'</button>'
+      +'</div>'
+      +'<div class="dm-score-row">'
+        +'<input class="draw-score-inp" type="number" min="0" max="99" value="'+xe(p.sa||'')+'" placeholder="-" oninput="setPairScore('+i+',&quot;a&quot;,this.value)" style="width:36px;">'
+        +'<span class="draw-score-sep" style="font-size:11px;">:</span>'
+        +'<input class="draw-score-inp" type="number" min="0" max="99" value="'+xe(p.sb||'')+'" placeholder="-" oninput="setPairScore('+i+',&quot;b&quot;,this.value)" style="width:36px;">'
+      +'</div>'
+    +'</div>'
+    +'<div class="draw-match-side">'
+      +'<div style="display:flex;align-items:center;gap:3px;">'+playerTag(p.b1,sideB)+mkSwap('b1',poolB)+'</div>'
+      +(p.b2?'<div style="display:flex;align-items:center;gap:3px;">'+playerTag(p.b2,sideB)+mkSwap('b2',poolB)+'</div>':'')
+    +'</div>'
+  +'</div>';
+}
+
+// Set winner by button (no score needed)
+function setMatchWinner(idx, side){
+  const pairs = window._matchPairs||[];
+  if(!pairs[idx]) return;
+  // toggle off if same
+  pairs[idx].winner = pairs[idx].winner===side ? '' : side;
+  // Update DOM in-place to avoid re-render flicker
+  const el = document.getElementById('draw-match-section');
+  if(el){
+    const rows = el.querySelectorAll('.draw-match-row');
+    if(rows[idx]){
+      rows[idx].outerHTML = matchRowHtml(pairs[idx], idx);
+    }
+  }
+  checkSaveBtn();
+}
+
+function renderMatchPairs(){
+  const el = document.getElementById('draw-match-section');
+  if(!el) return;
+  const pairs = window._matchPairs||[];
+
+  // Always show random btn on top
+  let html = '<button class="draw-spin-btn" style="font-size:14px;margin-bottom:10px;" onclick="randomMatchPairs()">🎲 Random cặp trận</button>';
+  // Show validation warnings
+  (window._matchWarnings||[]).forEach(w=>{
+    html += '<div style="background:#fff3cd;border:1px solid #f5c842;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;font-weight:700;color:#7a5800;">'+xe(w)+'</div>';
+  });
+
+  if(!pairs.length){ el.innerHTML=html; return; }
+
+  // ── Group by category ──
+  const catDefs = [
+    {key:'nam', label:'👨 Đôi Nam', color:'#4a90e2'},
+    {key:'mix', label:'👫 Nam Nữ',  color:'#9b59b6'},
+    {key:'nu',  label:'👩 Đôi Nữ',  color:'#e879b0'},
+  ];
+
+  catDefs.forEach(({key,label,color})=>{
+    const group = pairs.filter(p=>p.cat===key);
+    if(!group.length) return;
+    html += '<div style="background:'+color+'18;border-left:3px solid '+color+';border-radius:0 10px 10px 0;padding:8px 10px;margin-bottom:4px;">'
+      +'<div style="font-size:11px;font-weight:800;color:'+color+';letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;">'+label+'</div>'
+      +'<div class="draw-match-list" style="margin-bottom:0;">';
+    group.forEach(p=>{ const i=pairs.indexOf(p); html+=matchRowHtml(p,i); });
+    html += '</div></div>';
+  });
+
+  // Uncategorised fallback
+  const others = pairs.filter(p=>!catDefs.find(c=>c.key===p.cat));
+  if(others.length){
+    html += '<div class="draw-match-list">';
+    others.forEach(p=>{ const i=pairs.indexOf(p); html+=matchRowHtml(p,i); });
+    html += '</div>';
+  }
+
+  html += '<button class="draw-reshuffle" style="width:100%;margin-top:6px;" onclick="randomMatchPairs()">🔀 Random lại cặp</button>';
+  el.innerHTML = html;
+  checkSaveBtn();
+  updateDrawBetInfo();
+}
+
+function setPairScore(idx,side,val){
+  if(!window._matchPairs) return;
+  window._matchPairs[idx]['s'+side]=val;
+  const p=window._matchPairs[idx];
+  // auto-set winner from scores (only if no manual winner set)
+  const sA=parseInt(p.sa)||0, sB=parseInt(p.sb)||0;
+  if(p.sa!==''&&p.sb!==''&&sA!==sB&&!p.winner){
+    p.winner = sA>sB?'A':'B';
+  }
+  // Chỉ update class won-left/won-right, KHÔNG re-render row (sẽ destroy input đang focus)
+  const el = document.getElementById('draw-match-section');
+  if(el){
+    const rows = el.querySelectorAll('.draw-match-row');
+    if(rows[idx]){
+      rows[idx].classList.toggle('won-left',  p.winner==='A');
+      rows[idx].classList.toggle('won-right', p.winner==='B');
+    }
+  }
+  checkSaveBtn();
+}
+
+function checkSaveBtn(){
+  const btn=document.getElementById('draw-save-btn');
+  if(!btn) return;
+  const pairs=window._matchPairs||[];
+  const allDone=pairs.length>0&&pairs.every(p=>{
+    // Done if: winner button set, OR both scores entered
+    const hasWinner = p.winner==='A'||p.winner==='B';
+    const hasScores = p.sa!==''&&p.sa!==undefined&&p.sb!==''&&p.sb!==undefined;
+    return hasWinner||hasScores;
+  });
+  btn.disabled=!allDone;
+}
+
+// ── Save session to History ──
+function saveDrawSession(){
+  const pairs=window._matchPairs||[];
+  if(!pairs.length) return;
+  const today=new Date().toISOString().slice(0,10);
+  const catMap={nam:'nam',mix:'mix',nu:'nu'};
+
+  // 1. Lưu từng trận — bet=0, chỉ ghi kết quả thi đấu
+  pairs.forEach(p=>{
+    let s1=p.sa||'', s2=p.sb||'';
+    const w = p.winner || (s1!==''&&s2!==''&&s1!==s2?(parseInt(s1)>parseInt(s2)?'A':'B'):'');
+    if((!s1||!s2)&&w){ s1=w==='A'?'1':'0'; s2=w==='B'?'1':'0'; }
+    let t1p1=p.a1,t1p2=p.a2||'',t2p1=p.b1,t2p2=p.b2||'',rs1=s1,rs2=s2;
+    if(w==='B'){
+      t1p1=p.b1;t1p2=p.b2||'';t2p1=p.a1;t2p2=p.a2||'';
+      rs1=s2;rs2=s1;
+      if(rs1===rs2&&rs1!==''){rs1='1';rs2='0';}
+    } else if(w==='A'){
+      if(rs1===rs2&&rs1!==''){rs1='1';rs2='0';}
+    }
+    matches.push({id:matchUid++,cat:catMap[p.cat]||'nam',date:today,
+      t1p1,t1p2,t2p1,t2p2,s1:rs1,s2:rs2,
+      bet:0,saved:true,fromDraw:true,liveUrl:''});
+  });
+
+  // 2. Quỹ cược: mỗi người đội thua nộp 1 lần duy nhất.
+  //    Tạo 1 entry riêng per người (t2p1=tên, t2p2='')
+  //    → renderQuy: losers=[t2p1].filter(Boolean) = [tên] → cộng đúng 1 lần
+  const loserIdx = drawWinner==='A'?1:drawWinner==='B'?0:-1;
+  const loserTeam = loserIdx>=0 ? drawTeams[loserIdx] : null;
+  const loserPlayers = loserTeam ? loserTeam.players : [];
+  const betPerPerson = (drawBet&&loserPlayers.length)
+    ? Math.round(drawBet/loserPlayers.length) : 0;
+
+  if(betPerPerson){
+    loserPlayers.forEach(name=>{
+      matches.push({id:matchUid++,cat:'nam',date:today,
+        t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
+        s1:'1',s2:'0',
+        bet:betPerPerson,
+        saved:true,fromDraw:true,liveUrl:'',isBetEntry:true});
+    });
+  }
+
+  save();
+
+  // ── Build session summary card and append to log ──
+  appendSessionCard(drawTeams, pairs, drawWinner, drawBet);
+
+  // Show new-event button, clear result
+  const newBtn = document.getElementById('draw-new-event-btn');
+  if(newBtn) newBtn.style.display='block';
+  const resultEl=document.getElementById('draw-result');
+  if(resultEl){ resultEl.classList.remove('on'); resultEl.innerHTML=''; }
+}
+
+function appendSessionCard(teams, pairs, winner, bet){
+  const log = document.getElementById('draw-sessions-log');
+  if(!log) return;
+
+  const sessionNum = log.children.length + 1;
+  const winTeam  = teams.find(t=>t.id===winner);
+  const loseTeam = teams.find(t=>t.id!==(winner||'?')&&t.id!==winner);
+  const winName  = winTeam  ? winTeam.name  : '?';
+  const loseName = loseTeam ? loseTeam.name : '?';
+
+  // Count wins per team across all pairs
+  const wins = {A:0,B:0,C:0,D:0};
+  pairs.forEach(p=>{
+    const w = p.winner||(p.sa!==''&&p.sb!==''&&p.sa!==p.sb?(parseInt(p.sa)>parseInt(p.sb)?'A':'B'):'');
+    if(w) wins[w]=(wins[w]||0)+1;
+  });
+
+  // Team score display: show all teams
+  let teamsHtml = '';
+  teams.forEach((t,i)=>{
+    const w = wins[t.id]||0;
+    const isWinner = t.id===winner;
+    teamsHtml += '<span class="'+(isWinner?'draw-session-card-win':'draw-session-card-lose')+'">'+xe(t.name)+'</span>';
+    if(i<teams.length-1){
+      // Score between consecutive teams
+      const tA=teams[i], tB=teams[i+1];
+      const wA=wins[tA.id]||0, wB=wins[tB.id]||0;
+      teamsHtml += '<span class="draw-session-card-score">'+wA+' – '+wB+'</span>';
+    }
+  });
+
+  // Mini match pills
+  const catLabels={nam:'👨',mix:'👫',nu:'👩'};
+  const matchPills = pairs.map((p,i)=>{
+    const w = p.winner||(p.sa!==''&&p.sb!==''&&p.sa!==p.sb?(parseInt(p.sa)>parseInt(p.sb)?'A':'B'):'');
+    const cat = catLabels[p.cat]||'⚔️';
+    const score = (p.sa!==''&&p.sb!=='') ? p.sa+':'+p.sb : (w?'W':'–');
+    const cls = !w?'':'won'; // just show neutral for now
+    return '<span class="draw-session-mini-match '+cls+'">'+cat+' '+score+'</span>';
+  }).join('');
+
+  const betHtml = (bet&&winner)
+    ? ' · <span style="color:#e55;font-weight:700;">💸 '
+      +fmtNum(Math.round(bet/(loseTeam?loseTeam.players.length:1)))
+      +'🍃/người thua</span>'
+    : '';
+
+  const card = document.createElement('div');
+  card.className = 'draw-session-card';
+  card.innerHTML =
+    '<div class="draw-session-card-header">'
+      +'<span style="background:var(--gold);color:#fff;border-radius:7px;padding:2px 8px;font-size:11px;">Buổi '+sessionNum+'</span>'
+      +'<div class="draw-session-card-teams">'+teamsHtml+'</div>'
+      +(winner?'<span style="font-size:11px;font-weight:700;color:var(--green);">🏆 '+xe(winName)+'</span>':'')
+      +betHtml
+    +'</div>'
+    +'<div class="draw-session-card-matches">'+matchPills+'</div>';
+  log.appendChild(card);
+}
+
+function startNewDrawEvent(){
+  drawTeams=[];
+  drawTeamA=[]; drawTeamB=[];
+  window._matchPairs=[];
+  window._manualPairs=[];
+  window._drawLeftover=[];
+  drawWinner='';
+  drawCaptainA=''; drawCaptainB='';
+  window._pairMode='random';
+  // Clear result, keep log and new-event btn visible
+  const resultEl=document.getElementById('draw-result');
+  if(resultEl){ resultEl.classList.remove('on'); resultEl.innerHTML=''; }
+  // Scroll to top
+  document.getElementById('pg-draw').scrollTop=0;
+}
+
+function mkPlayerRow(name, side, captain){
+  const isCap = captain===name;
+  const mb = mbOf(name);
+  const avHtml = (mb&&mb.photo)
+    ? '<img src="'+mb.photo+'" style="width:24px;height:24px;border-radius:7px;">'
+    : '<div class="dav '+(mb?AVC[mb.color]:'')+'" style="'+(mb?'':'background:var(--muted)')+'">'+ini(name)+'</div>';
+  const safeName = name.replace(/'/g,"&#39;");
+  return '<div class="draw-player-tag'+(isCap?' captain':'')+'" draggable="true" data-name="'+safeName+'" data-team="'+side+'">'
+    +avHtml+'<span>'+xe(name)+'</span>'
+    +'<button class="draw-captain-btn'+(isCap?' on':'')+'" onclick="toggleCaptain(&quot;'+side+'&quot;,&quot;'+safeName+'&quot;)">'+(isCap?'★ ĐT':'☆')+'</button>'
+    +'</div>';
+}
+
+function renderTeamCard(side, label, players, captain){
+  const teamObj = drawTeams.find(t=>t.id===side);
+  const colorMap = {A:'#4a90e2',B:'#e879b0',C:'#2ecc71',D:'#e67e22'};
+  const col = colorMap[side]||'var(--gold)';
+
+  // Use stored males/females/customs if available, else categorise now
+  const mbMap = {};
+  members.forEach(m=>mbMap[m.name]=m);
+  const males   = teamObj&&teamObj.males   ? teamObj.males   : players.filter(n=>{ const m=mbMap[n]; return m&&m.gender==='m'; });
+  const females = teamObj&&teamObj.females ? teamObj.females : players.filter(n=>{ const m=mbMap[n]; return m&&m.gender==='f'; });
+  const customs = teamObj&&teamObj.customs ? teamObj.customs : players.filter(n=>!mbMap[n]);
+
+  const secHtml = (title, color, list) => {
+    if(!list.length) return '';
+    return '<div style="font-size:10px;font-weight:800;color:'+color+';letter-spacing:1.2px;text-transform:uppercase;margin:6px 0 3px;">'+title+'</div>'
+      +list.map(n=>mkPlayerRow(n,side,captain)).join('');
+  };
+
+  const bodyHtml = secHtml('👨 Nam','#4a90e2',males)
+    +secHtml('👩 Nữ','#e879b0',females)
+    +(customs.length? secHtml('➕ Khác','var(--muted)',customs):'');
+
+  return '<div class="draw-team-card team'+side+'">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +'<input class="draw-name-inp" style="flex:1;padding:5px 10px;font-size:14px;font-weight:800;border-color:'+col+';" '
+        +'value="'+xe(label)+'" '
+        +'oninput="updateTeamName(&quot;'+side+'&quot;,this.value)" placeholder="Tên đội...">'
+      +(captain?'<span style="font-size:11px;color:var(--gold);font-weight:800;">★ '+xe(captain)+'</span>':'')
+    +'</div>'
+    +'<div class="draw-team-players draw-team-drag" data-team="'+side+'">'+bodyHtml+'</div>'
+    +'</div>';
+}
+
+function updateTeamName(side, val){
+  const t = drawTeams.find(t=>t.id===side);
+  if(t) t.name = val;
+}
+
+function toggleCaptainTeam(side, name){
+  const t = drawTeams.find(t=>t.id===side);
+  if(!t) return;
+  t.captain = t.captain===name ? '' : name;
+  // backwards compat
+  if(side==='A') drawCaptainA=t.captain;
+  if(side==='B') drawCaptainB=t.captain;
+  renderDrawResult();
+}
+
+function playerTag(name, side){
+  const mb = mbOf(name);
+  const avHtml = (mb&&mb.photo)
+    ? '<img src="'+mb.photo+'" style="width:20px;height:20px;border-radius:6px;">'
+    : '<div class="dav '+(mb?AVC[mb.color]:'')+'" style="'+(mb?'':'background:var(--muted)')+'">'+ini(name)+'</div>';
+  return '<div class="draw-player-tag">'+avHtml+'<span>'+xe(name)+'</span></div>';
+}
+
 // ─── BACKUP & RESTORE ───
 const SNAP_KEY = 'gma_snapshots';
 const MAX_SNAPS = 10;
@@ -1246,7 +2514,7 @@ function saveSnapshot(label){
       label: label || 'Auto',
       time: new Date().toLocaleString('vi-VN'),
       memberCount: members.length,
-      matchCount: matches.filter(m=>m.saved).length,
+      matchCount: matches.filter(m=>m.saved&&!m.isBetEntry).length,
       data: getCurrentData()
     };
     snaps.unshift(snap);
@@ -1392,19 +2660,35 @@ function openPicker(matchId,field){
     list.className='pk-list';
     list.innerHTML='<div class="pk-empty">Chưa có thành viên.<br>Vào tab <strong>Thành viên</strong> để thêm trước nhé!</div>';
   } else if(m.cat==='mix'){
-    // Two columns: Nam | Nữ, sorted A->Z
-    list.className='pk-two-col';
+    // Slot 1 (t1p1/t2p1): hiện 2 cột nam+nữ
+    // Slot 2 (t1p2/t2p2): chỉ hiện gender ngược với slot 1 đã chọn
+    const isSlot2 = field==='t1p2'||field==='t2p2';
+    const partnerField = field==='t1p2'?'t1p1': field==='t2p2'?'t2p1':null;
+    const partnerName = partnerField ? m[partnerField] : null;
+    const partnerMb = partnerName ? members.find(mb=>mb.name===partnerName) : null;
     const males   = [...members].filter(mb=>mb.gender==='m').sort((a,b)=>a.name.localeCompare(b.name,'vi'));
     const females = [...members].filter(mb=>mb.gender==='f').sort((a,b)=>a.name.localeCompare(b.name,'vi'));
-    const colM = '<div class="pk-col">'
-      +'<div class="pk-col-header m">👨 Nam ('+males.length+')</div>'
-      +males.map(mb=>pkItemHtml(mb, current===mb.name, !( current===mb.name)&&used.includes(mb.name), true)).join('')
-      +'</div>';
-    const colF = '<div class="pk-col">'
-      +'<div class="pk-col-header f">👩 Nữ ('+females.length+')</div>'
-      +females.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), true)).join('')
-      +'</div>';
-    list.innerHTML = colM + colF;
+    if(isSlot2 && partnerMb){
+      // Slot 2: chỉ hiện ngược gender
+      const oppGender = partnerMb.gender==='m' ? 'f' : 'm';
+      const filtered = oppGender==='m' ? males : females;
+      const label = oppGender==='m' ? '👨 Nam' : '👩 Nữ';
+      list.className='pk-list';
+      list.innerHTML = '<div class="pk-col-header '+(oppGender==='m'?'m':'f')+'" style="padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:1px;">'+label+' — đôi với '+xe(partnerName)+'</div>'
+        +filtered.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
+    } else {
+      // Slot 1 hoặc slot 2 chưa có partner: hiện 2 cột
+      list.className='pk-two-col';
+      const colM = '<div class="pk-col">'
+        +'<div class="pk-col-header m">👨 Nam ('+males.length+')</div>'
+        +males.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), true)).join('')
+        +'</div>';
+      const colF = '<div class="pk-col">'
+        +'<div class="pk-col-header f">👩 Nữ ('+females.length+')</div>'
+        +females.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), true)).join('')
+        +'</div>';
+      list.innerHTML = colM + colF;
+    }
   } else {
     // Single column filtered by gender, sorted A->Z
     list.className='pk-list';
@@ -1610,7 +2894,7 @@ function renderMatches(){
   }
   // Unsaved (active) on top, saved below newest-first
   const unsaved = matches.filter(m=>!m.saved);
-  const saved   = matches.filter(m=>m.saved).slice().reverse();
+  const saved   = matches.filter(m=>m.saved&&!m.isBetEntry).slice().reverse();
   let html='';
   if(unsaved.length){
     html += '<div style="margin-bottom:6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">⚡ Đang diễn ra ('+unsaved.length+')</div>';
@@ -1672,7 +2956,11 @@ function rEdit(m){
       </div>
     </div>
     <div class="score-area">
-      <div class="score-label">Tỉ số</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <button class="wl-btn${m._winner==='A'?' win':m._winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')">🏆 Đội A thắng</button>
+        <button class="wl-btn${m._winner==='B'?' win':m._winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')">🏆 Đội B thắng</button>
+      </div>
+      <div class="score-label">Tỉ số (không bắt buộc)</div>
       <div class="srow">
         <input type="number" class="sb" min="0" max="30" placeholder="0" value="${m.s1}" oninput="upScore(${m.id},'s1',this.value)">
         <div class="sdash">:</div>
@@ -1680,7 +2968,7 @@ function rEdit(m){
       </div>
     </div>
     <div class="bet-area">
-      <div class="bet-label">🍃 Tiền cược (mỗi người thua trả)</div>
+      <div class="bet-label">🍃 Gây Quỹ (Mỗi người thua phải nộp)</div>
       <div class="bet-pills">
         ${[50,100,200,500].map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${v}🍃</span>`).join('')}
       </div>
@@ -1734,18 +3022,54 @@ function rSaved(m){
   </div>`;
 }
 
-function canSave(m){return m.t1p1&&m.t2p1&&m.s1!==''&&m.s2!==''&&+m.s1>=0&&+m.s2>=0;}
+function canSave(m){return !!(m.t1p1&&m.t2p1);}
+function setWinner(id, side){
+  const m=matches.find(m=>m.id===id);if(!m)return;
+  m._winner = m._winner===side ? '' : side;
+  // Luôn update score khi score còn là auto (rỗng, hoặc chỉ là 0/1)
+  const isAutoScore = (m.s1===''&&m.s2==='')
+    || (m.s1==='1'&&m.s2==='0')
+    || (m.s1==='0'&&m.s2==='1');
+  if(isAutoScore){
+    if(m._winner==='A'){ m.s1='1'; m.s2='0'; }
+    else if(m._winner==='B'){ m.s1='0'; m.s2='1'; }
+    else { m.s1=''; m.s2=''; }
+  }
+  const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
+  renderMatches();
+}
 function upScore(id,f,v){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m[f]=v;
+  // auto-set winner from scores
+  const s1=parseInt(m.s1)||0, s2=parseInt(m.s2)||0;
+  if(m.s1!==''&&m.s2!==''&&s1!==s2) m._winner=s1>s2?'A':'B';
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
+  // update winner highlight live
+  const mc=document.getElementById('mc'+id);
+  if(mc){
+    mc.querySelectorAll('.wl-btn').forEach(btn=>{
+      const side=btn.dataset.side;
+      btn.classList.toggle('win', m._winner===side);
+      btn.classList.toggle('lose', m._winner&&m._winner!==side);
+    });
+  }
   debounceSave();
 }
 function saveMatch(id){
   if(!isAdmin)return;
   const m=matches.find(m=>m.id===id);if(!m||!canSave(m))return;
   const sc=document.getElementById('mc'+id).querySelectorAll('.sb');
-  m.s1=sc[0].value;m.s2=sc[1].value;
+  // Score: dùng input nếu có, không thì xem _winner, cuối cùng default 0:0
+  if(sc[0].value!==''||sc[1].value!==''){
+    m.s1 = sc[0].value!=='' ? sc[0].value : '0';
+    m.s2 = sc[1].value!=='' ? sc[1].value : '0';
+  } else if(m._winner){
+    m.s1 = m._winner==='A' ? '1' : '0';
+    m.s2 = m._winner==='B' ? '1' : '0';
+  } else {
+    m.s1 = '0'; m.s2 = '0';
+  }
   m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;renderMatches();debounceSave();
 }
@@ -1778,7 +3102,7 @@ function setBetCustom(matchId, val){
 let quyFilter = {mode:'all', from:'', to:''};
 
 function initQuyFilter(){
-  const years=[...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  const years=[...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
   let qHtml='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=quyFilter.mode==='year'&&quyFilter.from===y;
@@ -1829,7 +3153,7 @@ function renderQuy(){
   const saved = getQuyFiltered();
   const el = document.getElementById('quy-content');
   if(!saved.length){
-    el.innerHTML='<div class="empty"><span class="ei">💰</span>Chưa có trận nào đặt cược.<br>Thêm tiền cược vào từng trận nhé!</div>';
+    el.innerHTML='<div class="empty"><span class="ei">💰</span>Chưa có trận nào gây quỹ.<br>Thêm vào từng trận nhé!</div>';
     return;
   }
   // Calculate debt per person
@@ -1853,7 +3177,7 @@ function renderQuy(){
     <div class="quy-total-block">
       <div class="quy-total-label">Tổng quỹ</div>
       <div class="quy-total-num">🍃 ${fmtNum(totalLeaf)}</div>
-      <div class="quy-total-sub">${totalMatches} trận có cược · ${sorted.length} người nợ</div>
+      <div class="quy-total-sub">${totalMatches} trận gây quỹ · ${sorted.length} nạn nhân 😈</div>
     </div>
     <div class="quy-stats">
       <div class="quy-stat"><div class="quy-stat-num">${totalMatches}</div><div class="quy-stat-lbl">Trận</div></div>
@@ -1861,7 +3185,7 @@ function renderQuy(){
     </div>
   </div>`;
   html += '<div class="sl" style="margin-top:0">BXH nộp quỹ nhiều nhất</div>';
-  html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Nợ 🍃</div></div>';
+  html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
   sorted.forEach((p,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
@@ -1891,7 +3215,7 @@ function initBxhFilter(){
   const curMonth = now.getMonth(); // 0-based
 
   // Quick pills: Tất cả + các năm có dữ liệu
-  const years = [...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
   let quickHtml = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on = bxhFilter.mode==='year' && bxhFilter.from===y;
@@ -1953,7 +3277,7 @@ function applyCustomFilter(){
 }
 
 function getFilteredMatches(){
-  const saved = matches.filter(m=>m.saved && m.date);
+  const saved = matches.filter(m=>m.saved && m.date && !m.isBetEntry);
   if(bxhFilter.mode==='all') return saved;
   if(bxhFilter.mode==='year') return saved.filter(m=>m.date.startsWith(bxhFilter.from));
   if(bxhFilter.mode==='month') return saved.filter(m=>m.date.startsWith(bxhFilter.from));
@@ -2040,7 +3364,7 @@ function renderBXH(){
 let histFilter = {mode:'all', from:'', to:''};
 
 function initHistFilter(){
-  const years = [...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
   let qHtml = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=histFilter.mode==='year'&&histFilter.from===y;
@@ -2084,7 +3408,7 @@ function applyHistFilter(){
   renderHist();
 }
 function getHistFiltered(){
-  const saved=matches.filter(m=>m.saved&&m.date);
+  const saved=matches.filter(m=>m.saved&&m.date&&!m.isBetEntry);
   if(histFilter.mode==='all') return saved;
   if(histFilter.mode==='year') return saved.filter(m=>m.date.startsWith(histFilter.from));
   if(histFilter.mode==='month') return saved.filter(m=>m.date.startsWith(histFilter.from));
