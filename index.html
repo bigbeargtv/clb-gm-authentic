@@ -2286,6 +2286,7 @@ function saveDrawSession(){
   const pairs=window._matchPairs||[];
   if(!pairs.length) return;
   const today=new Date().toISOString().slice(0,10);
+  const sessionId = 'ds_'+Date.now(); // ID duy nhất cho sự kiện này
   const catMap={nam:'nam',mix:'mix',nu:'nu'};
 
   // 1. Lưu từng trận — bet=0, chỉ ghi kết quả thi đấu
@@ -2303,7 +2304,7 @@ function saveDrawSession(){
     }
     matches.push({id:matchUid++,cat:catMap[p.cat]||'nam',date:today,
       t1p1,t1p2,t2p1,t2p2,s1:rs1,s2:rs2,
-      bet:0,saved:true,fromDraw:true,liveUrl:''});
+      bet:0,saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:''});
   });
 
   // 2. Quỹ cược: mỗi người đội thua nộp 1 lần duy nhất.
@@ -2321,7 +2322,7 @@ function saveDrawSession(){
         t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
         s1:'1',s2:'0',
         bet:betPerPerson,
-        saved:true,fromDraw:true,liveUrl:'',isBetEntry:true});
+        saved:true,fromDraw:true,drawSessionId:sessionId,liveUrl:'',isBetEntry:true});
     });
   }
 
@@ -2908,23 +2909,88 @@ function addMatch(){
 
 function renderMatches(){
   const el=document.getElementById('mlist');
-  if(!matches.length){
+  const unsaved = matches.filter(m=>!m.saved);
+  const savedNormal = matches.filter(m=>m.saved&&!m.isBetEntry&&!m.fromDraw).slice().reverse();
+  const savedDraw = matches.filter(m=>m.saved&&!m.isBetEntry&&m.fromDraw);
+
+  // Group draw matches by drawSessionId
+  const drawSessions = {};
+  savedDraw.forEach(m=>{
+    const sid = m.drawSessionId||m.date||'unknown';
+    if(!drawSessions[sid]) drawSessions[sid]={id:sid,date:m.date,matches:[]};
+    drawSessions[sid].matches.push(m);
+  });
+  const drawSessionList = Object.values(drawSessions).sort((a,b)=>b.date.localeCompare(a.date));
+
+  if(!unsaved.length&&!savedNormal.length&&!drawSessionList.length){
     el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chọn loại đôi rồi nhấn<br>"＋ Thêm trận đấu"</div>';
     return;
   }
-  // Unsaved (active) on top, saved below newest-first
-  const unsaved = matches.filter(m=>!m.saved);
-  const saved   = matches.filter(m=>m.saved&&!m.isBetEntry).slice().reverse();
   let html='';
+
+  // ── Đang diễn ra ──
   if(unsaved.length){
     html += '<div style="margin-bottom:6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">⚡ Đang diễn ra ('+unsaved.length+')</div>';
     html += unsaved.map(m=>rEdit(m)).join('');
   }
-  if(saved.length){
-    html += '<div style="margin:'+(unsaved.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 2px;">✅ Đã hoàn thành ('+saved.length+')</div>';
-    html += saved.map(m=>rSaved(m)).join('');
+
+  // ── Sự kiện bốc thăm ──
+  if(drawSessionList.length){
+    html += '<div style="margin:'+(unsaved.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--gold);text-transform:uppercase;padding:4px 2px;">🎲 Sự kiện bốc thăm ('+drawSessionList.length+')</div>';
+    drawSessionList.forEach((sess,si)=>{
+      const domId='dsess-'+sess.id.replace(/[^a-z0-9]/gi,'_');
+      const delBtnHtml = isAdmin
+        ? `<button class="del-btn" onclick="event.stopPropagation();delDrawSession('${sess.id}')" title="Xóa sự kiện" style="font-size:13px;padding:4px 8px;margin-left:4px;">🗑 Xóa</button>`
+        : '';
+      html += `<div class="mc" style="padding:0;overflow:hidden;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:var(--s2);border-bottom:1px solid var(--bdr);" onclick="toggleDrawSession('${domId}')">
+          <span style="font-size:16px;">🎲</span>
+          <div style="flex:1;">
+            <div style="font-weight:800;font-size:13px;">Sự kiện bốc thăm · ${fmtDate(sess.date)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${sess.matches.length} trận</div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);" id="${domId}-arrow">▼</span>
+          ${delBtnHtml}
+        </div>
+        <div id="${domId}" style="display:none;">
+          ${sess.matches.map(m=>rSavedWithDel(m)).join('')}
+        </div>
+      </div>`;
+    });
   }
+
+  // ── Đã hoàn thành thường ──
+  if(savedNormal.length){
+    html += '<div style="margin:'+(unsaved.length||drawSessionList.length?'18':'4')+'px 0 6px;font-size:10px;letter-spacing:2px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 2px;">✅ Đã hoàn thành ('+savedNormal.length+')</div>';
+    html += savedNormal.map(m=>rSaved(m)).join('');
+  }
+
   el.innerHTML=html;
+}
+
+function toggleDrawSession(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const open=el.style.display==='none';
+  el.style.display=open?'':'none';
+  const arrow=document.getElementById(id+'-arrow');
+  if(arrow) arrow.textContent=open?'▲':'▼';
+}
+
+function rSavedWithDel(m){
+  const w1=+m.s1>+m.s2;
+  const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ')||'Đội A';
+  const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ')||'Đội B';
+  function avS(n){const mb=mbOf(n);if(!mb)return'';return mb.photo?'<img class="av-img-small" src="'+mb.photo+'" style="width:20px;height:20px;border-radius:5px;">':`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
+  return `<div class="hi" style="align-items:center;">
+    <div style="flex:1;">
+      <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${avS(m.t1p1)}${xe(t1)}</div>
+      <div class="ht ${!w1?'w':'l'}">${!w1?'🏅 ':''}${avS(m.t2p1)}${xe(t2)}</div>
+      <div class="hm">${CL[m.cat]||''}</div>
+    </div>
+    <div class="hs">${m.s1} : ${m.s2}</div>
+    ${isAdmin?`<button onclick="delMatch(${m.id})" class="del-btn" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>`:''}
+  </div>`;
 }
 
 function mbOf(name){return members.find(m=>m.name===name);}
@@ -3037,7 +3103,7 @@ function rSaved(m){
         <div class="sv-score-big">${m.s1} : ${m.s2}</div>
         <div class="sv-meta">${fmtDate(m.date)}${m.bet?'<br><span class="bet-badge">🍃 '+m.bet+'/người</span>':''}</div>
         <button class="edit-btn" onclick="editMatch(${m.id})">✏️ Sửa</button>
-        <button class="del-btn" style="padding:6px 10px;font-size:13px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
+        <button class="del-btn admin-only" style="padding:6px 10px;font-size:13px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
       </div>
     </div>
   </div>`;
@@ -3495,7 +3561,7 @@ function renderHist(){
       const w1=+m.s1>+m.s2;
       const a=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img class="av-img-small" src="${mb.photo}" style="width:20px;height:20px;border-radius:5px;">` :`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
       const betHtml=m.bet?`<span style="font-size:10px;color:var(--green);font-weight:800;">🍃${m.bet}</span>`:'';
-      const delBtn = showDel&&isAdmin ? `<button onclick="delMatch(${m.id})" class="del-btn" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>` : '';
+      const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>` : '';
       return `<div class="hi" style="align-items:center;">
         <div style="flex:1;">
           <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${a(m.t1p1)}${xe(t1)}</div>
@@ -3511,10 +3577,13 @@ function renderHist(){
     if(drawMs.length){
       const drawId='hdraw-'+d;
       html+=`<div style="border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:6px;overflow:hidden;">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--s2);font-weight:800;font-size:13px;" onclick="toggleHistDay('${drawId}')">
-          <span>🎲</span>
-          <span style="flex:1;">Sự kiện bốc thăm · ${drawMs.length} trận</span>
-          <span style="font-size:11px;color:var(--muted);" id="${drawId}-arrow">▼</span>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);font-weight:800;font-size:13px;">
+          <span style="flex:1;cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="toggleHistDay('${drawId}')">
+            <span>🎲</span>
+            <span>Sự kiện bốc thăm · ${drawMs.length} trận</span>
+            <span style="font-size:11px;color:var(--muted);" id="${drawId}-arrow">▼</span>
+          </span>
+          <button class="del-btn admin-only" onclick="delDrawSession('${d}')" title="Xóa sự kiện" style="font-size:13px;padding:4px 8px;">🗑 Xóa</button>
         </div>
         <div id="${drawId}" style="display:none;">`;
       drawMs.forEach(m=>{ html+=matchRow(m, true); });
@@ -3528,6 +3597,20 @@ function renderHist(){
   });
   el.innerHTML=html;
 }
+function delDrawSession(sessionId){
+  if(!isAdmin) return;
+  if(!confirm('Xóa toàn bộ sự kiện này?')) return;
+  // Xóa theo drawSessionId (nếu có), fallback xóa theo date
+  if(sessionId.startsWith('ds_')){
+    matches = matches.filter(m=>m.drawSessionId!==sessionId);
+  } else {
+    matches = matches.filter(m=>!(m.fromDraw&&m.date===sessionId));
+  }
+  renderMatches();
+  renderHist();
+  debounceSave();
+}
+
 function toggleHistDay(id){
   const el=document.getElementById(id);
   if(!el) return;
