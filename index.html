@@ -578,6 +578,30 @@ nav{
   display:inline-block;
 }
 
+
+/* ── PICKER TWO COLUMNS ── */
+.pk-two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow-y:auto;flex:1;}
+.pk-two-col::-webkit-scrollbar{width:4px;}
+.pk-two-col::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.pk-col-header{
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:6px 10px;border-radius:8px;margin-bottom:6px;text-align:center;
+}
+.pk-col-header.m{background:#4a90e218;color:var(--blue);}
+.pk-col-header.f{background:#e879b018;color:var(--pink);}
+.pk-col{display:flex;flex-direction:column;gap:6px;}
+.pk-item-sm{
+  display:flex;align-items:center;gap:7px;padding:8px 10px;
+  background:var(--s1);border:1.5px solid var(--bdr);border-radius:10px;
+  cursor:pointer;transition:all .15s;
+}
+.pk-item-sm:hover{border-color:var(--gold);background:#f0b4290a;}
+.pk-item-sm.selected{border-color:var(--gold);background:#f0b42912;}
+.pk-item-sm.disabled{opacity:.3;pointer-events:none;}
+.pk-av-sm{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.pk-name-sm{font-size:12px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pk-check-sm{color:var(--gold);font-size:14px;flex-shrink:0;}
+
 </style>
 </div>
 
@@ -963,34 +987,61 @@ function saveEditMember(){
 }
 
 // ─── PICKER ───
+function pkItemHtml(mb, isSel, isUsed, small){
+  const avHtml = mb.photo
+    ? '<img class="'+(small?'av-img-small':'pk-av-img')+'" src="'+mb.photo+'" style="width:'+(small?'28':'36')+'px;height:'+(small?'28':'36')+'px;border-radius:'+(small?'8':'10')+'px;">'
+    : '<div class="'+(small?'pk-av-sm':'pk-av')+' '+AVC[mb.color]+'">'+ini(mb.name)+'</div>';
+  const cls = small ? 'pk-item-sm' : 'pk-item';
+  const nameHtml = small
+    ? '<span class="pk-name-sm">'+xe(mb.name)+'</span>'
+    : '<div class="pk-name">'+xe(mb.name)+'</div>';
+  const checkHtml = isSel ? '<span class="'+(small?'pk-check-sm':'pk-check')+'">✓</span>' : '';
+  const safeName = mb.name.replace(/'/g, '&#39;');
+  return '<div class="'+cls+(isSel?' selected':'')+(isUsed?' disabled':'')+'" onclick="pickMember(&quot;'+safeName+'&quot;)">'+avHtml+nameHtml+checkHtml+'</div>';
+}
+
 function openPicker(matchId,field){
   pickerCtx={matchId,field};
   const m=matches.find(m=>m.id===matchId);
   const used=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
   const current=m[field];
   const list=document.getElementById('pk-list');
+
   if(!members.length){
+    list.className='pk-list';
     list.innerHTML='<div class="pk-empty">Chưa có thành viên.<br>Vào tab <strong>Thành viên</strong> để thêm trước nhé!</div>';
+  } else if(m.cat==='mix'){
+    // Two columns: Nam | Nữ, sorted A->Z
+    list.className='pk-two-col';
+    const males   = [...members].filter(mb=>mb.gender==='m').sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+    const females = [...members].filter(mb=>mb.gender==='f').sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+    const colM = '<div class="pk-col">'
+      +'<div class="pk-col-header m">👨 Nam ('+males.length+')</div>'
+      +males.map(mb=>pkItemHtml(mb, current===mb.name, !( current===mb.name)&&used.includes(mb.name), true)).join('')
+      +'</div>';
+    const colF = '<div class="pk-col">'
+      +'<div class="pk-col-header f">👩 Nữ ('+females.length+')</div>'
+      +females.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), true)).join('')
+      +'</div>';
+    list.innerHTML = colM + colF;
   } else {
-    list.innerHTML=members.map(mb=>{
-      const isSel=current===mb.name;
-      const isUsed=!isSel&&used.includes(mb.name);
-      const pkAvHtml = mb.photo
-        ? '<img class="pk-av-img" src="'+mb.photo+'">'
-        : '<div class="pk-av '+AVC[mb.color]+'">'+ini(mb.name)+'</div>';
-      return `<div class="pk-item${isSel?' selected':''}${isUsed?' disabled':''}" onclick="pickMember('${mb.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">
-        ${pkAvHtml}
-        <div class="pk-name">${xe(mb.name)}</div>
-        <span class="pk-gender ${mb.gender==='m'?'pk-gm':'pk-gf'}">${mb.gender==='m'?'Nam':'Nữ'}</span>
-        ${isSel?'<span class="pk-check">✓</span>':''}
-      </div>`;
-    }).join('');
+    // Single column filtered by gender, sorted A->Z
+    list.className='pk-list';
+    const gFilter = m.cat==='nam' ? 'm' : 'f';
+    const filtered = [...members].filter(mb=>mb.gender===gFilter).sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+    if(!filtered.length){
+      list.innerHTML='<div class="pk-empty">Chưa có thành viên '+(gFilter==='m'?'Nam':'Nữ')+' nào.<br>Thêm ở tab <strong>Thành viên</strong> nhé!</div>';
+    } else {
+      list.innerHTML = filtered.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
+    }
   }
   document.getElementById('picker-overlay').classList.add('on');
   document.body.style.overflow='hidden';
 }
 function pickMember(name){
   if(!pickerCtx)return;
+  // decode &#39; back to apostrophe
+  name = name.replace(/&#39;/g, "'");
   const m=matches.find(m=>m.id===pickerCtx.matchId);
   if(m)m[pickerCtx.field]=m[pickerCtx.field]===name?'':name;
   closePicker();renderMatches();debounceSave();
