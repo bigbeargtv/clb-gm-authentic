@@ -663,6 +663,46 @@ nav{
 .quy-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
 .quy-nm{font-size:13px;font-weight:700;}
 
+
+/* ── LIVESTREAM ── */
+.hist-live-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;margin-bottom:4px;
+  background:linear-gradient(135deg,#fff0f0,#fff8f8);
+  border:1px solid #ff444430;border-radius:10px;
+}
+.hist-live-inp{
+  flex:1;background:transparent;border:none;outline:none;
+  font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);
+}
+.hist-live-inp::placeholder{color:var(--muted);}
+.hist-live-link{
+  display:inline-flex;align-items:center;gap:5px;
+  background:#ff4444;color:#fff;font-size:11px;font-weight:800;
+  padding:4px 10px;border-radius:8px;text-decoration:none;
+  transition:opacity .15s;white-space:nowrap;
+}
+.hist-live-link:hover{opacity:.85;}
+.hist-live-btn{
+  background:none;border:none;cursor:pointer;font-size:16px;
+  padding:2px 4px;opacity:.6;transition:opacity .15s;
+}
+.hist-live-btn:hover{opacity:1;}
+
+/* ── HIST FILTER ── */
+.hist-filter{
+  background:var(--s1);border:1px solid var(--bdr);border-radius:14px;
+  padding:12px 14px;margin-bottom:14px;
+}
+.hist-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+.hist-filter-row:last-child{margin-bottom:0;}
+.hist-result-label{
+  font-size:12px;color:var(--text2);font-weight:700;
+  margin-bottom:10px;padding:6px 10px;
+  background:var(--s2);border-radius:8px;border:1px solid var(--bdr);
+  display:inline-block;
+}
+
 </style>
 </div>
 
@@ -757,6 +797,18 @@ nav{
 
 <!-- HISTORY -->
 <div class="pg" id="pg-hist">
+  <div class="hist-filter">
+    <div class="bxh-filter-label">📅 Thời gian</div>
+    <div class="hist-filter-row" id="hfilter-quick"></div>
+    <div class="hist-filter-row" id="hfilter-months"></div>
+    <div class="bxh-filter-custom" id="hfilter-custom">
+      <input type="date" class="filter-date-inp" id="hfilter-from">
+      <span class="filter-sep">→</span>
+      <input type="date" class="filter-date-inp" id="hfilter-to">
+      <button class="filter-apply" onclick="applyHistFilter()">Xem</button>
+    </div>
+  </div>
+  <div id="hist-result-label"></div>
   <div id="hist"><div class="empty"><span class="ei">📋</span>Chưa có trận nào được lưu.</div></div>
 </div>
 
@@ -776,6 +828,17 @@ nav{
 
 <!-- QUỸ -->
 <div class="pg" id="pg-quy">
+  <div class="hist-filter">
+    <div class="bxh-filter-label">📅 Thời gian</div>
+    <div class="hist-filter-row" id="qfilter-quick"></div>
+    <div class="hist-filter-row" id="qfilter-months"></div>
+    <div class="bxh-filter-custom" id="qfilter-custom">
+      <input type="date" class="filter-date-inp" id="qfilter-from">
+      <span class="filter-sep">→</span>
+      <input type="date" class="filter-date-inp" id="qfilter-to">
+      <button class="filter-apply" onclick="applyQuyFilter()">Xem</button>
+    </div>
+  </div>
   <div id="quy-content"><div class="empty"><span class="ei">💰</span>Chưa có dữ liệu quỹ.</div></div>
 </div>
 
@@ -1462,8 +1525,59 @@ function setBetCustom(matchId, val){
 }
 
 // ─── QUỸ ───
+// ─── QUỸ FILTER ───
+let quyFilter = {mode:'all', from:'', to:''};
+
+function initQuyFilter(){
+  const years=[...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  let qHtml='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
+  years.forEach(y=>{
+    const on=quyFilter.mode==='year'&&quyFilter.from===y;
+    qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+  });
+  qHtml+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓 Tùy chọn</span>';
+  document.getElementById('qfilter-quick').innerHTML=qHtml;
+  const activeYear=quyFilter.mode==='year'?quyFilter.from:String(new Date().getFullYear());
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  let mHtml='';
+  for(let i=0;i<12;i++){
+    const mon=String(i+1).padStart(2,'0'), key=activeYear+'-'+mon;
+    const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const on=quyFilter.mode==='month'&&quyFilter.from===key;
+    if(hasData) mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+  }
+  document.getElementById('qfilter-months').innerHTML=mHtml;
+  document.getElementById('qfilter-custom').classList.toggle('on',quyFilter.mode==='custom');
+}
+function setQuyFilter(mode,val){quyFilter={mode,from:val||'',to:''};renderQuy();}
+function toggleQuyCustom(){
+  const el=document.getElementById('qfilter-custom');
+  el.classList.toggle('on');
+  if(el.classList.contains('on')){
+    const now=new Date(),y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0');
+    document.getElementById('qfilter-from').value=y+'-'+m+'-01';
+    const last=new Date(y,now.getMonth()+1,0);
+    document.getElementById('qfilter-to').value=y+'-'+m+'-'+String(last.getDate()).padStart(2,'0');
+  }
+}
+function applyQuyFilter(){
+  const from=document.getElementById('qfilter-from').value;
+  const to=document.getElementById('qfilter-to').value;
+  if(!from||!to){alert('Chọn đủ ngày!');return;}
+  quyFilter={mode:'custom',from,to};renderQuy();
+}
+function getQuyFiltered(){
+  const saved=matches.filter(m=>m.saved&&m.bet&&m.bet>0&&m.date);
+  if(quyFilter.mode==='all') return saved;
+  if(quyFilter.mode==='year') return saved.filter(m=>m.date.startsWith(quyFilter.from));
+  if(quyFilter.mode==='month') return saved.filter(m=>m.date.startsWith(quyFilter.from));
+  if(quyFilter.mode==='custom') return saved.filter(m=>m.date>=quyFilter.from&&m.date<=quyFilter.to);
+  return saved;
+}
+
 function renderQuy(){
-  const saved = matches.filter(m=>m.saved && m.bet && m.bet>0);
+  initQuyFilter();
+  const saved = getQuyFiltered();
   const el = document.getElementById('quy-content');
   if(!saved.length){
     el.innerHTML='<div class="empty"><span class="ei">💰</span>Chưa có trận nào đặt cược.<br>Thêm tiền cược vào từng trận nhé!</div>';
@@ -1673,11 +1787,75 @@ function renderBXH(){
 }
 
 // ─── HISTORY ───
+// ─── HIST FILTER ───
+let histFilter = {mode:'all', from:'', to:''};
+
+function initHistFilter(){
+  const years = [...new Set(matches.filter(m=>m.saved&&m.date).map(m=>m.date.slice(0,4)))].sort().reverse();
+  let qHtml = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
+  years.forEach(y=>{
+    const on=histFilter.mode==='year'&&histFilter.from===y;
+    qHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+  });
+  qHtml += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓 Tùy chọn</span>';
+  document.getElementById('hfilter-quick').innerHTML = qHtml;
+
+  const activeYear = histFilter.mode==='year' ? histFilter.from : String(new Date().getFullYear());
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  let mHtml='';
+  for(let i=0;i<12;i++){
+    const mon=String(i+1).padStart(2,'0');
+    const key=activeYear+'-'+mon;
+    const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const on=histFilter.mode==='month'&&histFilter.from===key;
+    if(hasData) mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+  }
+  document.getElementById('hfilter-months').innerHTML = mHtml;
+  document.getElementById('hfilter-custom').classList.toggle('on', histFilter.mode==='custom');
+}
+function setHistFilter(mode,val){
+  histFilter={mode, from:val||'', to:''};
+  renderHist();
+}
+function toggleHistCustom(){
+  const el=document.getElementById('hfilter-custom');
+  el.classList.toggle('on');
+  if(el.classList.contains('on')){
+    const now=new Date(), y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0');
+    document.getElementById('hfilter-from').value=y+'-'+m+'-01';
+    const last=new Date(y,now.getMonth()+1,0);
+    document.getElementById('hfilter-to').value=y+'-'+m+'-'+String(last.getDate()).padStart(2,'0');
+  }
+}
+function applyHistFilter(){
+  const from=document.getElementById('hfilter-from').value;
+  const to=document.getElementById('hfilter-to').value;
+  if(!from||!to){alert('Chọn đủ ngày!');return;}
+  histFilter={mode:'custom',from,to};
+  renderHist();
+}
+function getHistFiltered(){
+  const saved=matches.filter(m=>m.saved&&m.date);
+  if(histFilter.mode==='all') return saved;
+  if(histFilter.mode==='year') return saved.filter(m=>m.date.startsWith(histFilter.from));
+  if(histFilter.mode==='month') return saved.filter(m=>m.date.startsWith(histFilter.from));
+  if(histFilter.mode==='custom') return saved.filter(m=>m.date>=histFilter.from&&m.date<=histFilter.to);
+  return saved;
+}
+
 function renderHist(){
-  const saved=matches.filter(m=>m.saved);
+  initHistFilter();
+  const saved=getHistFiltered();
   const el=document.getElementById('hist');
-  if(!saved.length){el.innerHTML='<div class="empty"><span class="ei">📋</span>Chưa có trận nào được lưu.</div>';return;}
-  // Group by date
+  const labelEl=document.getElementById('hist-result-label');
+
+  if(!saved.length){
+    el.innerHTML='<div class="empty"><span class="ei">📋</span>Chưa có trận nào.</div>';
+    if(labelEl) labelEl.innerHTML='';
+    return;
+  }
+  if(labelEl) labelEl.innerHTML='<span class="hist-result-label">'+getHistFilterLabel()+' · '+saved.length+' trận</span>';
+
   const byDate={};
   saved.forEach(m=>{
     const d=m.date||'unknown';
@@ -1688,29 +1866,58 @@ function renderHist(){
   let html='';
   dates.forEach(d=>{
     const ms=byDate[d].slice().reverse();
+    const dateMatches=matches.filter(m=>m.date===d);
+    // Find livestream link for this date (stored in first match of that date)
+    const liveMatch=dateMatches[0];
+    const liveUrl=liveMatch?liveMatch.liveUrl||'':'';
     html+=`<div class="hist-session">
-      <div class="hist-session-header">
+      <div class="hist-session-header" style="cursor:pointer;" onclick="toggleHistDay('hday-${d}')">
         <span style="font-size:15px;">📅</span>
         <span class="hist-date">${fmtDate(d)}</span>
         <span class="hist-count">${ms.length} trận</span>
+        ${liveUrl?'<a class="hist-live-link" href="'+xe(liveUrl)+'" target="_blank" onclick="event.stopPropagation()">▶ Live</a>':''}
+      </div>
+      <div id="hday-${d}">`;
+    // Livestream input (admin only)
+    html+=`<div class="hist-live-row admin-only">
+        <span style="font-size:14px;">📡</span>
+        <input class="hist-live-inp" type="url" placeholder="Thêm link livestream (YouTube, Facebook...)" value="${xe(liveUrl)}" oninput="saveLiveUrl('${d}',this.value)">
+        ${liveUrl?'<a class="hist-live-link" href="'+xe(liveUrl)+'" target="_blank">▶ Xem</a>':''}
       </div>`;
     ms.forEach(m=>{
       const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ')||'Đội A';
       const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ')||'Đội B';
       const w1=+m.s1>+m.s2;
       const a=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img class="av-img-small" src="${mb.photo}" style="width:20px;height:20px;border-radius:5px;">` :`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
+      const betHtml=m.bet?`<span style="font-size:10px;color:var(--green);font-weight:800;">🍃${m.bet}</span>`:'';
       html+=`<div class="hi">
         <div>
           <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${a(m.t1p1)}${xe(t1)}</div>
           <div class="ht ${!w1?'w':'l'}">${!w1?'🏅 ':''}${a(m.t2p1)}${xe(t2)}</div>
-          <div class="hm">${CL[m.cat]} · chạm ${m.tgt}</div>
+          <div class="hm">${CL[m.cat]} · chạm ${m.tgt} ${betHtml}</div>
         </div>
         <div class="hs">${m.s1} : ${m.s2}</div>
       </div>`;
     });
-    html+='</div>';
+    html+='</div></div>';
   });
   el.innerHTML=html;
+}
+function toggleHistDay(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'':'none';
+}
+function saveLiveUrl(date, url){
+  if(!isAdmin) return;
+  matches.filter(m=>m.date===date).forEach(m=>m.liveUrl=url);
+  debounceSave();
+}
+function getHistFilterLabel(){
+  if(histFilter.mode==='all') return '📋 Toàn thời gian';
+  if(histFilter.mode==='year') return '📅 Năm '+histFilter.from;
+  if(histFilter.mode==='month'){const[y,m]=histFilter.from.split('-');return '📅 Tháng '+parseInt(m)+' năm '+y;}
+  if(histFilter.mode==='custom') return '📅 '+fmtDate(histFilter.from)+' → '+fmtDate(histFilter.to);
+  return '';
 }
 
 // ─── UTILS ───
