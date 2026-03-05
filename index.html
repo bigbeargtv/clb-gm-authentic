@@ -1376,6 +1376,14 @@ async function save(){
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
   setTimeout(()=>{ isSyncing = false; }, 1000);
+  // Auto-snapshot (throttled: max 1 per 5 min)
+  if(ok && isAdmin){
+    const now = Date.now();
+    if(now - lastSnapTime > 5*60*1000 && (members.length||matches.length)){
+      saveSnapshot('Auto save');
+      lastSnapTime = now;
+    }
+  }
 }
 function setSaveDot(saved){
   const dot=document.getElementById('saveDot');
@@ -2594,17 +2602,8 @@ function closeBackup(e){
   document.getElementById('backup-modal-overlay').classList.remove('on');
 }
 
-// Auto-snapshot every save (throttled: max 1 per 5 min)
+// Auto-snapshot throttled — gọi trực tiếp sau khi save xong (không override)
 let lastSnapTime = 0;
-const _origSave = save;
-async function save(){
-  await _origSave.call(this);
-  const now = Date.now();
-  if(isAdmin && now - lastSnapTime > 5*60*1000 && (members.length||matches.length)){
-    saveSnapshot('Auto save');
-    lastSnapTime = now;
-  }
-}
 
 // ─── EDIT MEMBER ───
 let editMemberId = null;
