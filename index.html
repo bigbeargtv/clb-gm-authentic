@@ -363,13 +363,13 @@ nav{
 .tbl-h{display:grid;grid-template-columns:28px 1fr 36px 36px 52px 48px;gap:3px;align-items:center;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
 .tbl-r{display:grid;grid-template-columns:28px 1fr 36px 36px 52px 48px;gap:3px;align-items:center;padding:10px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:5px;transition:all .15s;}
 .tbl-r:hover{border-color:var(--bdr2);transform:translateX(2px);}
-.tbl-r.r1{border-color:#f5c842;background:linear-gradient(135deg,#fff8e0,#fffdf5);}
-.tbl-r.r2{border-color:#c5cad8;}
-.tbl-r.r3{border-color:#d4b888;}
-.rk{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-align:center;color:var(--muted);line-height:1;}
-.r1 .rk{color:var(--gold);}
-.r2 .rk{color:#9ba3c2;}
-.r3 .rk{color:#a07840;}
+.tbl-r.r1{border:2px solid #f5c842;background:linear-gradient(135deg,#fff8e080,#fffdf5cc);box-shadow:0 2px 12px #f5c84230;}
+.tbl-r.r2{border:2px solid #b0b8cc;background:linear-gradient(135deg,#f0f2f880,#f8f9fbcc);box-shadow:0 2px 8px #b0b8cc25;}
+.tbl-r.r3{border:2px solid #c8a06a;background:linear-gradient(135deg,#fdf0e080,#fffbf5cc);box-shadow:0 2px 8px #c8a06a25;}
+.rk{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-align:center;color:var(--muted);line-height:1;min-width:24px;}
+.r1 .rk{color:#e6a800;text-shadow:0 1px 4px #f5c84260;}
+.r2 .rk{color:#8892b0;}
+.r3 .rk{color:#9a6f3a;}
 .bxh-player{display:flex;align-items:center;gap:8px;}
 .bxh-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
 .bxh-nm{font-size:13px;font-weight:700;}
@@ -677,9 +677,9 @@ nav{
   transition:all .15s;
 }
 .quy-row:hover{border-color:var(--bdr2);transform:translateX(2px);}
-.quy-row.r1{border-color:#f5c842;background:linear-gradient(135deg,#fff8e0,#fffdf5);}
-.quy-row.r2{border-color:#c5cad8;}
-.quy-row.r3{border-color:#d4b888;}
+.quy-row.r1{border:2px solid #f5c842;background:linear-gradient(135deg,#fff8e080,#fffdf5cc);box-shadow:0 2px 12px #f5c84230;}
+.quy-row.r2{border:2px solid #b0b8cc;background:linear-gradient(135deg,#f0f2f880,#f8f9fbcc);box-shadow:0 2px 8px #b0b8cc25;}
+.quy-row.r3{border:2px solid #c8a06a;background:linear-gradient(135deg,#fdf0e080,#fffbf5cc);box-shadow:0 2px 8px #c8a06a25;}
 .quy-h{display:grid;grid-template-columns:28px 1fr 80px 80px;gap:6px;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
 .quy-debt{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--red);text-align:right;}
 .quy-matches{font-size:12px;color:var(--muted);text-align:center;}
@@ -1216,6 +1216,8 @@ nav{
     <div class="em-title">✏️ Chỉnh sửa thành viên</div>
     <div class="em-label">Tên</div>
     <input class="em-inp" id="em-name" placeholder="Tên thành viên...">
+    <div class="em-label" style="margin-top:10px;">Bí danh <span style="font-size:11px;color:var(--muted);font-weight:600;">(không bắt buộc)</span></div>
+    <input class="em-inp" id="em-nickname" placeholder="Nickname, biệt danh...">
     <div class="em-label">Giới tính</div>
     <div class="em-gender-row">
       <button class="em-gender-btn on-m" id="em-gm" onclick="setEditGender('m')">👨 Nam</button>
@@ -1489,6 +1491,7 @@ function renderMembers(){
     +'</div>'
     +'<div style="flex:1;min-width:0;">'
     +'<div class="mc-name">'+xe(m.name)+'</div>'
+    +(m.nickname?'<div style="font-size:11px;color:var(--gold);font-weight:700;margin-top:1px;">"'+xe(m.nickname)+'"</div>':'')
     +'<div class="mc-gender">'+(m.gender==='m'?'👨 Nam':'👩 Nữ')+'</div>'
     +'</div>'
     +(isAdmin?'<div style="position:absolute;top:7px;right:8px;display:flex;gap:4px;">'
@@ -2681,6 +2684,7 @@ function openEditMember(id){
   editMemberId = id;
   editGender = m.gender;
   document.getElementById('em-name').value = m.name;
+  document.getElementById('em-nickname').value = m.nickname||'';
   setEditGender(m.gender);
   document.getElementById('edit-member-overlay').classList.add('on');
   setTimeout(()=>document.getElementById('em-name').focus(), 100);
@@ -2708,6 +2712,7 @@ function saveEditMember(){
   const oldName = m.name;
   m.name = name;
   m.gender = editGender;
+  m.nickname = document.getElementById('em-nickname').value.trim();
   // Update name in all matches
   matches.forEach(match=>{
     ['t1p1','t1p2','t2p1','t2p2'].forEach(f=>{
