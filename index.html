@@ -83,11 +83,15 @@ nav{
   display:flex;background:var(--s1);
   border-bottom:1px solid var(--bdr);
   position:sticky;top:56px;z-index:40;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
+nav::-webkit-scrollbar{display:none;}
 .nt{
-  flex:1;padding:11px 4px 9px;border:none;background:transparent;
-  font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;
-  letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  flex:0 0 auto;min-width:64px;padding:11px 6px 9px;border:none;background:transparent;
+  font-family:'Nunito',sans-serif;font-size:9.5px;font-weight:800;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
   cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;
   display:flex;flex-direction:column;align-items:center;gap:3px;
 }
@@ -655,6 +659,30 @@ nav{
 }
 
 
+
+/* STATS */
+.stats-member-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:6px;}
+.stats-member-chip:hover,.stats-member-chip.on{border-color:var(--gold);background:#f0b42910;}
+.stat-card{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.stat-box{background:var(--s1);border-radius:10px;padding:10px 6px;text-align:center;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;line-height:1;}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-top:3px;}
+.stat-bar-wrap{background:var(--s1);border-radius:8px;height:10px;overflow:hidden;margin-top:4px;}
+.stat-bar{height:10px;border-radius:8px;transition:width .6s ease;}
+.partner-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);}
+.partner-row:last-child{border-bottom:none;}
+
+/* ALBUM */
+.album-section{margin-bottom:18px;}
+.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:12px;overflow:hidden;}
+.album-thumb{width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;transition:opacity .15s;}
+.album-thumb:hover{opacity:.85;}
+.album-lightbox{position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}
+.album-lightbox img{max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;}
+.album-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px dashed var(--bdr2);border-radius:12px;background:transparent;color:var(--muted);font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:12px;}
+.album-upload-btn:hover{border-color:var(--gold);color:var(--gold);}
+
 /* LEDGER */
 .ldg-card{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
 .ldg-person-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
@@ -1027,6 +1055,8 @@ nav{
   <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
   <button class="nt" onclick="goTab('pg-draw')" id="nt5"><span class="ic">🎲</span>Bốc thăm</button>
   <button class="nt" onclick="goTab('pg-ledger')" id="nt6"><span class="ic">💵</span>Thu Chi</button>
+  <button class="nt" onclick="goTab('pg-stats')" id="nt7"><span class="ic">👤</span>Cá Nhân</button>
+  <button class="nt" onclick="goTab('pg-album')" id="nt8"><span class="ic">📸</span>Album</button>
 </nav>
 
 <!-- MEMBERS -->
@@ -1141,6 +1171,18 @@ nav{
 <!-- THU CHI -->
 <div class="pg" id="pg-ledger">
   <div id="ledger-content"></div>
+</div>
+
+
+<!-- THỐNG KÊ CÁ NHÂN -->
+<div class="pg" id="pg-stats">
+  <div id="stats-picker" style="margin-bottom:12px;"></div>
+  <div id="stats-content"></div>
+</div>
+
+<!-- ALBUM -->
+<div class="pg" id="pg-album">
+  <div id="album-content"></div>
 </div>
 
 <!-- BỐC THĂM -->
@@ -1375,6 +1417,9 @@ async function load(){
     drawSessionsMeta = data.drawSessionsMeta || {};
     ledger = data.ledger || [];
     ledgerUid = data.ledgerUid || 1;
+    clubInitBalance = +data.clubInitBalance || 0;
+    album = data.album || [];
+    albumUid = data.albumUid || 1;
     if(data.drawDraft){
       const dr = data.drawDraft;
       drawSelected     = new Set(dr.selected||[]);
@@ -1426,7 +1471,9 @@ async function save(){
     tgt, cat, sessionDate,
     drawSessionsMeta,
     drawDraft,
-    ledger, ledgerUid
+    ledger, ledgerUid,
+    clubInitBalance,
+    album, albumUid
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
@@ -1451,13 +1498,15 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5','pg-ledger':'nt6'};
+  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5','pg-ledger':'nt6','pg-stats':'nt7','pg-album':'nt8'};
   document.getElementById(map[id]).classList.add('on');
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
   if(id==='pg-quy')renderQuy();
   if(id==='pg-draw')initDrawTab();
   if(id==='pg-ledger')renderLedger();
+  if(id==='pg-stats')renderStats();
+  if(id==='pg-album')renderAlbum();
   // Lưu tab hiện tại để F5 giữ nguyên
   try{ localStorage.setItem('activeTab', id); }catch(e){}
 }
@@ -1851,6 +1900,10 @@ let drawTeams = []; // [{name,color,players,captain}]
 let drawSessionsMeta = {}; // {sessionId: {name,teamA,teamB,captainA,captainB,winner,date}}
 let ledger = []; // [{id,date,name,amount,note,type:'in'|'out'}]
 let ledgerUid = 1;
+let clubInitBalance = 0; // Số dư quỹ CLB ban đầu
+let album = []; // [{id,date,url,caption,base64}]
+let albumUid = 1;
+let statsSelected = null; // tên member đang xem
 
 function doDrawSpin(){
   if(!isAdmin) return;
@@ -3920,7 +3973,7 @@ function renderLedger(){
   const totalOut = ledger.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
   // Cộng thêm từ bet entries đã paid
   const betPaid = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((s,m)=>s+(+m.bet),0);
-  const grandTotal = totalIn + betPaid - totalOut;
+  const grandTotal = clubInitBalance + totalIn + betPaid - totalOut;
   const totalOwed = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
 
   let h = '';
@@ -3928,7 +3981,7 @@ function renderLedger(){
   // ── Tổng quan ──
   h += `<div class="ldg-card" style="margin-bottom:14px;">
     <div style="font-weight:800;font-size:14px;margin-bottom:10px;">💵 Tổng quan quỹ CLB</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:${isAdmin?'10':'0'}px;">
       <div style="background:var(--s1);border-radius:10px;padding:10px;text-align:center;">
         <div class="ldg-balance-pos">${fmtNum(grandTotal)}🍃</div>
         <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Trong quỹ</div>
@@ -3938,6 +3991,13 @@ function renderLedger(){
         <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Còn nợ</div>
       </div>
     </div>
+    ${isAdmin?`<div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;">💰 Quỹ ban đầu</div>
+      <input id="club-init-bal" type="number" min="0" value="${clubInitBalance||''}" placeholder="0"
+        class="ldg-inp" style="flex:1;font-size:13px;padding:6px 8px;">
+      <span style="font-size:12px;color:var(--muted);">🍃</span>
+      <button onclick="saveClubInitBalance()" class="ldg-btn-in" style="padding:6px 12px;font-size:12px;flex-shrink:0;">Lưu</button>
+    </div>`:''}
   </div>`;
 
   // ── Thêm giao dịch nhanh (admin) ──
@@ -4187,6 +4247,14 @@ function delLedgerTx(id){
   renderLedger();
 }
 
+function saveClubInitBalance(){
+  if(!isAdmin) return;
+  const val = parseInt(document.getElementById('club-init-bal').value)||0;
+  clubInitBalance = val;
+  save();
+  renderLedger();
+}
+
 function saveInitBalance(name, domId){
   if(!isAdmin) return;
   const inp = document.getElementById('ldg-init-'+domId);
@@ -4220,6 +4288,335 @@ function toggleBetEntryPaid(matchId){
   m.paid = !m.paid;
   debounceSave();
   renderLedger();
+}
+
+
+// ─── THỐNG KÊ CÁ NHÂN ───
+function renderStats(){
+  const picker = document.getElementById('stats-picker');
+  const content = document.getElementById('stats-content');
+  if(!picker||!content) return;
+
+  // Picker: chọn thành viên
+  picker.innerHTML = '<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👤 Chọn thành viên</div>'
+    + members.map(m=>{
+        const on = statsSelected===m.name;
+        const av = m.photo
+          ? `<img src="${m.photo}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;">`
+          : `<div class="${AVC[m.color]}" style="width:36px;height:36px;border-radius:10px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
+        return `<div class="stats-member-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\'")}')">
+          ${av}
+          <span style="font-weight:800;font-size:13px;">${xe(m.name)}</span>
+          ${m.nickname?`<span style="font-size:11px;color:var(--gold);">"${xe(m.nickname)}"</span>`:''}
+          <span style="margin-left:auto;font-size:11px;color:var(--muted);">${on?'▲':'▶'}</span>
+        </div>`;
+      }).join('');
+
+  if(!statsSelected){ content.innerHTML=''; return; }
+  content.innerHTML = buildStatsHTML(statsSelected);
+}
+
+function selectStats(name){
+  statsSelected = statsSelected===name ? null : name;
+  renderStats();
+  if(statsSelected){
+    setTimeout(()=>document.getElementById('stats-content').scrollIntoView({behavior:'smooth',block:'start'}),100);
+  }
+}
+
+function buildStatsHTML(name){
+  const allM = matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&
+    [m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
+  if(!allM.length) return '<div class="empty"><span class="ei">📊</span>Chưa có trận nào.</div>';
+
+  // ── Tính các chỉ số ──
+  let wins=0, losses=0, draws=0;
+  const catCount={nam:0,mix:0,nu:0};
+  const catWin={nam:0,mix:0,nu:0};
+  const partners={}, rivals={}, partnerWins={}, rivalLosses={};
+  let totalPoints=0, totalPointsAgainst=0, maxWinStreak=0, curStreak=0;
+  let lastDate='', firstDate='';
+
+  allM.forEach(m=>{
+    const inT1=[m.t1p1,m.t1p2].includes(name);
+    const myScore  = inT1 ? +m.s1 : +m.s2;
+    const oppScore = inT1 ? +m.s2 : +m.s1;
+    const w = m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'' );
+    const won  = inT1 ? w==='A' : w==='B';
+    const lost = inT1 ? w==='B' : w==='A';
+
+    if(won){ wins++; curStreak++; maxWinStreak=Math.max(maxWinStreak,curStreak); }
+    else if(lost){ losses++; curStreak=0; }
+    else draws++;
+
+    if(!isNaN(myScore))  totalPoints += myScore;
+    if(!isNaN(oppScore)) totalPointsAgainst += oppScore;
+
+    catCount[m.cat]=(catCount[m.cat]||0)+1;
+    if(won) catWin[m.cat]=(catWin[m.cat]||0)+1;
+
+    // Partner (cùng đội)
+    const partner = inT1 ? (m.t1p1===name?m.t1p2:m.t1p1) : (m.t2p1===name?m.t2p2:m.t2p1);
+    if(partner){ partners[partner]=(partners[partner]||0)+1; if(won) partnerWins[partner]=(partnerWins[partner]||0)+1; }
+
+    // Rivals (đội đối)
+    const oppTeam = inT1 ? [m.t2p1,m.t2p2] : [m.t1p1,m.t1p2];
+    oppTeam.filter(Boolean).forEach(r=>{ rivals[r]=(rivals[r]||0)+1; if(lost) rivalLosses[r]=(rivalLosses[r]||0)+1; });
+
+    if(!firstDate||m.date<firstDate) firstDate=m.date;
+    if(!lastDate||m.date>lastDate)   lastDate=m.date;
+  });
+
+  const total = wins+losses+draws;
+  const winRate = total ? Math.round(wins/total*100) : 0;
+  const mb = mbOf(name);
+  const bigAv = mb&&mb.photo
+    ? `<img src="${mb.photo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;">`
+    : `<div class="${mb?AVC[mb.color]:''}" style="width:64px;height:64px;border-radius:16px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
+
+  // ── Xếp hạng trong CLB ──
+  const rankData = {};
+  members.forEach(m2=>{
+    const ms2 = matches.filter(x=>x.saved&&!x.isBetEntry&&[x.t1p1,x.t1p2,x.t2p1,x.t2p2].includes(m2.name));
+    let w2=0,l2=0;
+    ms2.forEach(x=>{
+      const inT=([x.t1p1,x.t1p2].includes(m2.name));
+      const ww=x.winner||(x.s1!==''&&x.s2!==''?(+x.s1>+x.s2?'A':+x.s2>+x.s1?'B':''):'');
+      if(inT?ww==='A':ww==='B') w2++;
+      else if(inT?ww==='B':ww==='A') l2++;
+    });
+    rankData[m2.name]={w:w2,total:ms2.length,rate:ms2.length?w2/ms2.length:0};
+  });
+  const rankList = Object.entries(rankData).sort((a,b)=>b[1].rate-a[1].rate||b[1].w-a[1].w);
+  const myRank = rankList.findIndex(r=>r[0]===name)+1;
+
+  // ── Top partner ──
+  const topPartners = Object.entries(partners).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  // ── Top rival (thua nhiều nhất) ──
+  const topRivals = Object.entries(rivals).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  let h = '';
+
+  // Header profile
+  h += `<div class="stat-card" style="display:flex;align-items:center;gap:14px;">
+    ${bigAv}
+    <div style="flex:1;">
+      <div style="font-size:18px;font-weight:900;">${xe(name)}</div>
+      ${mb&&mb.nickname?`<div style="font-size:12px;color:var(--gold);font-weight:700;">"${xe(mb.nickname)}"</div>`:''}
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">${mb?((mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · '):''}Tham gia từ ${fmtDate(firstDate)}</div>
+      <div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
+        <span style="background:var(--gold);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;">🏅 Hạng ${myRank}/${members.length}</span>
+        <span style="background:var(--green);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;">🔥 ${maxWinStreak} trận thắng liên tiếp</span>
+      </div>
+    </div>
+  </div>`;
+
+  // Tổng quan
+  h += `<div class="stat-card">
+    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">📊 Tổng quan</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" style="color:var(--gold);">${total}</div><div class="stat-lbl">Trận đã đấu</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--green);">${wins}</div><div class="stat-lbl">Thắng</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#e55;">${losses}</div><div class="stat-lbl">Thua</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:4px;">
+      <span style="color:var(--green);">Tỉ lệ thắng</span>
+      <span style="color:var(--gold);">${winRate}%</span>
+    </div>
+    <div class="stat-bar-wrap"><div class="stat-bar" style="width:${winRate}%;background:linear-gradient(90deg,var(--green),var(--gold));"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+      <div class="stat-box"><div class="stat-num" style="color:var(--text);font-size:18px;">${totalPoints}</div><div class="stat-lbl">Điểm ghi được</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#e55;font-size:18px;">${totalPointsAgainst}</div><div class="stat-lbl">Điểm bị ghi</div></div>
+    </div>
+  </div>`;
+
+  // Theo thể loại
+  h += `<div class="stat-card">
+    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">🎯 Theo thể loại</div>`;
+  ['nam','mix','nu'].forEach(cat=>{
+    if(!catCount[cat]) return;
+    const wr = Math.round((catWin[cat]||0)/catCount[cat]*100);
+    h += `<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:3px;">
+        <span>${CL[cat]}</span>
+        <span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · ${wr}%</span>
+      </div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${wr}%;background:${cat==='nam'?'#4a90e2':cat==='mix'?'var(--gold)':'#e27a9a'};"></div></div>
+    </div>`;
+  });
+  h += '</div>';
+
+  // Đồng đội hay gặp
+  if(topPartners.length){
+    h += `<div class="stat-card">
+      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">🤝 Đồng đội thường xuyên</div>`;
+    topPartners.forEach(([pname,count])=>{
+      const pmb=mbOf(pname);
+      const pav=pmb&&pmb.photo?`<img src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+        :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
+      const pw = partnerWins[pname]||0;
+      const pwr = Math.round(pw/count*100);
+      h += `<div class="partner-row">
+        ${pav}
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:13px;">${xe(pname)}</div>
+          <div style="font-size:11px;color:var(--muted);">${count} trận cùng · thắng ${pw} (${pwr}%)</div>
+        </div>
+        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${pwr}%;background:var(--green);"></div></div>
+      </div>`;
+    });
+    h += '</div>';
+  }
+
+  // Đối thủ hay gặp
+  if(topRivals.length){
+    h += `<div class="stat-card">
+      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">⚔️ Đối thủ thường xuyên</div>`;
+    topRivals.forEach(([rname,count])=>{
+      const rmb=mbOf(rname);
+      const rav=rmb&&rmb.photo?`<img src="${rmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+        :`<div class="${rmb?AVC[rmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${rmb?'':'var(--muted)'};">${ini(rname)}</div>`;
+      const rl=rivalLosses[rname]||0;
+      const rlr=Math.round(rl/count*100);
+      h += `<div class="partner-row">
+        ${rav}
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:13px;">${xe(rname)}</div>
+          <div style="font-size:11px;color:var(--muted);">${count} trận đối · thua ${rl} (${rlr}%)</div>
+        </div>
+        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${rlr}%;background:#e55;"></div></div>
+      </div>`;
+    });
+    h += '</div>';
+  }
+
+  // Đồng đội tỉ lệ thua cao (jinx partner)
+  const jinxPartners = Object.entries(partners)
+    .filter(([,c])=>c>=2)
+    .map(([pname,count])=>{
+      const pl = count-(partnerWins[pname]||0);
+      return [pname, count, pl, Math.round(pl/count*100)];
+    })
+    .filter(([,,, lr])=>lr>50)
+    .sort((a,b)=>b[3]-a[3]||b[2]-a[2])
+    .slice(0,3);
+
+  if(jinxPartners.length){
+    h += `<div class="stat-card">
+      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">💀 Đồng đội... xui xẻo</div>`;
+    jinxPartners.forEach(([pname,count,pl,plr])=>{
+      const pmb=mbOf(pname);
+      const pav=pmb&&pmb.photo?`<img src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+        :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
+      h += `<div class="partner-row">
+        ${pav}
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:13px;">${xe(pname)}</div>
+          <div style="font-size:11px;color:#e55;">${count} trận cùng · thua ${pl} (${plr}%)</div>
+        </div>
+        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${plr}%;background:#e55;"></div></div>
+      </div>`;
+    });
+    h += '</div>';
+  }
+
+  // 5 trận gần nhất
+  const recent = allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  h += `<div class="stat-card">
+    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">📅 5 trận gần nhất</div>`;
+  recent.forEach(m=>{
+    const inT1=[m.t1p1,m.t1p2].includes(name);
+    const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
+    const won=inT1?w==='A':w==='B';
+    const lost=inT1?w==='B':w==='A';
+    const res=won?'Thắng':lost?'Thua':'Hòa';
+    const col=won?'var(--green)':lost?'#e55':'var(--muted)';
+    const opp=inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];
+    const sc=(m.s1!==''&&m.s2!=='')?m.s1+' : '+m.s2:'';
+    h += `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);">
+      <span style="font-size:11px;font-weight:900;color:${col};min-width:36px;">${res}</span>
+      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">vs ${opp.filter(Boolean).map(n=>xe(n)).join(' & ')}</div>
+      <span style="font-size:11px;color:var(--muted);flex-shrink:0;">${sc}</span>
+      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+    </div>`;
+  });
+  h += '</div>';
+
+  return h;
+}
+
+// ─── ALBUM ───
+function renderAlbum(){
+  const el = document.getElementById('album-content');
+  if(!el) return;
+
+  let h = '';
+
+  if(isAdmin){
+    h += `<button class="album-upload-btn" onclick="triggerAlbumUpload()">📷 Thêm ảnh vào Album</button>
+    <input type="file" id="album-file-inp" accept="image/*" multiple style="display:none;" onchange="handleAlbumUpload(event)">`;
+  }
+
+  if(!album.length){
+    h += '<div class="empty"><span class="ei">📸</span>Album trống.<br>Thêm ảnh kỷ niệm của CLB!</div>';
+    el.innerHTML = h;
+    return;
+  }
+
+  // Group theo ngày
+  const byDay = {};
+  album.forEach(a=>{ if(!byDay[a.date]) byDay[a.date]=[]; byDay[a.date].push(a); });
+  const days = Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+
+  days.forEach(d=>{
+    const photos = byDay[d];
+    h += `<div class="album-section">
+      <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">📅 ${fmtDate(d)} · ${photos.length} ảnh</div>
+      <div class="album-grid">
+        ${photos.map(a=>`
+          <div style="position:relative;">
+            <img src="${a.url}" class="album-thumb" onclick="openLightbox('${a.id}')" loading="lazy">
+            ${isAdmin?`<button onclick="delAlbumPhoto(${a.id})" style="position:absolute;top:4px;right:4px;background:#000a;border:none;border-radius:6px;color:#fff;font-size:11px;padding:2px 6px;cursor:pointer;">✕</button>`:''}
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = h;
+}
+
+function triggerAlbumUpload(){ document.getElementById('album-file-inp').click(); }
+
+function handleAlbumUpload(e){
+  const files = [...e.target.files];
+  if(!files.length) return;
+  let done=0;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      album.push({id:albumUid++, date:vnDateStr(new Date()), url:ev.target.result, caption:''});
+      done++;
+      if(done===files.length){ save(); renderAlbum(); }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function openLightbox(id){
+  const a = album.find(x=>x.id===id);
+  if(!a) return;
+  const lb = document.createElement('div');
+  lb.className='album-lightbox';
+  lb.onclick=()=>lb.remove();
+  lb.innerHTML=`<img src="${a.url}">`;
+  document.body.appendChild(lb);
+}
+
+function delAlbumPhoto(id){
+  if(!isAdmin||!confirm('Xóa ảnh này?')) return;
+  album=album.filter(a=>a.id!==id);
+  save(); renderAlbum();
 }
 
 // ─── BXH ───
