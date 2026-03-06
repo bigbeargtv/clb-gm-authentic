@@ -654,6 +654,21 @@ nav{
   padding:3px 10px;border-radius:20px;
 }
 
+
+/* LEDGER */
+.ldg-card{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.ldg-person-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
+.ldg-person-row:hover{border-color:var(--bdr2);}
+.ldg-txn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);font-size:12px;}
+.ldg-in{color:var(--green);font-weight:800;}
+.ldg-out{color:#e55;font-weight:800;}
+.ldg-add-row{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+.ldg-inp{flex:1;min-width:80px;padding:8px 10px;border:1.5px solid var(--bdr2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;background:var(--s1);color:var(--text);}
+.ldg-btn-in{padding:8px 14px;border-radius:10px;border:none;background:var(--green);color:#fff;font-weight:800;font-size:13px;cursor:pointer;}
+.ldg-btn-out{padding:8px 14px;border-radius:10px;border:none;background:#e55;color:#fff;font-weight:800;font-size:13px;cursor:pointer;}
+.ldg-balance-pos{color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;}
+.ldg-balance-neg{color:#e55;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;}
+
 /* Quỹ tab */
 .quy-summary{
   background:linear-gradient(135deg,#0e1428,#131a30);
@@ -1011,6 +1026,7 @@ nav{
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
   <button class="nt" onclick="goTab('pg-draw')" id="nt5"><span class="ic">🎲</span>Bốc thăm</button>
+  <button class="nt" onclick="goTab('pg-ledger')" id="nt6"><span class="ic">💵</span>Thu Chi</button>
 </nav>
 
 <!-- MEMBERS -->
@@ -1110,6 +1126,7 @@ nav{
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="hist-filter-row" id="qfilter-quick"></div>
     <div class="hist-filter-row" id="qfilter-months"></div>
+    <div class="hist-filter-row" id="qfilter-days" style="margin-top:2px;"></div>
     <div class="bxh-filter-custom" id="qfilter-custom">
       <input type="date" class="filter-date-inp" id="qfilter-from">
       <span class="filter-sep">→</span>
@@ -1120,6 +1137,11 @@ nav{
   <div id="quy-content"><div class="empty"><span class="ei">💰</span>Chưa có dữ liệu quỹ.</div></div>
 </div>
 
+
+<!-- THU CHI -->
+<div class="pg" id="pg-ledger">
+  <div id="ledger-content"></div>
+</div>
 
 <!-- BỐC THĂM -->
 <div class="pg" id="pg-draw">
@@ -1351,6 +1373,8 @@ async function load(){
     cat       = data.cat       || 'nam';
     sessionDate = data.sessionDate || '';
     drawSessionsMeta = data.drawSessionsMeta || {};
+    ledger = data.ledger || [];
+    ledgerUid = data.ledgerUid || 1;
     if(data.drawDraft){
       const dr = data.drawDraft;
       drawSelected     = new Set(dr.selected||[]);
@@ -1401,7 +1425,8 @@ async function save(){
     matches, matchUid,
     tgt, cat, sessionDate,
     drawSessionsMeta,
-    drawDraft
+    drawDraft,
+    ledger, ledgerUid
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
@@ -1426,12 +1451,13 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5'};
+  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5','pg-ledger':'nt6'};
   document.getElementById(map[id]).classList.add('on');
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
   if(id==='pg-quy')renderQuy();
   if(id==='pg-draw')initDrawTab();
+  if(id==='pg-ledger')renderLedger();
   // Lưu tab hiện tại để F5 giữ nguyên
   try{ localStorage.setItem('activeTab', id); }catch(e){}
 }
@@ -1823,6 +1849,8 @@ function renderLoserCalc(){
 // All teams stored as array
 let drawTeams = []; // [{name,color,players,captain}]
 let drawSessionsMeta = {}; // {sessionId: {name,teamA,teamB,captainA,captainB,winner,date}}
+let ledger = []; // [{id,date,name,amount,note,type:'in'|'out'}]
+let ledgerUid = 1;
 
 function doDrawSpin(){
   if(!isAdmin) return;
@@ -3552,6 +3580,24 @@ function initQuyFilter(){
     if(hasData) mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
   }
   document.getElementById('qfilter-months').innerHTML=mHtml;
+  // Day pills: hiện khi đang chọn tháng hoặc ngày
+  const activeMonthQ = quyFilter.mode==='month' ? quyFilter.from
+    : quyFilter.mode==='day' ? quyFilter.from.slice(0,7) : null;
+  let dayHtml = '';
+  if(activeMonthQ){
+    const days = [...new Set(
+      matches.filter(m=>m.saved&&m.bet>0&&m.date&&m.date.startsWith(activeMonthQ))
+             .map(m=>m.date)
+    )].sort().reverse();
+    days.forEach(d=>{
+      const on = quyFilter.mode==='day' && quyFilter.from===d;
+      const [,mo2,dd2] = d.split('-');
+      dayHtml += `<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')" style="font-size:11px;">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
+    });
+  }
+  const daysEl = document.getElementById('qfilter-days');
+  if(daysEl) daysEl.innerHTML = dayHtml;
+
   document.getElementById('qfilter-custom').classList.toggle('on',quyFilter.mode==='custom');
 }
 function setQuyFilter(mode,val){quyFilter={mode,from:val||'',to:''};renderQuy();}
@@ -3576,8 +3622,132 @@ function getQuyFiltered(){
   if(quyFilter.mode==='all') return saved;
   if(quyFilter.mode==='year') return saved.filter(m=>m.date.startsWith(quyFilter.from));
   if(quyFilter.mode==='month') return saved.filter(m=>m.date.startsWith(quyFilter.from));
+  if(quyFilter.mode==='day') return saved.filter(m=>m.date===quyFilter.from);
   if(quyFilter.mode==='custom') return saved.filter(m=>m.date>=quyFilter.from&&m.date<=quyFilter.to);
   return saved;
+}
+
+
+// Paid state: {matchId: true/false} — lưu vào Firebase qua matches[m].paid
+function renderQuyDay(date, saved){
+  // Tính nợ từng người
+  const debtMap = {};
+  saved.forEach(m=>{
+    if(m.isBetEntry){
+      // entry từ bốc thăm: t2p1 là người nộp
+      if(!debtMap[m.t2p1]) debtMap[m.t2p1]={name:m.t2p1,total:0,paid:0,entries:[]};
+      debtMap[m.t2p1].total += +m.bet;
+      if(m.paid) debtMap[m.t2p1].paid += +m.bet;
+      debtMap[m.t2p1].entries.push(m);
+    } else {
+      // trận thường
+      const bet=+m.bet||0;
+      if(!bet) return;
+      const w1=+m.s1>+m.s2;
+      const losers=[...(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2])].filter(Boolean);
+      losers.forEach(name=>{
+        if(!debtMap[name]) debtMap[name]={name,total:0,paid:0,entries:[]};
+        debtMap[name].total += bet;
+        if(m['paid_'+name]) debtMap[name].paid += bet;
+        debtMap[name].entries.push({...m, _loser:name});
+      });
+    }
+  });
+
+  const list = Object.values(debtMap).sort((a,b)=>b.total-a.total);
+  const totalAll = list.reduce((s,p)=>s+p.total,0);
+  const totalPaid = list.reduce((s,p)=>s+p.paid,0);
+  const totalUnpaid = totalAll - totalPaid;
+  const unpaidPeople = list.filter(p=>p.paid<p.total);
+  const paidPeople = list.filter(p=>p.paid>=p.total&&p.total>0);
+
+  let h = '';
+
+  // Summary bar
+  h += `<div style="background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">📅 ${fmtDate(date)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+      <div style="background:var(--s1);border-radius:10px;padding:8px 4px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gold);">${fmtNum(totalAll)}🍃</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Tổng phải nộp</div>
+      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 4px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${fmtNum(totalPaid)}🍃</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Đã nộp</div>
+      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 4px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${fmtNum(totalUnpaid)}🍃</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Còn thiếu</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Chưa nộp
+  if(unpaidPeople.length){
+    h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#e55;margin-bottom:6px;">❌ Chưa nộp đủ (${unpaidPeople.length})</div>`;
+    unpaidPeople.forEach(p=>{
+      const mb=mbOf(p.name);
+      const av = mb&&mb.photo
+        ? `<img src="${mb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+        : `<div class="${mb?AVC[mb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
+      const remaining = p.total - p.paid;
+      const isPaidFull = false;
+      h += `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid #e5555540;border-radius:12px;margin-bottom:6px;">
+        ${av}
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:13px;">${xe(p.name)}</div>
+          <div style="font-size:11px;color:var(--muted);">${p.paid>0?`Đã nộp ${fmtNum(p.paid)}🍃 · `:''}<span style="color:#e55;font-weight:700;">Còn ${fmtNum(remaining)}🍃</span></div>
+        </div>
+        ${isAdmin?`<button onclick="togglePaidFull('${p.name}','${date}')"
+          style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">
+          ✓ Đã nộp
+        </button>`:''}
+      </div>`;
+    });
+  }
+
+  // Đã nộp
+  if(paidPeople.length){
+    h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin:12px 0 6px;">✅ Đã nộp đủ (${paidPeople.length})</div>`;
+    paidPeople.forEach(p=>{
+      const mb=mbOf(p.name);
+      const av = mb&&mb.photo
+        ? `<img src="${mb.photo}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;opacity:.7;">`
+        : `<div class="${mb?AVC[mb.color]:''}" style="width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.7;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
+      h += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1.5px solid var(--green)30;border-radius:12px;margin-bottom:5px;opacity:.8;">
+        ${av}
+        <div style="flex:1;font-weight:700;font-size:13px;">${xe(p.name)}</div>
+        <div style="font-size:12px;color:var(--green);font-weight:800;">${fmtNum(p.total)}🍃 ✅</div>
+        ${isAdmin?`<button onclick="togglePaidFull('${p.name}','${date}')"
+          style="padding:4px 8px;border-radius:6px;border:1px solid var(--bdr2);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">
+          Hủy
+        </button>`:''}
+      </div>`;
+    });
+  }
+
+  return h;
+}
+
+function togglePaidFull(name, date){
+  if(!isAdmin) return;
+  // Toggle tất cả entries của người này trong ngày
+  const entries = matches.filter(m=>m.saved&&m.bet>0&&m.date===date&&(
+    m.isBetEntry ? m.t2p1===name
+    : [m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name)
+  ));
+  if(!entries.length) return;
+  // Check hiện tại đã paid hết chưa
+  const allPaid = entries.every(m=>{
+    if(m.isBetEntry) return m.paid;
+    return m['paid_'+name];
+  });
+  entries.forEach(m=>{
+    if(m.isBetEntry) m.paid = !allPaid;
+    else m['paid_'+name] = !allPaid;
+  });
+  debounceSave();
+  renderQuy();
 }
 
 function renderQuy(){
@@ -3586,6 +3756,12 @@ function renderQuy(){
   const el = document.getElementById('quy-content');
   if(!saved.length){
     el.innerHTML='<div class="empty"><span class="ei">💰</span>Chưa có trận nào gây quỹ.<br>Thêm vào từng trận nhé!</div>';
+    return;
+  }
+
+  // ── Chế độ xem buổi: hiện danh sách nộp tiền ──
+  if(quyFilter.mode==='day'){
+    el.innerHTML = renderQuyDay(quyFilter.from, saved);
     return;
   }
   // Calculate debt per person
@@ -3601,6 +3777,14 @@ function renderQuy(){
       debt[name].matches += 1;
       totalLeaf += bet;
     });
+  });
+  // Cộng số dư quỹ cũ (initialBalance) vào BXH
+  members.forEach(mb=>{
+    const init = +mb.initialBalance||0;
+    if(!init) return;
+    if(!debt[mb.name]) debt[mb.name]={name:mb.name, total:0, matches:0};
+    debt[mb.name].total += init;
+    totalLeaf += init;
   });
   const sorted = Object.values(debt).sort((a,b)=>b.total-a.total);
   // Summary
@@ -3627,9 +3811,13 @@ function renderQuy(){
       ? '<img class="av-img-small" src="'+mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
       : '<div class="quy-av '+(mb?AVC[mb.color]:'')+'" '+(mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
     const rk = medal || (i+1);
+    // Kiểm tra đã nộp hết chưa (tất cả bet entries của người này đều paid)
+    const personBets = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===p.name&&m.bet>0);
+    const allPaid = personBets.length>0 && personBets.every(m=>m.paid);
+    const paidBadge = allPaid ? '<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-left:4px;">Đã Ủng Hộ ✅</span>' : '';
     html += `<div class="quy-row ${rc}">
       <div class="rk">${rk}</div>
-      <div class="quy-player">${avHtml}<span class="quy-nm">${xe(p.name)}</span></div>
+      <div class="quy-player">${avHtml}<div><span class="quy-nm">${xe(p.name)}</span>${paidBadge}</div></div>
       <div class="quy-matches">${p.matches}</div>
       <div class="quy-debt">${fmtNum(p.total)}🍃</div>
     </div>`;
@@ -3695,6 +3883,343 @@ function delBetEntry(id){
   matches = matches.filter(m=>m.id!==id);
   renderQuy();
   debounceSave();
+}
+
+
+// ─── THU CHI ───
+function renderLedger(){
+  const el = document.getElementById('ledger-content');
+  if(!el) return;
+
+  // Tính số dư từng người từ ledger + từ quỹ cược
+  const balances = {}; // name → {fromBet, fromLedger, ledgerTxns}
+
+  // Từ quỹ cược (bet entries đã paid/chưa paid)
+  matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0).forEach(m=>{
+    const name = m.t2p1;
+    if(!name) return;
+    if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
+    balances[name].fromBet += +m.bet;
+    if(m.paid) balances[name].fromLedger += +m.bet; // đã nộp = vào quỹ
+  });
+
+  // Từ ledger thủ công
+  ledger.forEach(tx=>{
+    const name = tx.name;
+    if(!name) return;
+    if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
+    if(tx.type==='in') balances[name].fromLedger += +tx.amount;
+    else balances[name].fromLedger -= +tx.amount;
+    balances[name].txns.push(tx);
+  });
+
+  // Tổng quỹ = tổng tiền đã thu được (fromLedger của tất cả)
+  const allMembers = members.map(m=>m.name);
+  // Tổng tiền thực tế trong quỹ = tổng in - tổng out từ ledger manual
+  const totalIn  = ledger.filter(t=>t.type==='in').reduce((s,t)=>s+(+t.amount),0);
+  const totalOut = ledger.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
+  // Cộng thêm từ bet entries đã paid
+  const betPaid = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((s,m)=>s+(+m.bet),0);
+  const grandTotal = totalIn + betPaid - totalOut;
+  const totalOwed = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
+
+  let h = '';
+
+  // ── Tổng quan ──
+  h += `<div class="ldg-card" style="margin-bottom:14px;">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">💵 Tổng quan quỹ CLB</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:var(--s1);border-radius:10px;padding:10px;text-align:center;">
+        <div class="ldg-balance-pos">${fmtNum(grandTotal)}🍃</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Trong quỹ</div>
+      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:10px;text-align:center;">
+        <div class="ldg-balance-neg">${fmtNum(totalOwed)}🍃</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Còn nợ</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Thêm giao dịch nhanh (admin) ──
+  if(isAdmin){
+    h += `<div class="ldg-card" style="margin-bottom:14px;">
+      <div style="font-weight:800;font-size:13px;margin-bottom:8px;">➕ Ghi thu/chi</div>
+      <div style="margin-bottom:6px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">Người</div>
+        <select id="ldg-sel-name" class="ldg-inp" style="width:100%;">
+          <option value="">-- Chọn thành viên --</option>
+          ${members.map(m=>`<option value="${xe(m.name)}">${xe(m.name)}</option>`).join('')}
+          <option value="__custom__">✏️ Nhập tên khác...</option>
+        </select>
+        <input id="ldg-custom-name" class="ldg-inp" placeholder="Tên người..." style="width:100%;margin-top:6px;display:none;">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">Số tiền 🍃</div>
+          <input id="ldg-amount" type="number" min="0" class="ldg-inp" style="width:100%;" placeholder="0">
+        </div>
+        <div style="flex:2;">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">Ghi chú</div>
+          <input id="ldg-note" class="ldg-inp" style="width:100%;" placeholder="Mua bóng, chi phí sân...">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="ldg-btn-in" style="flex:1;" onclick="addLedgerTx('in')">+ Thu tiền</button>
+        <button class="ldg-btn-out" style="flex:1;" onclick="addLedgerTx('out')">− Chi tiền</button>
+      </div>
+    </div>`;
+  }
+
+  // ── Danh sách tất cả thành viên + người có giao dịch ──
+  const nameSet = new Set([
+    ...members.map(m=>m.name),
+    ...Object.keys(balances),
+    ...ledger.map(t=>t.name)
+  ]);
+  const peopleList = [...nameSet].map(name=>{
+    const b = balances[name]||{fromBet:0,fromLedger:0,txns:[]};
+    const netBet = b.fromBet;
+    const netIn  = ledger.filter(t=>t.name===name&&t.type==='in').reduce((s,t)=>s+(+t.amount),0);
+    const netOut = ledger.filter(t=>t.name===name&&t.type==='out').reduce((s,t)=>s+(+t.amount),0);
+    const betPaidAmt = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.paid).reduce((s,m)=>s+(+m.bet),0);
+    const betUnpaid  = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
+    return {name, netBet, betPaidAmt, betUnpaid, netIn, netOut, txns: b.txns};
+  }).sort((a,b)=>b.betUnpaid-a.betUnpaid||b.netBet-a.netBet||a.name.localeCompare(b.name));
+
+  if(peopleList.length){
+    h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👤 Chi tiết từng người</div>`;
+
+    peopleList.forEach(p=>{
+      const domId = 'ldg-p-'+p.name.replace(/\W/g,'_');
+      const isOpen = window._openDays && window._openDays.has(domId);
+      const mb = mbOf(p.name);
+      const av = mb&&mb.photo
+        ? `<img src="${mb.photo}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;">`
+        : `<div class="${mb?AVC[mb.color]:''}" style="width:34px;height:34px;border-radius:10px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
+
+      // ── Gom trận thua + bet entries theo ngày ──
+      const lostNormal = matches.filter(m=>{
+        if(!m.saved||!m.bet||m.bet<=0||m.isBetEntry) return false;
+        const w = m.winner||(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':'');
+        const losers = w==='A'?[m.t2p1,m.t2p2]:w==='B'?[m.t1p1,m.t1p2]:[];
+        return losers.includes(p.name);
+      });
+      const betEntries = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===p.name&&m.bet>0);
+      const allDebt = [...lostNormal, ...betEntries];
+
+      // Tính tổng nợ thực tế từ tất cả trận thua
+      const totalDebt = allDebt.reduce((s,m)=>s+(+m.bet),0);
+      const totalPaidDebt = allDebt.filter(m=>m.isBetEntry?m.paid:m['paid_'+p.name]).reduce((s,m)=>s+(+m.bet),0);
+      const totalUnpaid = totalDebt - totalPaidDebt;
+      const hasUnpaid = totalUnpaid > 0;
+      const borderCol = hasUnpaid ? '#e5555550' : totalDebt>0 ? '#00b85530' : 'var(--bdr)';
+
+      let summaryLine = '';
+      if(totalUnpaid>0) summaryLine += `<span style="color:#e55;font-weight:800;">⏳ Nợ ${fmtNum(totalUnpaid)}🍃</span>`;
+      const initBal = mbOf(p.name) ? (+mbOf(p.name).initialBalance||0) : 0;
+      const totalPaidAll = totalPaidDebt + p.netIn + initBal - p.netOut;
+      if(totalPaidAll>0) summaryLine += (summaryLine?' · ':'')+`<span style="color:var(--green);">✅ Đã nộp ${fmtNum(totalPaidAll)}🍃</span>`;
+      if(p.netIn>0||p.netOut>0){
+        const manual = p.netIn-p.netOut;
+        summaryLine += (summaryLine?' · ':'')+`<span style="color:var(--muted);">Thủ công: ${manual>=0?'+':''}${fmtNum(manual)}🍃</span>`;
+      }
+      if(!summaryLine) summaryLine = `<span style="color:var(--muted);font-size:11px;">Chưa có trận nào</span>`;
+      const byDay = {};
+      allDebt.forEach(m=>{ if(!byDay[m.date]) byDay[m.date]=[]; byDay[m.date].push(m); });
+      const dayKeys = Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+
+      let txHtml = '';
+      dayKeys.forEach(d=>{
+        const dayMs = byDay[d];
+        const dayTotal = dayMs.reduce((s,m)=>s+(+m.bet),0);
+        const dayPaid  = dayMs.filter(m=>m.isBetEntry?m.paid:m['paid_'+p.name]).reduce((s,m)=>s+(+m.bet),0);
+        const allPaid  = dayPaid >= dayTotal;
+        txHtml += `<div style="padding:7px 12px;background:var(--s2);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;font-weight:800;flex:1;color:var(--text);">📅 ${fmtDate(d)}</span>
+          <span style="font-size:11px;font-weight:800;color:${allPaid?'var(--green)':'#e55'};">${allPaid?'✅ Xong':'Còn nợ '+fmtNum(dayTotal-dayPaid)+'🍃'}</span>
+        </div>`;
+        dayMs.forEach(m=>{
+          const isPaid = m.isBetEntry ? !!m.paid : !!m['paid_'+p.name];
+          let label='', sub='';
+          if(m.isBetEntry){
+            label = (drawSessionsMeta[m.drawSessionId]||{}).name || 'Bốc thăm';
+            sub = CL[m.cat]||'';
+          } else {
+            const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ');
+            const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ');
+            const sc=(m.s1!==''&&m.s2!=='')?m.s1+':'+m.s2:'';
+            label = t1+' vs '+t2;
+            sub = (CL[m.cat]||'')+(sc?' · '+sc:'');
+          }
+          txHtml += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);background:var(--s1);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(label)}</div>
+              <div style="font-size:10px;color:var(--muted);">${xe(sub)} · ${fmtNum(m.bet)}🍃</div>
+            </div>
+            <span style="font-size:11px;font-weight:800;color:${isPaid?'var(--green)':'#e55'};margin-right:4px;">${isPaid?'✅':'⏳ Nợ'}</span>
+            ${isAdmin?`<button onclick="toggleMatchPaid(${m.id},'${p.name}')"
+              style="padding:5px 10px;border-radius:8px;border:1.5px solid ${isPaid?'var(--bdr2)':'var(--green)'};
+              background:${isPaid?'transparent':'#00b85510'};color:${isPaid?'var(--muted)':'var(--green)'};
+              font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+              ${isPaid?'Hủy':'Đã nộp'}
+            </button>`:''}
+          </div>`;
+        });
+      });
+
+      // Số dư ban đầu
+      const mbObj2 = mbOf(p.name);
+      const initBal2 = mbObj2 ? (+mbObj2.initialBalance||0) : 0;
+      if(initBal2>0){
+        txHtml += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);background:var(--s1);">
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">💰 Số dư quỹ cũ</div>
+            <div style="font-size:10px;color:var(--muted);">Ghi nhận ban đầu</div>
+          </div>
+          <span class="ldg-in">+${fmtNum(initBal2)}🍃</span>
+        </div>`;
+      }
+
+      const manualTxns = ledger.filter(t=>t.name===p.name).sort((a,b)=>b.date.localeCompare(a.date));
+      if(manualTxns.length){
+        txHtml += `<div style="padding:6px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2);">Giao dịch thủ công</div>`;
+        manualTxns.forEach(tx=>{
+          txHtml += `<div class="ldg-txn" style="background:var(--s1);">
+            <span style="font-size:16px;">${tx.type==='in'?'💚':'🔴'}</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;">${xe(tx.note||'—')}</div>
+              <div style="font-size:11px;color:var(--muted);">${fmtDate(tx.date)}</div>
+            </div>
+            <span class="${tx.type==='in'?'ldg-in':'ldg-out'}">${tx.type==='in'?'+':'-'}${fmtNum(tx.amount)}🍃</span>
+            ${isAdmin?`<button onclick="delLedgerTx(${tx.id})" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);">🗑</button>`:''}
+          </div>`;
+        });
+      }
+
+      // Quick +/- buttons + số dư ban đầu (admin)
+      let quickBtns = '';
+      if(isAdmin){
+        const mbObj = mbOf(p.name);
+        const initVal = mbObj ? (+mbObj.initialBalance||0) : 0;
+        quickBtns = `<div style="border-top:1px solid var(--bdr);background:var(--s2);">
+          <div style="padding:8px 12px 4px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Số dư ban đầu (quỹ cũ)</div>
+          <div style="display:flex;gap:6px;padding:0 12px 8px;align-items:center;">
+            <input id="ldg-init-${domId}" type="number" min="0" value="${initVal||''}" placeholder="0"
+              class="ldg-inp" style="flex:1;font-size:13px;padding:6px 8px;">
+            <span style="font-size:12px;font-weight:700;color:var(--muted);">🍃</span>
+            <button onclick="saveInitBalance('${p.name}','${domId}')"
+              class="ldg-btn-in" style="padding:6px 12px;font-size:12px;">Lưu</button>
+          </div>
+          <div style="padding:0 12px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding-bottom:4px;">Ghi thu / chi thủ công</div>
+          <div style="display:flex;gap:6px;padding:0 12px 10px;">
+            <input id="ldg-quick-amt-${domId}" type="number" min="0" placeholder="Số tiền..." class="ldg-inp" style="flex:1;font-size:12px;padding:6px 8px;">
+            <input id="ldg-quick-note-${domId}" placeholder="Ghi chú..." class="ldg-inp" style="flex:2;font-size:12px;padding:6px 8px;">
+            <button onclick="quickLedger('${p.name}','${domId}','in')" class="ldg-btn-in" style="padding:6px 10px;font-size:13px;">+</button>
+            <button onclick="quickLedger('${p.name}','${domId}','out')" class="ldg-btn-out" style="padding:6px 10px;font-size:13px;">−</button>
+          </div>
+        </div>`;
+      }
+
+      h += `<div style="border:1.5px solid ${borderCol};border-radius:12px;margin-bottom:8px;overflow:hidden;">
+        <div class="ldg-person-row" onclick="toggleMatchDay('${domId}')" style="border:none;border-radius:0;margin:0;">
+          ${av}
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:13px;">${xe(p.name)}</div>
+            <div style="font-size:11px;margin-top:2px;">${summaryLine}</div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);" id="${domId}-arrow">${isOpen?'▲':'▼'}</span>
+        </div>
+        <div id="${domId}" style="display:${isOpen?'block':'none'};">
+          ${txHtml}
+          ${quickBtns}
+        </div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML = h;
+
+  // Xử lý dropdown tên
+  const sel = document.getElementById('ldg-sel-name');
+  if(sel) sel.addEventListener('change', ()=>{
+    const ci = document.getElementById('ldg-custom-name');
+    if(ci) ci.style.display = sel.value==='__custom__' ? 'block' : 'none';
+  });
+}
+
+function addLedgerTx(type){
+  if(!isAdmin) return;
+  const sel = document.getElementById('ldg-sel-name');
+  const customInp = document.getElementById('ldg-custom-name');
+  const name = sel.value==='__custom__' ? (customInp?customInp.value.trim():'') : sel.value;
+  const amount = parseInt(document.getElementById('ldg-amount').value)||0;
+  const note = document.getElementById('ldg-note').value.trim();
+  if(!name){ alert('Chọn tên!'); return; }
+  if(!amount){ alert('Nhập số tiền!'); return; }
+  ledger.push({id:ledgerUid++, date:vnDateStr(new Date()), name, amount, note, type});
+  document.getElementById('ldg-amount').value='';
+  document.getElementById('ldg-note').value='';
+  save();
+  renderLedger();
+}
+
+function quickLedger(name, domId, type){
+  if(!isAdmin) return;
+  const amtEl = document.getElementById('ldg-quick-amt-'+domId);
+  const noteEl = document.getElementById('ldg-quick-note-'+domId);
+  const amount = parseInt(amtEl?amtEl.value:0)||0;
+  const note = noteEl ? noteEl.value.trim() : '';
+  if(!amount){ amtEl&&amtEl.focus(); return; }
+  ledger.push({id:ledgerUid++, date:vnDateStr(new Date()), name, amount, note, type});
+  if(amtEl) amtEl.value='';
+  if(noteEl) noteEl.value='';
+  // Keep accordion open
+  if(window._openDays) window._openDays.add(domId);
+  save();
+  renderLedger();
+}
+
+function delLedgerTx(id){
+  if(!isAdmin) return;
+  if(!confirm('Xóa giao dịch này?')) return;
+  ledger = ledger.filter(t=>t.id!==id);
+  save();
+  renderLedger();
+}
+
+function saveInitBalance(name, domId){
+  if(!isAdmin) return;
+  const inp = document.getElementById('ldg-init-'+domId);
+  const val = parseInt(inp?inp.value:0)||0;
+  const mb = members.find(m=>m.name===name);
+  if(!mb) return;
+  mb.initialBalance = val;
+  // Thu gọn lại sau khi lưu
+  if(window._openDays) window._openDays.delete(domId);
+  save();
+  renderLedger();
+}
+
+function toggleMatchPaid(matchId, name){
+  if(!isAdmin) return;
+  const m = matches.find(m=>m.id===matchId);
+  if(!m) return;
+  if(m.isBetEntry) m.paid = !m.paid;
+  else m['paid_'+name] = !m['paid_'+name];
+  // Keep accordion open
+  const domId = 'ldg-p-'+name.replace(/\W/g,'_');
+  if(window._openDays) window._openDays.add(domId);
+  debounceSave();
+  renderLedger();
+}
+
+function toggleBetEntryPaid(matchId){
+  if(!isAdmin) return;
+  const m = matches.find(m=>m.id===matchId);
+  if(!m) return;
+  m.paid = !m.paid;
+  debounceSave();
+  renderLedger();
 }
 
 // ─── BXH ───
