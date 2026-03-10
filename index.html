@@ -77,6 +77,8 @@ header{
 }
 .save-dot{width:7px;height:7px;border-radius:50%;background:#bbc3d8;transition:all .3s;}
 .save-dot.saved{background:var(--green);box-shadow:0 0 8px var(--green);}
+.save-dot.pending{background:#f5a623;box-shadow:0 0 8px #f5a62380;animation:pulse-dot .8s infinite alternate;}
+@keyframes pulse-dot{from{opacity:1;}to{opacity:.4;}}
 
 /* NAV */
 nav{
@@ -1444,10 +1446,13 @@ async function load(){
 }
 
 let saveTimer=null;
+let pendingSave=false;
 function debounceSave(){
   clearTimeout(saveTimer);
-  setSaveDot(false);
-  saveTimer=setTimeout(()=>{ save(); }, 900);
+  pendingSave=true;
+  setSaveDot(false); // sẽ hiện màu cam vì pendingSave=true
+  document.getElementById('saveLabel').textContent='⏳ Chưa lưu...';
+  saveTimer=setTimeout(()=>{ save(); }, 100);
 }
 async function save(){
   isSyncing = true;
@@ -1475,6 +1480,7 @@ async function save(){
     clubInitBalance,
     album, albumUid
   });
+  pendingSave=false;
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
   setTimeout(()=>{ isSyncing = false; }, 1000);
@@ -1489,8 +1495,9 @@ async function save(){
 }
 function setSaveDot(saved){
   const dot=document.getElementById('saveDot');
-  if(saved){dot.classList.add('saved');}
-  else{dot.classList.remove('saved');}
+  dot.classList.remove('saved','pending');
+  if(saved){ dot.classList.add('saved'); }
+  else if(pendingSave){ dot.classList.add('pending'); }
 }
 
 // ─── NAV ───
@@ -5047,6 +5054,14 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   // Hide loading overlay
   const ov = document.getElementById('loadingOverlay');
   if(ov) ov.style.display='none';
+  // Cảnh báo khi F5/đóng tab khi còn dữ liệu chưa lưu
+  window.addEventListener('beforeunload', function(e){
+    if(pendingSave || saveTimer){
+      e.preventDefault();
+      e.returnValue = 'Dữ liệu chưa được lưu lên Firebase. Bạn có chắc muốn thoát?';
+      return e.returnValue;
+    }
+  });
 })();
 </script>
 </body>
