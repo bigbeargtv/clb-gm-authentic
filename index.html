@@ -244,7 +244,7 @@ nav::-webkit-scrollbar{display:none;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;padding:2px 4px;line-height:1;border-radius:6px;transition:all .15s;}
 .del-btn:hover{color:var(--red);background:#e0555518;}
 
-.tgrid{display:grid;grid-template-columns:1fr 36px 1fr;gap:8px;align-items:start;margin-bottom:13px;}
+.tgrid{display:grid;grid-template-columns:1fr 36px 1fr;gap:8px;align-items:center;margin-bottom:13px;}
 .tcol{display:flex;flex-direction:column;gap:6px;}
 .team-label{font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:2px;text-align:center;}
 
@@ -263,7 +263,7 @@ nav::-webkit-scrollbar{display:none;}
 
 .vs-col{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding-top:24px;gap:4px;
+  gap:4px;
 }
 .vs-text{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;color:var(--muted);letter-spacing:2px;}
 .vs-line{width:1px;height:20px;background:var(--bdr);}
@@ -1510,30 +1510,26 @@ function setSaveDot(saved){
 
 // ─── NAV ───
 function goTab(id){
-  // Auto-close khi chuyển tab:
-  // 1) Trận MỚI chưa nhập gì → xóa hẳn
-  // 2) Trận CŨ đang sửa nhưng chưa đổi gì → revert về saved
+  // Auto-close khi chuyển tab (dù đã nhập hay chưa):
+  // 1) Trận MỚI chưa lưu → xóa hẳn
+  // 2) Trận CŨ đang sửa chưa lưu → revert về trạng thái gốc
   if(id !== 'pg-matches'){
     let changed = false;
-    // Trận mới (_isNew) chưa nhập gì
-    const emptyNew = matches.filter(m=>m._isNew&&!m.saved&&!m.t1p1&&!m.t1p2&&!m.t2p1&&!m.t2p2&&!m.s1&&!m.s2&&!m.winner&&!m.bet);
-    if(emptyNew.length){
-      emptyNew.forEach(m=>{ matches=matches.filter(x=>x.id!==m.id); });
+    // Trận mới: xóa hẳn dù đã nhập hay chưa
+    const unsavedNew = matches.filter(m=>m._isNew&&!m.saved);
+    if(unsavedNew.length){
+      unsavedNew.forEach(m=>{ matches=matches.filter(x=>x.id!==m.id); });
       changed=true;
     }
-    // Trận cũ đang sửa (_editOrig) nhưng chưa đổi gì → revert
+    // Trận cũ đang sửa: revert về bản gốc dù đã đổi hay chưa
     matches.filter(m=>!m.saved&&m._editOrig).forEach(m=>{
       const orig = JSON.parse(m._editOrig);
-      const cur  = JSON.stringify({t1p1:m.t1p1,t1p2:m.t1p2,t2p1:m.t2p1,t2p2:m.t2p2,s1:m.s1,s2:m.s2,winner:m.winner,bet:m.bet});
-      if(cur===m._editOrig){
-        // Chưa đổi gì → revert saved
-        Object.assign(m, orig);
-        m.saved=true;
-        delete m._editOrig;
-        changed=true;
-      }
+      Object.assign(m, orig);
+      m.saved=true;
+      delete m._editOrig;
+      changed=true;
     });
-    if(changed) debounceSave();
+    if(changed){ renderMatches(); debounceSave(); }
   }
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
@@ -4657,25 +4653,47 @@ function renderAlbum(){
       <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📅 ${fmtDate(d)} · ${items.length} mục</div>`;
 
     items.filter(a=>a.type==='link').forEach(a=>{
-      h += `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid var(--bdr2);border-radius:12px;margin-bottom:6px;">
-        <span style="font-size:22px;">🔗</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:800;font-size:13px;">${xe(a.title||'Album ảnh')}</div>
-          <a href="${xe(a.url)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--gold);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(a.url)}</a>
+      const isEditing = window._albumEditId === a.id;
+      h += `<div style="background:var(--s2);border:1.5px solid ${isEditing?'var(--gold)':'var(--bdr2)'};border-radius:12px;margin-bottom:6px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
+          <span style="font-size:22px;">🔗</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:13px;">${xe(a.title||'Album ảnh')}</div>
+            <a href="${xe(a.url)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--gold);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(a.url)}</a>
+          </div>
+          ${isAdmin?`<button onclick="toggleAlbumEdit(${a.id})" style="background:none;border:none;cursor:pointer;font-size:15px;color:${isEditing?'var(--gold)':'var(--muted)'};" title="Sửa">✏️</button>`:''}
+          ${isAdmin?`<button onclick="delAlbumPhoto(${a.id})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="Xóa">🗑</button>`:''}
         </div>
-        ${isAdmin?`<button onclick="delAlbumPhoto(${a.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">🗑</button>`:''}
+        ${isAdmin&&isEditing?`<div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--bdr);">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-top:8px;">TIÊU ĐỀ</div>
+          <input id="alb-edit-title-${a.id}" class="ldg-inp" style="width:100%;box-sizing:border-box;" value="${xe(a.title||'')}" placeholder="Tiêu đề...">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;">LINK</div>
+          <input id="alb-edit-url-${a.id}" class="ldg-inp" style="width:100%;box-sizing:border-box;" value="${xe(a.url||'')}" placeholder="https://...">
+          <button onclick="saveAlbumEdit(${a.id})" class="save-btn" style="padding:8px;font-size:12px;margin-top:2px;">💾 Lưu</button>
+        </div>`:''}
       </div>`;
     });
 
     const photos = items.filter(a=>a.type==='photo'||!a.type);
     if(photos.length){
-      if(photos[0].title) h += `<div style="font-size:12px;font-weight:700;margin-bottom:4px;">${xe(photos[0].title)}</div>`;
-      h += `<div class="album-grid">
-        ${photos.map(a=>`<div style="position:relative;">
-          <img src="${a.url}" class="album-thumb" onclick="openLightbox(${a.id})" loading="lazy">
-          ${isAdmin?`<button onclick="delAlbumPhoto(${a.id})" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;">✕</button>`:''}
-        </div>`).join('')}
-      </div>`;
+      photos.forEach(a=>{
+        const isEditingP = window._albumEditId === a.id;
+        h += `<div style="background:var(--s2);border:1.5px solid ${isEditingP?'var(--gold)':'var(--bdr2)'};border-radius:12px;margin-bottom:6px;overflow:hidden;">
+          <div style="position:relative;">
+            <img src="${a.url}" class="album-thumb" onclick="openLightbox(${a.id})" loading="lazy" style="width:100%;border-radius:0;aspect-ratio:unset;max-height:220px;object-fit:cover;">
+            ${isAdmin?`<div style="position:absolute;top:6px;right:6px;display:flex;gap:4px;">
+              <button onclick="toggleAlbumEdit(${a.id})" style="background:#000a;border:none;border-radius:5px;color:#fff;font-size:12px;padding:3px 7px;cursor:pointer;" title="Sửa">✏️</button>
+              <button onclick="delAlbumPhoto(${a.id})" style="background:#000a;border:none;border-radius:5px;color:#fff;font-size:12px;padding:3px 7px;cursor:pointer;" title="Xóa">🗑</button>
+            </div>`:''}
+          </div>
+          ${a.title?`<div style="padding:6px 10px;font-size:12px;font-weight:700;">${xe(a.title)}</div>`:''}
+          ${isAdmin&&isEditingP?`<div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--bdr);">
+            <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-top:8px;">TIÊU ĐỀ / MÔ TẢ</div>
+            <input id="alb-edit-title-${a.id}" class="ldg-inp" style="width:100%;box-sizing:border-box;" value="${xe(a.title||'')}" placeholder="Mô tả ảnh...">
+            <button onclick="saveAlbumEdit(${a.id})" class="save-btn" style="padding:8px;font-size:12px;margin-top:2px;">💾 Lưu</button>
+          </div>`:''}
+        </div>`;
+      });
     }
     h += '</div>';
   });
@@ -4732,6 +4750,27 @@ function openLightbox(id){
 function delAlbumPhoto(id){
   if(!isAdmin||!confirm('Xóa mục này?')) return;
   album=album.filter(a=>a.id!==id);
+  save(); renderAlbum();
+}
+function toggleAlbumEdit(id){
+  if(!isAdmin) return;
+  window._albumEditId = (window._albumEditId===id) ? null : id;
+  renderAlbum();
+  // scroll đến item
+  setTimeout(()=>{
+    const el = document.getElementById('alb-edit-title-'+id);
+    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); }
+  }, 80);
+}
+function saveAlbumEdit(id){
+  if(!isAdmin) return;
+  const a = album.find(x=>x.id===id);
+  if(!a) return;
+  const titleEl = document.getElementById('alb-edit-title-'+id);
+  const urlEl   = document.getElementById('alb-edit-url-'+id);
+  if(titleEl) a.title = titleEl.value.trim();
+  if(urlEl)   a.url   = urlEl.value.trim();
+  window._albumEditId = null;
   save(); renderAlbum();
 }
 
