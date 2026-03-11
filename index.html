@@ -3258,16 +3258,7 @@ function finishDrawSession(sessionId){
   renderMatches();
 }
 
-let _renderPending = false;
 function renderMatches(){
-  if(_renderPending) return;
-  _renderPending = true;
-  requestAnimationFrame(()=>{
-    _renderPending = false;
-    _renderMatchesNow();
-  });
-}
-function _renderMatchesNow(){
   const el=document.getElementById('mlist');
   const unsaved = matches.filter(m=>!m.saved);
   const savedNormal = matches.filter(m=>m.saved&&!m.isBetEntry&&!m.fromDraw).slice().reverse();
@@ -3386,7 +3377,9 @@ function _renderMatchesNow(){
   }
 
   el.innerHTML=html;
-} // end _renderMatchesNow
+}
+
+function renameDrawSession(sessionId){
   if(!isAdmin) return;
   const meta = drawSessionsMeta[sessionId] || {};
   const current = meta.name || '';
