@@ -221,6 +221,17 @@ nav::-webkit-scrollbar{display:none;}
   transition:transform .15s;
 }
 .mc:hover{transform:translateY(-1px);}
+.mc-editing{
+  border:2px solid var(--gold) !important;
+  box-shadow:0 4px 20px #f0b42922 !important;
+}
+.mc-date-inp{
+  background:var(--s1);border:1.5px solid var(--bdr2);color:var(--text);
+  border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;
+  font-family:'Nunito',sans-serif;outline:none;cursor:pointer;
+  transition:border-color .2s;
+}
+.mc-date-inp:focus{border-color:var(--gold);}
 .mc-head{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
 .mc-num{
   font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
@@ -1080,11 +1091,6 @@ nav::-webkit-scrollbar{display:none;}
 
 <!-- MATCHES -->
 <div class="pg" id="pg-matches">
-  <div class="sl admin-only">Buổi thi đấu</div>
-  <div class="date-input-wrap admin-only">
-    <input type="date" class="date-inp" id="sessionDate">
-  </div>
-
   <div class="sl admin-only">Loại trận mới</div>
   <div class="cats admin-only">
     <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')">👨 Đôi Nam</div>
@@ -1092,6 +1098,8 @@ nav::-webkit-scrollbar{display:none;}
     <div class="cpill nu" id="cp-nu" onclick="setCat('nu')">👩 Đôi Nữ</div>
   </div>
   <button class="add-btn admin-only" onclick="addMatch()">＋ Thêm trận đấu</button>
+  <!-- sessionDate hidden — dùng nội bộ, ngày hiển thị trong từng card -->
+  <input type="date" id="sessionDate" style="display:none;">
   <div id="mlist"></div>
 </div>
 
@@ -1502,6 +1510,14 @@ function setSaveDot(saved){
 
 // ─── NAV ───
 function goTab(id){
+  // Auto-close unsaved matches rỗng khi chuyển tab
+  if(id !== 'pg-matches'){
+    const emptyUnsaved = matches.filter(m=>!m.saved&&!m.t1p1&&!m.t1p2&&!m.t2p1&&!m.t2p2&&!m.s1&&!m.s2&&!m.winner&&!m.bet);
+    if(emptyUnsaved.length){
+      emptyUnsaved.forEach(m=>{ matches=matches.filter(x=>x.id!==m.id); });
+      debounceSave();
+    }
+  }
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
@@ -1514,7 +1530,6 @@ function goTab(id){
   if(id==='pg-ledger')renderLedger();
   if(id==='pg-stats')renderStats();
   if(id==='pg-album')renderAlbum();
-  // Lưu tab hiện tại để F5 giữ nguyên
   try{ localStorage.setItem('activeTab', id); }catch(e){}
 }
 
@@ -3243,7 +3258,16 @@ function finishDrawSession(sessionId){
   renderMatches();
 }
 
+let _renderPending = false;
 function renderMatches(){
+  if(_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(()=>{
+    _renderPending = false;
+    _renderMatchesNow();
+  });
+}
+function _renderMatchesNow(){
   const el=document.getElementById('mlist');
   const unsaved = matches.filter(m=>!m.saved);
   const savedNormal = matches.filter(m=>m.saved&&!m.isBetEntry&&!m.fromDraw).slice().reverse();
@@ -3362,9 +3386,7 @@ function renderMatches(){
   }
 
   el.innerHTML=html;
-}
-
-function renameDrawSession(sessionId){
+} // end _renderMatchesNow
   if(!isAdmin) return;
   const meta = drawSessionsMeta[sessionId] || {};
   const current = meta.name || '';
@@ -3439,15 +3461,21 @@ function clrSlot(e,matchId,field){
 }
 
 function rEdit(m){
-  return `<div class="mc" id="mc${m.id}">
+  const BET_PRESETS = [0,50000,100000,200000,500000];
+  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'đ';
+  const matchDate = m.date || sessionDate || todayStr();
+  return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
-      <span class="mc-num">TRẬN #${m.id}</span>
-      <span class="cbadge ${CB[m.cat]}">${CL[m.cat]}</span>
-      <button class="del-btn" onclick="delMatch(${m.id})" title="Xóa">✕</button>
+      <span class="cbadge ${CB[m.cat]}" style="font-size:12px;padding:5px 14px;">${CL[m.cat]}</span>
+      <div style="flex:1;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
+        <span style="font-size:12px;">📅</span>
+        <input type="date" class="mc-date-inp" value="${matchDate}" onchange="setMatchDate(${m.id},this.value)" onclick="event.stopPropagation()">
+      </div>
+      <button class="del-btn" onclick="delMatch(${m.id})" title="Xóa" style="margin-left:6px;font-size:18px;">✕</button>
     </div>
     <div class="tgrid">
       <div class="tcol">
-        <div class="team-label">Đội A</div>
+        <div class="team-label">⬅ Đội A</div>
         ${slot(m.id,'t1p1',m.t1p1)}
         ${slot(m.id,'t1p2',m.t1p2)}
       </div>
@@ -3457,15 +3485,15 @@ function rEdit(m){
         <div class="vs-line"></div>
       </div>
       <div class="tcol">
-        <div class="team-label">Đội B</div>
+        <div class="team-label">Đội B ➡</div>
         ${slot(m.id,'t2p1',m.t2p1)}
         ${slot(m.id,'t2p2',m.t2p2)}
       </div>
     </div>
     <div class="score-area">
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <button class="wl-btn${m.winner==='A'?' win':m.winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')">🏆 Đội A thắng</button>
-        <button class="wl-btn${m.winner==='B'?' win':m.winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')">🏆 Đội B thắng</button>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button class="wl-btn${m.winner==='A'?' win':m.winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')" style="font-size:14px;font-weight:800;flex:1;padding:10px;">🏆 A thắng</button>
+        <button class="wl-btn${m.winner==='B'?' win':m.winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')" style="font-size:14px;font-weight:800;flex:1;padding:10px;">🏆 B thắng</button>
       </div>
       <div class="score-label">Tỉ số (không bắt buộc)</div>
       <div class="srow">
@@ -3475,19 +3503,18 @@ function rEdit(m){
       </div>
     </div>
     <div class="bet-area">
-      <div class="bet-label">🍃 Gây Quỹ (Mỗi người thua phải nộp)</div>
+      <div class="bet-label">💰 Tiền cược (mỗi người thua nộp)</div>
       <div class="bet-pills">
-        ${[50,100,200,500].map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${v}🍃</span>`).join('')}
+        ${BET_PRESETS.map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${fmtBet(v)}</span>`).join('')}
       </div>
       <div class="bet-custom-row">
-        <input type="number" class="bet-inp" min="0" placeholder="Số khác..." value="${m.bet&&![50,100,200,500].includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">🍃/người</span>
+        <input type="number" class="bet-inp" min="0" step="10000" placeholder="Nhập số khác (VD: 150000)..." value="${m.bet&&!BET_PRESETS.includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">đ/người</span>
       </div>
     </div>
     <button class="save-btn" id="sb${m.id}" onclick="saveMatch(${m.id})" ${canSave(m)?'':'disabled'}>✅ Lưu kết quả</button>
   </div>`;
 }
-
 function avSpan(name,sz=24,fsz=11){
   const mb=mbOf(name);
   const r=Math.floor(sz*.28);
@@ -3526,6 +3553,12 @@ function rSaved(m){
 }
 
 function canSave(m){return !!(m.t1p1&&m.t2p1);}
+function setMatchDate(id, val){
+  const m=matches.find(m=>m.id===id);if(!m)return;
+  m.date=val; sessionDate=val;
+  document.getElementById('sessionDate').value=val;
+  debounceSave();
+}
 function setWinner(id, side){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m.winner = m.winner===side ? '' : side;
