@@ -219,6 +219,17 @@ nav::-webkit-scrollbar{display:none;}
   transition:transform .15s;
 }
 .mc:hover{transform:translateY(-1px);}
+.mc-editing{
+  border:2px solid var(--gold) !important;
+  box-shadow:0 4px 20px #f0b42922 !important;
+}
+.mc-date-inp{
+  background:var(--s1);border:1.5px solid var(--bdr2);color:var(--text);
+  border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;
+  font-family:'Nunito',sans-serif;outline:none;cursor:pointer;
+  transition:border-color .2s;
+}
+.mc-date-inp:focus{border-color:var(--gold);}
 .mc-head{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
 .mc-num{
   font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
@@ -3432,15 +3443,21 @@ function clrSlot(e,matchId,field){
 }
 
 function rEdit(m){
-  return `<div class="mc" id="mc${m.id}">
+  const BET_PRESETS = [0,50000,100000,200000,500000];
+  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'đ';
+  const matchDate = m.date || todayStr();
+  return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
-      <span class="mc-num">TRẬN #${m.id}</span>
-      <span class="cbadge ${CB[m.cat]}">${CL[m.cat]}</span>
-      <button class="del-btn" onclick="delMatch(${m.id})" title="Xóa">✕</button>
+      <span class="cbadge ${CB[m.cat]}" style="font-size:12px;padding:5px 14px;">${CL[m.cat]}</span>
+      <div style="flex:1;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
+        <span style="font-size:12px;">📅</span>
+        <input type="date" class="mc-date-inp" value="${matchDate}" onchange="setMatchDate(${m.id},this.value)" onclick="event.stopPropagation()">
+      </div>
+      <button class="del-btn" onclick="delMatch(${m.id})" title="Xóa" style="margin-left:6px;font-size:18px;">✕</button>
     </div>
     <div class="tgrid">
       <div class="tcol">
-        <div class="team-label">Đội A</div>
+        <div class="team-label">⬅ Đội A</div>
         ${slot(m.id,'t1p1',m.t1p1)}
         ${slot(m.id,'t1p2',m.t1p2)}
       </div>
@@ -3450,15 +3467,15 @@ function rEdit(m){
         <div class="vs-line"></div>
       </div>
       <div class="tcol">
-        <div class="team-label">Đội B</div>
+        <div class="team-label">Đội B ➡</div>
         ${slot(m.id,'t2p1',m.t2p1)}
         ${slot(m.id,'t2p2',m.t2p2)}
       </div>
     </div>
     <div class="score-area">
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <button class="wl-btn${m.winner==='A'?' win':m.winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')">🏆 Đội A thắng</button>
-        <button class="wl-btn${m.winner==='B'?' win':m.winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')">🏆 Đội B thắng</button>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button class="wl-btn${m.winner==='A'?' win':m.winner==='B'?' lose':''}" data-side="A" onclick="setWinner(${m.id},'A')" style="font-size:14px;font-weight:800;flex:1;padding:10px;">🏆 A thắng</button>
+        <button class="wl-btn${m.winner==='B'?' win':m.winner==='A'?' lose':''}" data-side="B" onclick="setWinner(${m.id},'B')" style="font-size:14px;font-weight:800;flex:1;padding:10px;">🏆 B thắng</button>
       </div>
       <div class="score-label">Tỉ số (không bắt buộc)</div>
       <div class="srow">
@@ -3468,19 +3485,18 @@ function rEdit(m){
       </div>
     </div>
     <div class="bet-area">
-      <div class="bet-label">🍃 Gây Quỹ (Mỗi người thua phải nộp)</div>
+      <div class="bet-label">💰 Tiền cược (mỗi người thua nộp)</div>
       <div class="bet-pills">
-        ${[50,100,200,500].map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${v}🍃</span>`).join('')}
+        ${BET_PRESETS.map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${fmtBet(v)}</span>`).join('')}
       </div>
       <div class="bet-custom-row">
-        <input type="number" class="bet-inp" min="0" placeholder="Số khác..." value="${m.bet&&![50,100,200,500].includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">🍃/người</span>
+        <input type="number" class="bet-inp" min="0" step="10000" placeholder="Nhập số khác (VD: 150000)..." value="${m.bet&&!BET_PRESETS.includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">đ/người</span>
       </div>
     </div>
     <button class="save-btn" id="sb${m.id}" onclick="saveMatch(${m.id})" ${canSave(m)?'':'disabled'}>✅ Lưu kết quả</button>
   </div>`;
 }
-
 function avSpan(name,sz=24,fsz=11){
   const mb=mbOf(name);
   const r=Math.floor(sz*.28);
@@ -3501,7 +3517,10 @@ function rSaved(m){
     ${won?'<span style="font-size:11px;">🏅</span>':''}
   </div>`;
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
-    <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
+      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:''}
+    </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
       ${teamHtml(t1,w1)}
       ${teamHtml(t2,!w1)}
@@ -3519,6 +3538,10 @@ function rSaved(m){
 }
 
 function canSave(m){return !!(m.t1p1&&m.t2p1);}
+function setMatchDate(id, val){
+  const m=matches.find(m=>m.id===id); if(!m) return;
+  m.date=val; debounceSave();
+}
 function setWinner(id, side){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m.winner = m.winner===side ? '' : side;
@@ -3599,8 +3622,10 @@ function setBet(matchId, val){
   if(!isAdmin) return;
   const m=matches.find(m=>m.id===matchId);
   if(!m) return;
-  m.bet = m.bet===val ? 0 : val; // toggle off if same
-  renderMatches(); debounceSave();
+  m.bet = m.bet===val ? 0 : val;
+  const mc=document.getElementById('mc'+matchId);
+  if(mc){ const presets=[0,50000,100000,200000,500000]; mc.querySelectorAll('.bet-pill').forEach((p,i)=>{ p.classList.toggle('on', m.bet===presets[i]); }); }
+  debounceSave();
 }
 function setBetCustom(matchId, val){
   if(!isAdmin) return;
@@ -4044,7 +4069,13 @@ function renderLedger(){
     const betPaidAmt = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.paid).reduce((s,m)=>s+(+m.bet),0);
     const betUnpaid  = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
     return {name, netBet, betPaidAmt, betUnpaid, netIn, netOut, txns: b.txns};
-  }).sort((a,b)=>b.betUnpaid-a.betUnpaid||b.netBet-a.netBet||a.name.localeCompare(b.name));
+  });
+  peopleList.sort((a,b)=>{
+    const aOwes=a.betUnpaid>0, bOwes=b.betUnpaid>0;
+    if(aOwes&&!bOwes) return -1;
+    if(!aOwes&&bOwes) return 1;
+    return b.betUnpaid-a.betUnpaid||b.netBet-a.netBet||a.name.localeCompare(b.name);
+  });
 
   if(peopleList.length){
     h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👤 Chi tiết từng người</div>`;
@@ -5006,7 +5037,7 @@ function renderHist(){
       const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ')||'Đội B';
       const w1=+m.s1>+m.s2;
       const a=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img class="av-img-small" src="${mb.photo}" style="width:20px;height:20px;border-radius:5px;">` :`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
-      const betHtml=m.bet?`<span style="font-size:10px;color:var(--green);font-weight:800;">🍃${m.bet}</span>`:'';
+      const betHtml=m.bet>0?`<span style="font-size:10px;color:var(--green);font-weight:800;background:#1a9e6015;border-radius:5px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:'';
       const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>` : '';
       return `<div class="hi" style="align-items:center;">
         <div style="flex:1;">
