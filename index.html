@@ -1400,16 +1400,24 @@ function applyRemoteData(data){
     if(remote !== local){ members = data.members||[]; memberUid = data.memberUid||1; changed=true; }
   }
   if(data.matches !== undefined){
-    const remote = JSON.stringify(data.matches);
-    const local  = JSON.stringify(matches);
-    if(remote !== local){ matches = data.matches||[]; matchUid = data.matchUid||1; changed=true; }
+    const remote = JSON.stringify(data.matches||[]);
+    // Chỉ so sánh phần saved để tránh unsaved card trigger re-render
+    const localSaved = JSON.stringify(matches.filter(m=>m.saved));
+    if(remote !== localSaved){
+      const unsaved = matches.filter(m=>!m.saved);
+      matches = data.matches||[];
+      matchUid = data.matchUid||1;
+      if(unsaved.length) matches = [...matches, ...unsaved];
+      changed=true;
+    }
   }
   if(data.sessionDate !== undefined && data.sessionDate !== sessionDate){
     sessionDate = data.sessionDate||''; changed=true;
   }
   if(changed){
     renderMembers();
-    renderMatches();
+    // Chỉ render lại phần saved, không động đến card đang nhập
+    renderMatchesSaved();
     const dateEl=document.getElementById('sessionDate');
     if(dateEl && sessionDate) dateEl.value=sessionDate;
   }
@@ -1460,7 +1468,9 @@ let saveTimer=null;
 function debounceSave(){
   clearTimeout(saveTimer);
   setSaveDotPending();
-  saveTimer=setTimeout(()=>{ save(); }, 100);
+  // Khi đang nhập trận (unsaved card tồn tại) → delay 2s để tránh SSE echo làm reset UI
+  const delay = matches.some(m=>!m.saved) ? 2000 : 100;
+  saveTimer=setTimeout(()=>{ save(); }, delay);
 }
 async function save(){
   isSyncing = true;
@@ -1490,7 +1500,7 @@ async function save(){
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
-  setTimeout(()=>{ isSyncing = false; }, 1000);
+  setTimeout(()=>{ isSyncing = false; }, 5000);
   // Auto-snapshot (throttled: max 1 per 5 min)
   if(ok && isAdmin){
     const now = Date.now();
@@ -3397,6 +3407,38 @@ function renderMatches(){
   }
 
   el.innerHTML=html;
+}
+
+// Chỉ update phần saved (dùng khi sync remote, không đụng card đang nhập)
+function renderMatchesSaved(){
+  const el=document.getElementById('mlist');
+  if(!el) return;
+  // Nếu không có unsaved card nào thì full re-render
+  const unsaved = matches.filter(m=>!m.saved);
+  if(!unsaved.length){ renderMatches(); return; }
+  // Có unsaved card: chỉ update phần saved bên dưới bằng cách
+  // giữ nguyên các #mc{id} đang hiển thị, chỉ re-render phần saved
+  // Đơn giản nhất: render lại toàn bộ nhưng restore lại giá trị input
+  const snapshots = {};
+  unsaved.forEach(m=>{
+    const mc = document.getElementById('mc'+m.id);
+    if(!mc) return;
+    const snap = {};
+    mc.querySelectorAll('input,select,textarea').forEach(inp=>{
+      if(inp.id) snap[inp.id] = inp.value;
+    });
+    snapshots[m.id] = snap;
+  });
+  renderMatches();
+  // Restore input values
+  unsaved.forEach(m=>{
+    const snap = snapshots[m.id];
+    if(!snap) return;
+    Object.entries(snap).forEach(([id,val])=>{
+      const el2 = document.getElementById(id);
+      if(el2 && document.activeElement !== el2) el2.value = val;
+    });
+  });
 }
 
 function renameDrawSession(sessionId){
