@@ -1062,7 +1062,7 @@ nav::-webkit-scrollbar{display:none;}
 
 <nav>
   <button class="nt on" onclick="goTab('pg-members')" id="nt0"><span class="ic">👥</span>Thành viên</button>
-  <button class="nt" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
+  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
   <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
@@ -3081,6 +3081,11 @@ function logoutAdmin(){
   try{ localStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
   renderMembers();
   renderMatches();
+  // Nếu đang ở tab Trận đấu → chuyển sang BXH cho khách
+  try{
+    const active = localStorage.getItem('activeTab');
+    if(active==='pg-matches') goTab('pg-bxh');
+  }catch(e){}
 }
 
 // ─── MATCH ───
@@ -3472,7 +3477,7 @@ function clrSlot(e,matchId,field){
 
 function rEdit(m){
   const BET_PRESETS = [0,50000,100000,200000,500000];
-  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'đ';
+  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k🍃':''+v+'🍃');
   const matchDate = m._isNew ? todayStr() : (m.date || todayStr());
   return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
@@ -3519,7 +3524,7 @@ function rEdit(m){
       </div>
       <div class="bet-custom-row">
         <input type="number" class="bet-inp" min="0" step="10000" placeholder="Nhập số khác (VD: 150000)..." value="${m.bet&&!BET_PRESETS.includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">đ/người</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">🍃/người</span>
       </div>
     </div>
     <button class="save-btn" id="sb${m.id}" onclick="saveMatch(${m.id})" ${canSave(m)?'':'disabled'}>✅ Lưu kết quả</button>
@@ -3547,7 +3552,7 @@ function rSaved(m){
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
     <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
       <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
-      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:''}
+      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':m.bet}🍃</span>`:''}
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
       ${teamHtml(t1,w1)}
@@ -4997,7 +5002,7 @@ function renderHist(){
         <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
         ${won?'<span style="font-size:11px;">🏅</span>':''}
       </div>`;
-      const betTag = m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:'';
+      const betTag = m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':m.bet}🍃</span>`:'';
       const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:13px;" title="Xóa">🗑</button>` : '';
       return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);">
         <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
