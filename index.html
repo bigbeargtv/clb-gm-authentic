@@ -3524,7 +3524,7 @@ function clrSlot(e,matchId,field){
 
 function rEdit(m){
   const BET_PRESETS = [0,50000,100000,200000,500000];
-  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'đ';
+  const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'🍃';
   const matchDate = m.date || todayStr();
   return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
@@ -3571,7 +3571,7 @@ function rEdit(m){
       </div>
       <div class="bet-custom-row">
         <input type="number" class="bet-inp" min="0" step="10000" placeholder="Nhập số khác (VD: 150000)..." value="${m.bet&&!BET_PRESETS.includes(m.bet)?m.bet:''}" oninput="setBetCustom(${m.id},this.value)">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">đ/người</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">🍃/người</span>
       </div>
     </div>
     <button class="save-btn" id="sb${m.id}" onclick="saveMatch(${m.id})" ${canSave(m)?'':'disabled'}>✅ Lưu kết quả</button>
@@ -3599,7 +3599,7 @@ function rSaved(m){
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
     <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
       <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
-      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:''}
+      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}🍃</span>`:''}
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
       ${teamHtml(t1,w1)}
@@ -4858,13 +4858,47 @@ function handleAlbumUpload(e){
 function openLightbox(id){
   const a = album.find(x=>x.id===id);
   if(!a) return;
+  // Get photos in same day-group, same order as displayed
+  const dayPhotos = album.filter(x=>(x.type==='photo'||!x.type) && x.date===a.date);
+  let curIdx = dayPhotos.findIndex(x=>x.id===id);
+
+  function renderLb(){
+    const cur = dayPhotos[curIdx];
+    const hasPrev = curIdx > 0;
+    const hasNext = curIdx < dayPhotos.length - 1;
+    lb.innerHTML = `
+      <img src="${cur.url}" onclick="event.stopPropagation()" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;user-select:none;">
+      <button onclick="this.closest('.album-lightbox').remove()" style="position:fixed;top:16px;right:16px;background:#000a;border:none;border-radius:8px;color:#fff;font-size:20px;padding:4px 12px;cursor:pointer;z-index:1;">✕</button>
+      ${dayPhotos.length>1?`<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:#000b;border-radius:24px;padding:6px 14px;">
+        <button id="lb-prev" onclick="event.stopPropagation();lbNav(-1)" style="background:none;border:none;color:${hasPrev?'#fff':'#ffffff40'};font-size:22px;cursor:${hasPrev?'pointer':'default'};padding:0 4px;">‹</button>
+        <span style="color:#ffffffa0;font-size:12px;font-weight:700;">${curIdx+1} / ${dayPhotos.length}</span>
+        <button id="lb-next" onclick="event.stopPropagation();lbNav(1)" style="background:none;border:none;color:${hasNext?'#fff':'#ffffff40'};font-size:22px;cursor:${hasNext?'pointer':'default'};padding:0 4px;">›</button>
+      </div>`:''}
+      ${cur.title?`<div style="position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#000b;color:#fff;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;max-width:80%;text-align:center;">${xe(cur.title)}</div>`:''}
+    `;
+  }
+
+  window.lbNav = function(dir){
+    const next = curIdx + dir;
+    if(next < 0 || next >= dayPhotos.length) return;
+    curIdx = next;
+    renderLb();
+  };
+
   const lb = document.createElement('div');
   lb.className='album-lightbox';
-  lb.innerHTML=`<img src="${a.url}" onclick="event.stopPropagation()" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;">
-    <button onclick="this.closest('.album-lightbox').remove()" style="position:fixed;top:16px;right:16px;background:#000a;border:none;border-radius:8px;color:#fff;font-size:20px;padding:4px 12px;cursor:pointer;">✕</button>
-    ${a.title?`<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#000b;color:#fff;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;">${xe(a.title)}</div>`:''}`;
   lb.onclick=()=>lb.remove();
   document.body.appendChild(lb);
+  renderLb();
+
+  // Keyboard nav
+  const keyHandler = (e)=>{
+    if(!document.body.contains(lb)){ document.removeEventListener('keydown',keyHandler); return; }
+    if(e.key==='ArrowRight') window.lbNav(1);
+    if(e.key==='ArrowLeft') window.lbNav(-1);
+    if(e.key==='Escape') lb.remove();
+  };
+  document.addEventListener('keydown', keyHandler);
 }
 
 function delAlbumPhoto(id){
@@ -5131,20 +5165,32 @@ function renderHist(){
     const normMs = ms.filter(m=>!m.fromDraw);
 
     function matchRow(m, showDel=false){
-      const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ')||'Đội A';
-      const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ')||'Đội B';
+      const t1=[m.t1p1,m.t1p2].filter(Boolean);
+      const t2=[m.t2p1,m.t2p2].filter(Boolean);
       const w1=+m.s1>+m.s2;
-      const a=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img class="av-img-small" src="${mb.photo}" style="width:20px;height:20px;border-radius:5px;">` :`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
-      const betHtml=m.bet>0?`<span style="font-size:10px;color:var(--green);font-weight:800;background:#1a9e6015;border-radius:5px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:'';
-      const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>` : '';
-      return `<div class="hi" style="align-items:center;">
-        <div style="flex:1;">
-          <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${a(m.t1p1)}${xe(t1)}</div>
-          <div class="ht ${!w1?'w':'l'}">${!w1?'🏅 ':''}${a(m.t2p1)}${xe(t2)}</div>
-          <div class="hm">${CL[m.cat]} ${betHtml}</div>
+      const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+      const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
+        ${names.map(n=>av(n)).join('')}
+        <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
+        ${won?'<span style="font-size:11px;">🏅</span>':''}
+      </div>`;
+      const betHtml=m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}🍃</span>`:'';
+      const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" title="Xóa">🗑</button>` : '';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+          <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
+          ${betHtml}
         </div>
-        <div class="hs">${m.s1} : ${m.s2}</div>
-        ${delBtn}
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+          ${teamHtml(t1,w1)}
+          ${teamHtml(t2,!w1)}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--text)'};">${m.s1}</span>
+          <span style="font-size:9px;color:var(--muted);line-height:1;">:</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--text)'};">${m.s2}</span>
+        </div>
+        ${delBtn?`<div style="display:flex;gap:4px;flex-shrink:0;">${delBtn}</div>`:''}
       </div>`;
     }
 
