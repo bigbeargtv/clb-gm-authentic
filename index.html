@@ -77,6 +77,8 @@ header{
 }
 .save-dot{width:7px;height:7px;border-radius:50%;background:#bbc3d8;transition:all .3s;}
 .save-dot.saved{background:var(--green);box-shadow:0 0 8px var(--green);}
+.save-dot.pending{background:#f0a500;box-shadow:0 0 8px #f0a500;animation:pulseDot .8s ease-in-out infinite;}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.4;}}
 
 /* NAV */
 nav{
@@ -1060,7 +1062,7 @@ nav::-webkit-scrollbar{display:none;}
 
 <nav>
   <button class="nt on" onclick="goTab('pg-members')" id="nt0"><span class="ic">👥</span>Thành viên</button>
-  <button class="nt" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
+  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
   <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
@@ -1457,8 +1459,8 @@ async function load(){
 let saveTimer=null;
 function debounceSave(){
   clearTimeout(saveTimer);
-  setSaveDot(false);
-  saveTimer=setTimeout(()=>{ save(); }, 900);
+  setSaveDotPending();
+  saveTimer=setTimeout(()=>{ save(); }, 100);
 }
 async function save(){
   isSyncing = true;
@@ -1500,12 +1502,29 @@ async function save(){
 }
 function setSaveDot(saved){
   const dot=document.getElementById('saveDot');
-  if(saved){dot.classList.add('saved');}
-  else{dot.classList.remove('saved');}
+  dot.classList.remove('saved','pending');
+  if(saved) dot.classList.add('saved');
+}
+function setSaveDotPending(){
+  const dot=document.getElementById('saveDot');
+  dot.classList.remove('saved');
+  dot.classList.add('pending');
 }
 
 // ─── NAV ───
 function goTab(id){
+  // Khi rời tab Trận Đấu: đóng tất cả trận đang mở (chưa lưu)
+  if(id !== 'pg-matches'){
+    let changed=false;
+    // Trận mới (_isNew hoặc chưa saved) → xóa hẳn
+    const newUnsaved=matches.filter(m=>!m.saved&&!m._editOrig);
+    if(newUnsaved.length){ matches=matches.filter(m=>m.saved||m._editOrig); changed=true; }
+    // Trận cũ đang sửa (_editOrig) → revert về trạng thái cũ
+    matches.filter(m=>!m.saved&&m._editOrig).forEach(m=>{
+      Object.assign(m,JSON.parse(m._editOrig)); m.saved=true; delete m._editOrig; changed=true;
+    });
+    if(changed){ renderMatches(); debounceSave(); }
+  }
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
@@ -2887,11 +2906,21 @@ function openPicker(matchId,field){
 }
 function pickMember(name){
   if(!pickerCtx)return;
-  // decode &#39; back to apostrophe
   name = name.replace(/&#39;/g, "'");
-  const m=matches.find(m=>m.id===pickerCtx.matchId);
-  if(m)m[pickerCtx.field]=m[pickerCtx.field]===name?'':name;
-  closePicker();renderMatches();debounceSave();
+  const mid=pickerCtx.matchId, field=pickerCtx.field;
+  const m=matches.find(m=>m.id===mid);
+  if(m) m[field]=m[field]===name?'':name;
+  closePicker();
+  // Targeted update: chỉ update slot đó, không full re-render
+  const mc=document.getElementById('mc'+mid);
+  if(mc){
+    const slotEl=mc.querySelector('[data-slot="'+field+'"]');
+    if(slotEl && m) slotEl.outerHTML=slot(mid,field,m[field]);
+    // update save btn
+    const sb=document.getElementById('sb'+mid);
+    if(sb) sb.disabled=!canSave(m);
+  } else { renderMatches(); }
+  debounceSave();
 }
 function closePicker(e){
   if(e&&e.target!==document.getElementById('picker-overlay'))return;
@@ -3051,6 +3080,8 @@ function logoutAdmin(){
   const b = document.getElementById('adminBadge');
   if(b) b.remove();
   try{ localStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+  // Nếu đang ở tab Trận Đấu thì tự về BXH
+  if(document.getElementById('pg-matches').classList.contains('on')) goTab('pg-bxh');
   renderMembers();
   renderMatches();
 }
@@ -3426,20 +3457,27 @@ function slot(matchId,field,name){
     const slotAv = mb.photo
       ? '<img class="av-img-small" src="'+mb.photo+'" style="width:26px;height:26px;border-radius:8px;">'
       : '<div class="slot-av '+AVC[mb.color]+'">'+ini(mb.name)+'</div>';
-    return '<div class="pslot" onclick="openPicker('+matchId+',\''+field+'\')">'
+    return '<div class="pslot" data-slot="'+field+'" onclick="openPicker('+matchId+',\''+field+'\')">'
       +slotAv
       +'<span class="slot-name">'+xe(mb.name)+'</span>'
       +'<span class="slot-x" onclick="clrSlot(event,'+matchId+',\''+field+'\')">✕</span>'
       +'</div>';
   }
-  return `<div class="pslot" onclick="openPicker(${matchId},'${field}')">
-    <span class="slot-ph">＋ Chọn người...</span>
-  </div>`;
+  return '<div class="pslot" data-slot="'+field+'" onclick="openPicker('+matchId+',\''+field+'\')">'+'<span class="slot-ph">＋ Chọn người...</span></div>';
 }
 function clrSlot(e,matchId,field){
   e.stopPropagation();
   const m=matches.find(m=>m.id===matchId);
-  if(m){m[field]='';renderMatches();debounceSave();}
+  if(!m) return;
+  m[field]='';
+  const mc=document.getElementById('mc'+matchId);
+  if(mc){
+    const slotEl=mc.querySelector('[data-slot="'+field+'"]');
+    if(slotEl) slotEl.outerHTML=slot(matchId,field,'');
+    const sb=document.getElementById('sb'+matchId);
+    if(sb) sb.disabled=!canSave(m);
+  } else { renderMatches(); }
+  debounceSave();
 }
 
 function rEdit(m){
@@ -3596,10 +3634,17 @@ function saveMatch(id){
     else if(m.winner==='B'){ m.s1='0'; m.s2='1'; }
     else { m.s1='0'; m.s2='0'; }
   }
-  m.date=document.getElementById('sessionDate').value||todayStr();
+  if(!m.date) m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;renderMatches();debounceSave();
 }
-function editMatch(id){if(!isAdmin)return;const m=matches.find(m=>m.id===id);if(m){m.saved=false;renderMatches();}}
+function editMatch(id){
+  if(!isAdmin) return;
+  const m=matches.find(m=>m.id===id);
+  if(!m) return;
+  m._editOrig=JSON.stringify({t1p1:m.t1p1,t1p2:m.t1p2,t2p1:m.t2p1,t2p2:m.t2p2,s1:m.s1,s2:m.s2,winner:m.winner,bet:m.bet});
+  m.saved=false;
+  renderMatches();
+}
 function delMatch(id){
   if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
@@ -4068,13 +4113,24 @@ function renderLedger(){
     const netOut = ledger.filter(t=>t.name===name&&t.type==='out').reduce((s,t)=>s+(+t.amount),0);
     const betPaidAmt = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.paid).reduce((s,m)=>s+(+m.bet),0);
     const betUnpaid  = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
-    return {name, netBet, betPaidAmt, betUnpaid, netIn, netOut, txns: b.txns};
+    // Tính tổng nợ thực tế (trận thua thường + betEntry)
+    const lostM = matches.filter(m=>{
+      if(!m.saved||!m.bet||m.bet<=0||m.isBetEntry) return false;
+      const w=m.winner||(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':'');
+      return (w==='A'?[m.t2p1,m.t2p2]:w==='B'?[m.t1p1,m.t1p2]:[]).includes(name);
+    });
+    const betM = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.bet>0);
+    const totalDebt = [...lostM,...betM].reduce((s,m)=>s+(+m.bet),0);
+    const totalPaid = [...lostM,...betM].filter(m=>m.isBetEntry?m.paid:m['paid_'+name]).reduce((s,m)=>s+(+m.bet),0);
+    const totalUnpaid = totalDebt - totalPaid;
+    return {name, netBet, betPaidAmt, betUnpaid, netIn, netOut, txns: b.txns, totalUnpaid};
   });
+  // Sort: người còn nợ lên đầu, theo số nợ giảm dần
   peopleList.sort((a,b)=>{
-    const aOwes=a.betUnpaid>0, bOwes=b.betUnpaid>0;
+    const aOwes=a.totalUnpaid>0, bOwes=b.totalUnpaid>0;
     if(aOwes&&!bOwes) return -1;
     if(!aOwes&&bOwes) return 1;
-    return b.betUnpaid-a.betUnpaid||b.netBet-a.netBet||a.name.localeCompare(b.name);
+    return b.totalUnpaid-a.totalUnpaid||a.name.localeCompare(b.name);
   });
 
   if(peopleList.length){
@@ -5132,6 +5188,9 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   await load();
   await loadLogo();
   checkSavedAdminSession();
+  window.addEventListener('beforeunload', function(e){
+    if(saveTimer){ e.preventDefault(); e.returnValue='Dữ liệu chưa được lưu. Bạn có chắc muốn thoát?'; return e.returnValue; }
+  });
   // Set date input
   const dateEl=document.getElementById('sessionDate');
   dateEl.value=sessionDate||todayStr();
