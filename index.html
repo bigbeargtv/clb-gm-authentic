@@ -1510,13 +1510,30 @@ function setSaveDot(saved){
 
 // ─── NAV ───
 function goTab(id){
-  // Auto-close unsaved matches rỗng khi chuyển tab
+  // Auto-close khi chuyển tab:
+  // 1) Trận MỚI chưa nhập gì → xóa hẳn
+  // 2) Trận CŨ đang sửa nhưng chưa đổi gì → revert về saved
   if(id !== 'pg-matches'){
-    const emptyUnsaved = matches.filter(m=>!m.saved&&!m.t1p1&&!m.t1p2&&!m.t2p1&&!m.t2p2&&!m.s1&&!m.s2&&!m.winner&&!m.bet);
-    if(emptyUnsaved.length){
-      emptyUnsaved.forEach(m=>{ matches=matches.filter(x=>x.id!==m.id); });
-      debounceSave();
+    let changed = false;
+    // Trận mới (_isNew) chưa nhập gì
+    const emptyNew = matches.filter(m=>m._isNew&&!m.saved&&!m.t1p1&&!m.t1p2&&!m.t2p1&&!m.t2p2&&!m.s1&&!m.s2&&!m.winner&&!m.bet);
+    if(emptyNew.length){
+      emptyNew.forEach(m=>{ matches=matches.filter(x=>x.id!==m.id); });
+      changed=true;
     }
+    // Trận cũ đang sửa (_editOrig) nhưng chưa đổi gì → revert
+    matches.filter(m=>!m.saved&&m._editOrig).forEach(m=>{
+      const orig = JSON.parse(m._editOrig);
+      const cur  = JSON.stringify({t1p1:m.t1p1,t1p2:m.t1p2,t2p1:m.t2p1,t2p2:m.t2p2,s1:m.s1,s2:m.s2,winner:m.winner,bet:m.bet});
+      if(cur===m._editOrig){
+        // Chưa đổi gì → revert saved
+        Object.assign(m, orig);
+        m.saved=true;
+        delete m._editOrig;
+        changed=true;
+      }
+    });
+    if(changed) debounceSave();
   }
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
@@ -3071,10 +3088,10 @@ function setCat(c){cat=c;['nam','mix','nu'].forEach(v=>{document.getElementById(
 
 function addMatch(){
   if(!isAdmin)return;
-  const d=document.getElementById('sessionDate').value;
-  sessionDate=d||todayStr();
-  if(!document.getElementById('sessionDate').value)document.getElementById('sessionDate').value=sessionDate;
-  matches.push({id:matchUid++,cat,tgt,date:sessionDate,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',bet:0,saved:false});
+  const today = todayStr();
+  sessionDate = today;
+  document.getElementById('sessionDate').value = today;
+  matches.push({id:matchUid++,cat,tgt,date:today,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',bet:0,saved:false,_isNew:true});
   renderMatches();debounceSave();
   setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);
 }
@@ -3456,7 +3473,7 @@ function clrSlot(e,matchId,field){
 function rEdit(m){
   const BET_PRESETS = [0,50000,100000,200000,500000];
   const fmtBet = v => v===0?'Không':(v>=1000?(v/1000)+'k':''+v)+'đ';
-  const matchDate = m.date || sessionDate || todayStr();
+  const matchDate = m._isNew ? todayStr() : (m.date || todayStr());
   return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
       <span class="cbadge ${CB[m.cat]}" style="font-size:12px;padding:5px 14px;">${CL[m.cat]}</span>
@@ -3528,7 +3545,10 @@ function rSaved(m){
     ${won?'<span style="font-size:11px;">🏅</span>':''}
   </div>`;
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
-    <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
+      ${m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:''}
+    </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
       ${teamHtml(t1,w1)}
       ${teamHtml(t2,!w1)}
@@ -3609,7 +3629,15 @@ function saveMatch(id){
   m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;renderMatches();debounceSave();
 }
-function editMatch(id){if(!isAdmin)return;const m=matches.find(m=>m.id===id);if(m){m.saved=false;renderMatches();}}
+function editMatch(id){
+  if(!isAdmin)return;
+  const m=matches.find(m=>m.id===id);
+  if(!m) return;
+  // Lưu snapshot trạng thái gốc để detect "chưa sửa gì"
+  m._editOrig = JSON.stringify({t1p1:m.t1p1,t1p2:m.t1p2,t2p1:m.t2p1,t2p2:m.t2p2,s1:m.s1,s2:m.s2,winner:m.winner,bet:m.bet});
+  m.saved=false;
+  renderMatches();
+}
 function delMatch(id){
   if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
@@ -4941,39 +4969,53 @@ function renderHist(){
     // Find livestream link for this date (stored in first match of that date)
     const liveMatch=dateMatches[0];
     const liveUrl=liveMatch?liveMatch.liveUrl||'':'';
-    html+=`<div class="hist-session">
-      <div class="hist-session-header" style="cursor:pointer;" onclick="toggleHistDay('hday-${d}')">
-        <span style="font-size:15px;">📅</span>
-        <span class="hist-date">${fmtDate(d)}</span>
-        <span class="hist-count">${ms.length} trận</span>
-        ${liveUrl?'<a class="hist-live-link" href="'+xe(liveUrl)+'" target="_blank" onclick="event.stopPropagation()">▶ Live</a>':''}
+    html+=`<div style="margin-bottom:8px;border:1.5px solid var(--bdr2);border-radius:12px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--s2);cursor:pointer;font-weight:800;font-size:12px;" onclick="toggleHistDay('hday-${d}')">
+        <span>📅</span>
+        <span style="flex:1;">${fmtDate(d)} · ${ms.length} trận</span>
+        ${liveUrl?`<a class="hist-live-link" href="${xe(liveUrl)}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;font-weight:700;color:var(--nam-c);text-decoration:none;">▶ Live</a>`:''}
+        <span style="font-size:11px;color:var(--muted);" id="hday-${d}-arrow">▼</span>
       </div>
-      <div id="hday-${d}">`;
+      <div id="hday-${d}" style="display:none;">`;
     // Livestream input (admin only)
-    html+=`<div class="hist-live-row admin-only-flex">
-        <span style="font-size:14px;">📡</span>
-        <input class="hist-live-inp" type="url" placeholder="Thêm link livestream (YouTube, Facebook...)" value="${xe(liveUrl)}" oninput="saveLiveUrl('${d}',this.value)">
-        ${liveUrl?'<a class="hist-live-link" href="'+xe(liveUrl)+'" target="_blank">▶ Xem</a>':''}
+    html+=`<div class="hist-live-row admin-only-flex" style="padding:8px 12px;gap:8px;background:var(--s2);border-bottom:1px solid var(--bdr);">
+        <span style="font-size:13px;flex-shrink:0;">📡</span>
+        <input class="hist-live-inp" type="url" placeholder="Link livestream (YouTube, Facebook...)" value="${xe(liveUrl)}" oninput="saveLiveUrl('${d}',this.value)" style="flex:1;font-size:12px;padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr2);background:var(--s1);color:var(--text);outline:none;">
+        ${liveUrl?`<a class="hist-live-link" href="${xe(liveUrl)}" target="_blank" style="font-size:11px;font-weight:700;color:var(--nam-c);text-decoration:none;white-space:nowrap;">▶ Xem</a>`:''}
       </div>`;
     // Tách draw matches và normal matches
     const drawMs = ms.filter(m=>m.fromDraw);
     const normMs = ms.filter(m=>!m.fromDraw);
 
     function matchRow(m, showDel=false){
-      const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ')||'Đội A';
-      const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ')||'Đội B';
-      const w1=+m.s1>+m.s2;
-      const a=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img class="av-img-small" src="${mb.photo}" style="width:20px;height:20px;border-radius:5px;">` :`<div class="bxh-av ${AVC[mb.color]}" style="width:20px;height:20px;font-size:10px;border-radius:5px;">${ini(n)}</div>`;}
-      const betHtml=m.bet?`<span style="font-size:10px;color:var(--green);font-weight:800;">🍃${m.bet}</span>`:'';
-      const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:14px;" title="Xóa">🗑</button>` : '';
-      return `<div class="hi" style="align-items:center;">
-        <div style="flex:1;">
-          <div class="ht ${w1?'w':'l'}">${w1?'🏅 ':''}${a(m.t1p1)}${xe(t1)}</div>
-          <div class="ht ${!w1?'w':'l'}">${!w1?'🏅 ':''}${a(m.t2p1)}${xe(t2)}</div>
-          <div class="hm">${CL[m.cat]} ${betHtml}</div>
+      const t1=[m.t1p1,m.t1p2].filter(Boolean);
+      const t2=[m.t2p1,m.t2p2].filter(Boolean);
+      const w1 = m.winner==='A' || (m.winner===''&&+m.s1>+m.s2&&m.s1!=='');
+      const av=(n)=>{const mb=mbOf(n);if(!mb)return'';return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`;};
+      const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
+        ${names.map(n=>av(n)).join('')}
+        <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
+        ${won?'<span style="font-size:11px;">🏅</span>':''}
+      </div>`;
+      const betTag = m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}đ</span>`:'';
+      const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 7px;font-size:13px;" title="Xóa">🗑</button>` : '';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+          <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
+          ${betTag}
         </div>
-        <div class="hs">${m.s1} : ${m.s2}</div>
-        ${delBtn}
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+          ${teamHtml(t1,w1)}
+          ${teamHtml(t2,!w1)}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--text)'};">${m.s1}</span>
+          <span style="font-size:9px;color:var(--muted);line-height:1;">:</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--text)'};">${m.s2}</span>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          ${delBtn}
+        </div>
       </div>`;
     }
 
@@ -5008,7 +5050,7 @@ function renderHist(){
     // Normal matches → hiện như cũ
     normMs.forEach(m=>{ html+=matchRow(m); });
 
-    html+='</div></div>';
+    html+='</div></div>'; // end hist-session
   });
   el.innerHTML=html;
 }
