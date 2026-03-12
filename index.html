@@ -1158,7 +1158,6 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <div class="i-hero">
     <div class="i-hero-bg" id="iHeroBg"></div>
     <div class="i-hero-ov"></div>
-    <div class="i-hero-badge i-editable" id="iHeroBadge">&#x1F3F8; Pickleball Club</div>
     <div class="i-hero-txt">
       <h2>CLB <em>GM Authentic</em></h2>
       <p><span class="i-hero-dot"></span>H&#xE0; N&#x1ED9;i&nbsp;<span class="i-hero-dot"></span>&nbsp;Since 2024</p>
@@ -1604,7 +1603,9 @@ async function load(){
     ledgerUid = data.ledgerUid || 1;
     clubInitBalance = +data.clubInitBalance || 0;
     album = data.album || [];
-    if(data.clbInfo) clbInfo = data.clbInfo;
+    if(data.clbInfo) clbInfo = Object.assign({}, clbInfo, data.clbInfo, {
+      features: (data.clbInfo.features && data.clbInfo.features.length) ? data.clbInfo.features : clbInfo.features
+    });
     renderIntro();
     albumUid = data.albumUid || 1;
     if(data.drawDraft){
