@@ -1312,6 +1312,9 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 <!-- QUỸ -->
 <div class="pg" id="pg-quy">
   <div id="quy-debt-wrap" style="padding:0 14px"></div>
+
+  <!-- QR CHUYỂN KHOẢN -->
+  <div id="quy-qr-block" style="padding:0 14px 4px"></div>
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="hist-filter-row" id="qfilter-quick"></div>
@@ -1487,7 +1490,8 @@ let clbInfo={
     {icon:'\ud83d\udcb0',title:'Qu\u1ef9 r\u00f5 r\u00e0ng',sub:'Thua tr\u1eadn n\u1ed9p qu\u1ef9 \u2014 minh b\u1ea1ch 100%'},
     {icon:'\ud83c\udf7b',title:'\u0102n nh\u1eadu h\u00e0ng th\u00e1ng',sub:'\u0110\u00e1nh xong k\u00e9o nhau \u0103n t\u1ed1i'},
     {icon:'\ud83c\udf0d',title:'Du l\u1ecbch h\u00e0ng n\u0103m',sub:'Trip CLB m\u1ed7i n\u0103m t\u1eeb qu\u1ef9 chung'}
-  ]
+  ],
+  bank:{name:'Vietcombank',account:'1234567890',owner:'NGUYEN VAN A',amount:''}
 };
 let tgt=11, cat='nam', matches=[], matchUid=1;
 let sessionDate='', pickerCtx=null;
@@ -1604,7 +1608,8 @@ async function load(){
     clubInitBalance = +data.clubInitBalance || 0;
     album = data.album || [];
     if(data.clbInfo) clbInfo = Object.assign({}, clbInfo, data.clbInfo, {
-      features: (data.clbInfo.features && data.clbInfo.features.length) ? data.clbInfo.features : clbInfo.features
+      features: (data.clbInfo.features && data.clbInfo.features.length) ? data.clbInfo.features : clbInfo.features,
+      bank: Object.assign({}, clbInfo.bank, data.clbInfo.bank||{})
     });
     renderIntro();
     albumUid = data.albumUid || 1;
@@ -4086,8 +4091,106 @@ function togglePaidFull(name, date){
   renderQuy();
 }
 
+function renderQuyQR(){
+  const wrap=document.getElementById('quy-qr-block');
+  if(!wrap) return;
+  const b=clbInfo.bank||{};
+  const bank=b.name||'';
+  const acc=b.account||'';
+  const owner=b.owner||'';
+  const amt=b.amount||'';
+  const note=b.note||'Nop quy CLB';
+
+  // Build VietQR URL (api.vietqr.io)
+  // Format: https://img.vietqr.io/image/{bank}-{account}-{template}.png?amount={amt}&addInfo={note}&accountName={name}
+  const bankCode=b.bankCode||'VCB';
+  const qrUrl=acc?`https://img.vietqr.io/image/${bankCode}-${acc}-compact2.png?amount=${amt||''}&addInfo=${encodeURIComponent(note)}&accountName=${encodeURIComponent(owner)}`:'';
+
+  const editBtns=isAdmin?`
+    <button onclick="editBankInfo()" style="display:block;width:100%;margin-top:10px;padding:7px;border-radius:8px;border:1px dashed rgba(240,180,41,0.4);background:transparent;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;">
+      ✏️ Chỉnh thông tin chuyển khoản
+    </button>`:'';
+
+  if(!acc){
+    if(!isAdmin){ wrap.innerHTML=''; return; }
+    wrap.innerHTML=`<div style="background:var(--card);border-radius:13px;padding:14px;border:1.5px dashed rgba(240,180,41,0.3);text-align:center;color:var(--muted);font-size:13px;">
+      💳 Chưa có thông tin chuyển khoản
+      ${editBtns}
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML=`
+  <div style="background:var(--card);border-radius:13px;padding:14px;border:1px solid var(--bdr);">
+    <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+      💳 Chuyển khoản nộp quỹ<span style="flex:1;height:1px;background:var(--bdr);display:block;"></span>
+    </div>
+    <div style="display:flex;gap:14px;align-items:center;">
+      ${qrUrl?`<div style="flex-shrink:0;background:#fff;border-radius:12px;padding:6px;width:110px;height:110px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <img src="${qrUrl}" style="width:98px;height:98px;object-fit:contain;" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<span style=font-size:10px;color:#999;text-align:center>QR không tải được</span>'">
+      </div>`:''}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${xe(bank)}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gold);letter-spacing:1px;">${xe(acc)}</div>
+        <div style="font-size:13px;font-weight:700;margin-top:2px;">${xe(owner)}</div>
+        ${amt?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">Số tiền gợi ý: <b style="color:var(--text);">${fmtNum(+amt)}đ</b></div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Nội dung: <b style="color:var(--text);">${xe(note)}</b></div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(240,180,41,0.07);border-radius:8px;font-size:11.5px;color:var(--muted);line-height:1.5;">
+      📌 Quét mã QR hoặc chuyển khoản theo thông tin trên. Ghi đúng nội dung để admin xác nhận dễ hơn nhé!
+    </div>
+    ${editBtns}
+  </div>`;
+}
+
+function editBankInfo(){
+  if(!isAdmin) return;
+  const b=clbInfo.bank||{};
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML=`
+  <div style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:360px;border:1px solid var(--bdr);">
+    <div style="font-weight:800;font-size:15px;margin-bottom:16px;">💳 Thông tin chuyển khoản</div>
+    ${[
+      ['bankCode','Mã ngân hàng (VCB, TCB, MB...)',b.bankCode||'VCB'],
+      ['bankName','Tên ngân hàng',b.name||'Vietcombank'],
+      ['account','Số tài khoản',b.account||''],
+      ['owner','Chủ tài khoản (IN HOA)',b.owner||''],
+      ['amount','Số tiền gợi ý (để trống nếu không cố định)',b.amount||''],
+      ['note','Nội dung chuyển khoản',b.note||'Nop quy CLB'],
+    ].map(([id,label,val])=>`
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;">${label}</div>
+        <input id="bk-${id}" class="ldg-inp" style="width:100%;box-sizing:border-box;" value="${xe(val)}">
+      </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:10px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Hủy</button>
+      <button onclick="saveBankInfo(this)" style="flex:2;padding:10px;border-radius:9px;border:none;background:var(--gold);color:#1a1a1a;font-size:13px;font-weight:800;cursor:pointer;">💾 Lưu</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{ if(e.target===modal) modal.remove(); });
+}
+
+function saveBankInfo(btn){
+  const modal=btn.closest('div[style*="fixed"]');
+  clbInfo.bank={
+    bankCode:(document.getElementById('bk-bankCode').value||'').trim().toUpperCase(),
+    name:(document.getElementById('bk-bankName').value||'').trim(),
+    account:(document.getElementById('bk-account').value||'').trim(),
+    owner:(document.getElementById('bk-owner').value||'').trim().toUpperCase(),
+    amount:(document.getElementById('bk-amount').value||'').trim(),
+    note:(document.getElementById('bk-note').value||'').trim(),
+  };
+  debounceSave();
+  if(modal) modal.remove();
+  renderQuyQR();
+}
+
 function renderQuy(){
   renderDebtSummary();
+  renderQuyQR();
   initQuyFilter();
   const saved = getQuyFiltered();
   const el = document.getElementById('quy-content');
@@ -5062,7 +5165,7 @@ function renderAlbum(){
     const dayId  = 'albd-'+d.replace(/-/g,'');
     const isEditingDay = (window._albumEditDay === d);
     const isOpen = window._albumOpenDays && window._albumOpenDays.has(dayId);
-    const dayTitle = xe(items[0] && items[0]._dayTitle ? items[0]._dayTitle : fmtDate(d));
+    const dayTitle = xe(items[0] && (items[0]._dayTitle || items[0].title) ? (items[0]._dayTitle || items[0].title) : fmtDate(d));
     const countLabel = [photos.length ? photos.length+' ảnh' : '', links.length ? links.length+' link' : ''].filter(Boolean).join(' · ');
 
     // ── Header card ──
@@ -5102,7 +5205,7 @@ function renderAlbum(){
       h += '<span style="font-size:20px;flex-shrink:0;">🔗</span>';
       h += '<div style="flex:1;min-width:0;">';
       h += '<div style="font-weight:800;font-size:13px;">'+xe(a.title||'Link album')+'</div>';
-      h += '<a href="'+xe(a.url)+'" target="_blank" rel="noopener" style="font-size:11px;color:var(--gold);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+xe(a.url)+'</a>';
+      h += '<a href="'+xe(a.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--gold);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+xe(a.url)+'</a>';
       h += '</div>';
       if(isAdmin) h += '<button onclick="delAlbumPhoto('+a.id+')" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);">🗑</button>';
       h += '</div>';
@@ -5167,9 +5270,15 @@ function addAlbumLink(){
   const date  = document.getElementById('alb-date').value || vnDateStr(new Date());
   const link  = (document.getElementById('alb-link').value||'').trim();
   if(!link){ document.getElementById('alb-link').focus(); return; }
-  album.push({id:albumUid++, date, type:'link', title, url:link});
+  // Nếu đã có item cùng ngày, sync _dayTitle
+  const existing = album.filter(a=>a.date===date);
+  if(title) existing.forEach(a=>{ a._dayTitle=title; });
+  album.push({id:albumUid++, date, type:'link', title, url:link, _dayTitle:title||null});
   document.getElementById('alb-link').value='';
   document.getElementById('alb-title').value='';
+  // Tự mở ngày vừa thêm
+  if(!window._albumOpenDays) window._albumOpenDays=new Set();
+  window._albumOpenDays.add('albd-'+date.replace(/-/g,''));
   save(); renderAlbum(); renderIntro();
 }
 
@@ -5178,15 +5287,18 @@ function handleAlbumUpload(e){
   if(!files.length) return;
   const title = (document.getElementById('alb-title')||{}).value||'';
   const date  = (document.getElementById('alb-date')||{}).value||vnDateStr(new Date());
+  if(title) album.filter(a=>a.date===date).forEach(a=>{ a._dayTitle=title; });
   let done=0;
   files.forEach(file=>{
     const reader = new FileReader();
     reader.onload = ev=>{
-      album.push({id:albumUid++, date, type:'photo', title, url:ev.target.result});
+      album.push({id:albumUid++, date, type:'photo', title, url:ev.target.result, _dayTitle:title||null});
       done++;
       if(done===files.length){
         const ti=document.getElementById('alb-title');
         if(ti) ti.value='';
+        if(!window._albumOpenDays) window._albumOpenDays=new Set();
+        window._albumOpenDays.add('albd-'+date.replace(/-/g,''));
         save(); renderAlbum(); renderIntro();
       }
     };
