@@ -28,7 +28,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CLB GM AUTHENTIC</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f0f2f7;--s1:#ffffff;--s2:#f8f9fc;--s3:#eef0f6;
@@ -88,6 +90,8 @@ nav{
   overflow-x:auto;overflow-y:hidden;
   scrollbar-width:none;
   -ms-overflow-style:none;
+  touch-action:pan-x;
+  -webkit-overflow-scrolling:touch;
 }
 nav::-webkit-scrollbar{display:none;}
 .nt{
@@ -97,13 +101,13 @@ nav::-webkit-scrollbar{display:none;}
   cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;
   display:flex;flex-direction:column;align-items:center;gap:3px;
 }
-.nt .ic{font-size:17px;transition:transform .2s;line-height:1;display:block;}
+.nt .ic{font-size:24px;transition:transform .2s;line-height:1;display:block;will-change:transform;}
 .nt.on{color:var(--gold);border-bottom-color:var(--gold);}
 .nt.on .ic{transform:scale(1.15);}
 
 /* PAGE */
-.pg{display:none;padding:16px 14px 60px;position:relative;z-index:1;max-width:520px;margin:0 auto;}
-.pg.on{display:block;animation:fadeUp .25s ease;}
+.pg{display:none;padding:16px 14px 60px;position:relative;z-index:1;max-width:520px;margin:0 auto;contain:layout style;}
+.pg.on{contain:none;display:block;animation:fadeUp .25s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
 /* SECTION LABEL */
@@ -738,6 +742,24 @@ nav::-webkit-scrollbar{display:none;}
 .quy-row.r3{border:2px solid #c8a06a;background:linear-gradient(135deg,#fdf0e080,#fffbf5cc);box-shadow:0 2px 8px #c8a06a25;}
 .quy-h{display:grid;grid-template-columns:28px 1fr 80px 80px;gap:6px;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
 .quy-debt{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--red);text-align:right;}
+.debt-block{background:var(--card);border-radius:12px;margin:12px 0 0;border:1.5px solid rgba(229,85,85,0.25);overflow:hidden;}
+.debt-block-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(229,85,85,0.08);border-bottom:1px solid rgba(229,85,85,0.12);}
+.debt-block-title{font-size:12px;font-weight:800;color:#e55;flex:1;letter-spacing:.5px;}
+.debt-block-count{background:rgba(229,85,85,0.18);color:#e55;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:800;}
+.debt-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .15s;}
+.debt-row:last-child{border-bottom:none;}
+.debt-row:hover{background:rgba(255,255,255,0.04);}
+.debt-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;color:#fff;}
+.debt-name{flex:1;font-size:13px;font-weight:600;}
+.debt-amount{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;color:#e55;}
+.debt-arrow{font-size:20px;color:var(--muted);transition:transform .2s;line-height:1;will-change:transform;}
+.debt-detail{display:none;background:var(--s2);border-top:1px solid rgba(229,85,85,0.12);}
+.debt-detail.on{display:block;}
+.debt-match-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr);font-size:12px;}
+.debt-match-row:last-child{border-bottom:none;}
+.debt-match-date{color:var(--muted);min-width:52px;font-size:11px;}
+.debt-match-teams{flex:1;color:var(--text2);}
+.debt-match-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#e55;white-space:nowrap;}
 .quy-matches{font-size:12px;color:var(--muted);text-align:center;}
 .quy-player{display:flex;align-items:center;gap:8px;}
 .quy-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
@@ -1050,7 +1072,7 @@ nav::-webkit-scrollbar{display:none;}
       <div class="logo-icon" id="logoIcon">🏓</div>
       <button class="logo-edit" onclick="triggerLogoUpload()" title="Đổi logo">📷</button>
     </div>
-    <div class="logo-text"><span>GM</span><em> AUTHENTIC</em></div>
+    <div class="logo-text" onclick="goTab('pg-intro')" style="cursor:pointer"><span>GM</span><em> AUTHENTIC</em></div>
   </div>
   <div class="save-status">
     <div class="save-dot saved" id="saveDot"></div>
@@ -1061,19 +1083,110 @@ nav::-webkit-scrollbar{display:none;}
 </header>
 
 <nav>
-  <button class="nt on" onclick="goTab('pg-members')" id="nt0"><span class="ic">👥</span>Thành viên</button>
-  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt1"><span class="ic">⚡</span>Trận đấu</button>
-  <button class="nt" onclick="goTab('pg-bxh')" id="nt2"><span class="ic">🏆</span>BXH</button>
-  <button class="nt" onclick="goTab('pg-hist')" id="nt3"><span class="ic">📋</span>Lịch sử</button>
-  <button class="nt" onclick="goTab('pg-quy')" id="nt4"><span class="ic">💰</span>Quỹ</button>
-  <button class="nt" onclick="goTab('pg-draw')" id="nt5"><span class="ic">🎲</span>Bốc thăm</button>
-  <button class="nt" onclick="goTab('pg-ledger')" id="nt6"><span class="ic">💵</span>Thu Chi</button>
-  <button class="nt" onclick="goTab('pg-stats')" id="nt7"><span class="ic">🏅</span>Thành Tích</button>
-  <button class="nt" onclick="goTab('pg-album')" id="nt8"><span class="ic">📸</span>Album</button>
+  <button class="nt on" onclick="goTab('pg-intro')" id="nt0"><span class="ic">🏠</span>CLB</button>
+  <button class="nt admin-only" onclick="goTab('pg-members')" id="nt1"><span class="ic">👥</span>Thành viên</button>
+  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="ic">⚡</span>Trận đấu</button>
+  <button class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="ic">🏆</span>BXH</button>
+  <button class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="ic">📋</span>Lịch sử</button>
+  <button class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="ic">💰</span>Quỹ</button>
+  <button class="nt admin-only" onclick="goTab('pg-draw')" id="nt6"><span class="ic">🎲</span>Bốc thăm</button>
+  <button class="nt admin-only" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
+  <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ic">🏅</span>Thành Tích</button>
+  <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ic">📸</span>Album</button>
 </nav>
 
+<!-- INTRO -->
+<div class="pg on" id="pg-intro">
+<style>
+.iw{padding:14px 14px 90px;}
+.i-hero{position:relative;border-radius:12px;overflow:hidden;margin-bottom:14px;height:180px;display:flex;align-items:flex-end;background:#222;}
+.i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;}
+.i-hero-ov{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.82) 100%);}
+.i-hero-txt{position:relative;z-index:2;padding:16px;flex:1;}
+.i-hero-txt h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;line-height:1.05;color:#fff;margin-bottom:2px;}
+.i-hero-txt h2 em{color:var(--gold);font-style:normal;}
+.i-hero-txt p{font-size:12px;color:rgba(255,255,255,0.55);margin:0;}
+.i-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.i-stat{background:var(--card);border-radius:9px;padding:12px 6px;text-align:center;border:1px solid var(--bdr);}
+.i-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;color:var(--gold);line-height:1;}
+.i-stat-l{font-size:10px;color:var(--muted);margin-top:2px;}
+.i-block{background:var(--card);border-radius:11px;padding:14px;margin-bottom:12px;border:1px solid var(--bdr);}
+.i-block-ttl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.i-desc{font-size:13.5px;color:var(--text2);line-height:1.75;outline:none;}
+.i-tags{margin-top:10px;}
+.i-tag{display:inline-block;background:rgba(255,255,255,0.07);border-radius:20px;padding:3px 10px;font-size:11.5px;color:var(--muted);margin:3px 3px 0 0;}
+.i-sched{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bdr);}
+.i-sched:last-of-type{border-bottom:none;padding-bottom:0;}
+.i-sched:first-of-type{padding-top:0;}
+.i-sched-day{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--gold);min-width:34px;line-height:1;}
+.i-sched-sep{width:1px;height:26px;background:var(--bdr);flex-shrink:0;}
+.i-sched-info{flex:1;}
+.i-sched-time{font-size:13px;font-weight:600;outline:none;}
+.i-sched-loc{font-size:11.5px;color:var(--muted);margin-top:1px;outline:none;}
+.i-map-btn{display:block;width:100%;margin-top:10px;background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.22);border-radius:8px;color:var(--gold);font-size:12.5px;font-weight:600;padding:9px;text-align:center;text-decoration:none;}
+.i-gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;min-height:84px;}
+.i-gallery::-webkit-scrollbar{height:3px;}
+.i-gallery::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+.i-gimg{flex:0 0 130px;height:88px;border-radius:8px;overflow:hidden;background:var(--bg2);}
+.i-gimg img{width:100%;height:100%;object-fit:cover;display:block;}
+.i-gallery-empty{font-size:12px;color:var(--muted);padding:20px 0;font-style:italic;}
+.i-edit-hint{font-size:11px;color:rgba(240,180,41,0.5);margin-top:6px;display:none;font-style:italic;}
+body.admin-mode .i-edit-hint{display:block;}
+body.admin-mode .i-editable{border-bottom:1px dashed rgba(240,180,41,0.4);}
+body:not(.admin-mode) .i-editable{pointer-events:none;}
+</style>
+<div class="iw">
+  <div class="i-hero">
+    <div class="i-hero-bg" id="iHeroBg"></div>
+    <div class="i-hero-ov"></div>
+    <div class="i-hero-txt">
+      <h2>CLB <em>GM Authentic</em></h2>
+      <p>Pickleball &middot; M&#x1EF9; &#x110;&#xEC;nh, H&#xE0; N&#x1ED9;i</p>
+    </div>
+  </div>
+  <div class="i-stats">
+    <div class="i-stat"><div class="i-stat-n i-editable" id="iStatMember">~30</div><div class="i-stat-l">th&agrave;nh vi&ecirc;n</div></div>
+    <div class="i-stat"><div class="i-stat-n">2</div><div class="i-stat-l">bu&#x1ED5;i/tu&#x1EA7;n</div></div>
+    <div class="i-stat"><div class="i-stat-n">2h</div><div class="i-stat-l">m&#x1ED7;i bu&#x1ED5;i</div></div>
+  </div>
+  <div class="i-block">
+    <div class="i-block-ttl">V&#x1EC1; CLB</div>
+    <div class="i-desc i-editable" id="iDesc">Nh&#xF3;m nh&#x1ECF; ~30 ng&#x01B0;&#x1EDD;i, ch&#x01A1;i pickleball bu&#x1ED5;i t&#x1ED1;i th&#x1EE9; 3 v&#xE0; th&#x1EE9; 6. Kh&#xF4;ng ph&#xE2;n bi&#x1EC7;t tr&#xEC;nh &#x111;&#x1ED9; &#x2014; m&#x1EDB;i hay c&#x169; &#x111;&#x1EC1;u &#x111;&#x01B0;&#x1EE3;c.</div>
+    <div class="i-edit-hint">&#x270F;&#xFE0F; Ch&#x1EA1;m v&#xE0;o &#x111;&#x1EC3; ch&#x1EC9;nh s&#x1EED;a</div>
+    <div class="i-tags">
+      <span class="i-tag">&#x1F3F8; Pickleball &#x111;&#xF4;i</span>
+      <span class="i-tag">&#x1F3B2; B&#x1ED1;c th&#x103;m chia &#x111;&#x1ED9;i</span>
+      <span class="i-tag">&#x1F4CA; B&#x1EA3;ng x&#x1EBF;p h&#x1EA1;ng</span>
+      <span class="i-tag">&#x1F4B0; Qu&#x1EF9; r&#xF5; r&#xE0;ng</span>
+    </div>
+  </div>
+  <div class="i-block">
+    <div class="i-block-ttl">L&#x1ECB;ch sinh ho&#x1EA1;t</div>
+    <div class="i-sched">
+      <div class="i-sched-day">T3</div><div class="i-sched-sep"></div>
+      <div class="i-sched-info">
+        <div class="i-sched-time i-editable" id="iTime1">18:00 &ndash; 20:00</div>
+        <div class="i-sched-loc i-editable" id="iLoc1">S&acirc;n Ocean Pickleball</div>
+      </div>
+    </div>
+    <div class="i-sched">
+      <div class="i-sched-day">T6</div><div class="i-sched-sep"></div>
+      <div class="i-sched-info">
+        <div class="i-sched-time i-editable" id="iTime2">18:00 &ndash; 20:00</div>
+        <div class="i-sched-loc i-editable" id="iLoc2">S&acirc;n Ocean Pickleball</div>
+      </div>
+    </div>
+    <a class="i-map-btn" href="https://maps.google.com/?q=99+Le+Duc+Tho,+My+Dinh,+Ha+Noi" target="_blank">&#x1F4CD; 99 L&ecirc; &#x110;&#x1EE9;c Th&#x1ECD;, M&#x1EF9; &#x110;&#xEC;nh, H&#xE0; N&#x1ED9;i &rarr;</a>
+  </div>
+  <div class="i-block">
+    <div class="i-block-ttl">&#x1EA2;nh ho&#x1EA1;t &#x111;&#x1ED9;ng</div>
+    <div class="i-gallery" id="iGallery"><span class="i-gallery-empty">Ch&#x01B0;a c&#xF3; &#x1EA3;nh &#x2014; h&#xE3;y upload v&#xE0;o tab Album</span></div>
+  </div>
+</div>
+</div>
+
 <!-- MEMBERS -->
-<div class="pg on" id="pg-members">
+<div class="pg" id="pg-members">
   <div class="sl admin-only">Thêm thành viên</div>
   <div class="add-member-row admin-only-flex">
     <input class="mi" id="newName" placeholder="Tên thành viên..." onkeydown="if(event.key==='Enter')addMember()">
@@ -1165,6 +1278,7 @@ nav::-webkit-scrollbar{display:none;}
 
 <!-- QUỸ -->
 <div class="pg" id="pg-quy">
+  <div id="quy-debt-wrap" style="padding:0 14px"></div>
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="hist-filter-row" id="qfilter-quick"></div>
@@ -1329,6 +1443,7 @@ const MONTHS=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6',
 
 // ─── STATE ───
 let members=[], memberUid=1, newGender='m';
+let clbInfo={desc:'Nhom nho ~30 nguoi, choi pickleball buoi toi thu 3 va thu 6.',memberCount:'~30',time1:'18:00–20:00',loc1:'San Ocean Pickleball',time2:'18:00–20:00',loc2:'San Ocean Pickleball'};
 let tgt=11, cat='nam', matches=[], matchUid=1;
 let sessionDate='', pickerCtx=null;
 
@@ -1440,6 +1555,8 @@ async function load(){
     ledgerUid = data.ledgerUid || 1;
     clubInitBalance = +data.clubInitBalance || 0;
     album = data.album || [];
+    if(data.clbInfo) clbInfo = data.clbInfo;
+    renderIntro();
     albumUid = data.albumUid || 1;
     if(data.drawDraft){
       const dr = data.drawDraft;
@@ -1496,7 +1613,8 @@ async function save(){
     drawDraft,
     ledger, ledgerUid,
     clubInitBalance,
-    album, albumUid
+    album, albumUid,
+    clbInfo
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
@@ -1538,8 +1656,9 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-members':'nt0','pg-matches':'nt1','pg-bxh':'nt2','pg-hist':'nt3','pg-quy':'nt4','pg-draw':'nt5','pg-ledger':'nt6','pg-stats':'nt7','pg-album':'nt8'};
+  const map={'pg-intro':'nt0','pg-members':'nt1','pg-matches':'nt2','pg-bxh':'nt3','pg-hist':'nt4','pg-quy':'nt5','pg-draw':'nt6','pg-ledger':'nt7','pg-stats':'nt8','pg-album':'nt9'};
   document.getElementById(map[id]).classList.add('on');
+  if(id==='pg-intro')renderIntro();
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
   if(id==='pg-quy')renderQuy();
@@ -1648,7 +1767,7 @@ function renderDrawPool(){
   pool.innerHTML = members.map(mb => {
     const on = drawSelected.has(mb.name);
     const avHtml = mb.photo
-      ? `<img src="${mb.photo}" style="width:22px;height:22px;border-radius:7px;">`
+      ? `<img loading="lazy" src="${mb.photo}" style="width:22px;height:22px;border-radius:7px;" decoding="async">`
       : `<div class="dav ${AVC[mb.color]}">${ini(mb.name)}</div>`;
     return `<div class="draw-chip${on?' on':''}" onclick="toggleDrawMember('${mb.name.replace(/'/g,"&#39;")}')">
       ${avHtml}<span>${xe(mb.name)}</span>
@@ -3080,6 +3199,7 @@ function loginAdmin(silent){
   try{ localStorage.setItem(ADMIN_SESSION_KEY,'true'); }catch(e){}
   renderMembers();
   renderMatches();
+  enableIntroEdit(true);
 }
 function logoutAdmin(){
   if(!confirm('Thoát chế độ Admin?')) return;
@@ -3094,6 +3214,7 @@ function logoutAdmin(){
   if(document.getElementById('pg-matches').classList.contains('on')) goTab('pg-bxh');
   renderMembers();
   renderMatches();
+  enableIntroEdit(false);
 }
 
 // ─── MATCH ───
@@ -3127,7 +3248,7 @@ function renderActiveSession(sess){
   const matchRows = sess.matches.map((m,i)=>{
     const tA = [m.t1p1,m.t1p2].filter(Boolean);
     const tB = [m.t2p1,m.t2p2].filter(Boolean);
-    const av = n=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+    const av = n=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
     const wA = m.winner==='A'||(m.winner===''&&+m.s1>+m.s2&&m.s1!=='');
     const wB = m.winner==='B'||(m.winner===''&&+m.s2>+m.s1&&m.s2!=='');
     const badge = `<span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>`;
@@ -3590,7 +3711,7 @@ function rSaved(m){
   const w1=+m.s1>+m.s2;
   const t1=[m.t1p1,m.t1p2].filter(Boolean);
   const t2=[m.t2p1,m.t2p2].filter(Boolean);
-  const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+  const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
   const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
     ${names.map(n=>av(n)).join('')}
     <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
@@ -3853,7 +3974,7 @@ function renderQuyDay(date, saved){
     unpaidPeople.forEach(p=>{
       const mb=mbOf(p.name);
       const av = mb&&mb.photo
-        ? `<img src="${mb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+        ? `<img loading="lazy" src="${mb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
         : `<div class="${mb?AVC[mb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
       const remaining = p.total - p.paid;
       const isPaidFull = false;
@@ -3877,7 +3998,7 @@ function renderQuyDay(date, saved){
     paidPeople.forEach(p=>{
       const mb=mbOf(p.name);
       const av = mb&&mb.photo
-        ? `<img src="${mb.photo}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;opacity:.7;">`
+        ? `<img loading="lazy" src="${mb.photo}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;opacity:.7;" decoding="async">`
         : `<div class="${mb?AVC[mb.color]:''}" style="width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.7;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
       h += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1.5px solid var(--green)30;border-radius:12px;margin-bottom:5px;opacity:.8;">
         ${av}
@@ -3916,6 +4037,7 @@ function togglePaidFull(name, date){
 }
 
 function renderQuy(){
+  renderDebtSummary();
   initQuyFilter();
   const saved = getQuyFiltered();
   const el = document.getElementById('quy-content');
@@ -4183,7 +4305,7 @@ function renderLedger(){
       const isOpen = window._openDays && window._openDays.has(domId);
       const mb = mbOf(p.name);
       const av = mb&&mb.photo
-        ? `<img src="${mb.photo}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;">`
+        ? `<img loading="lazy" src="${mb.photo}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;" decoding="async">`
         : `<div class="${mb?AVC[mb.color]:''}" style="width:34px;height:34px;border-radius:10px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
 
       // ── Gom trận thua + bet entries theo ngày ──
@@ -4420,6 +4542,97 @@ function toggleBetEntryPaid(matchId){
 }
 
 
+// ─── GIỚI THIỆU CLB ───
+function renderIntro(){
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.textContent=val;};
+  set('iStatMember',clbInfo.memberCount);
+  set('iDesc',clbInfo.desc);
+  set('iTime1',clbInfo.time1);
+  set('iLoc1',clbInfo.loc1);
+  set('iTime2',clbInfo.time2);
+  set('iLoc2',clbInfo.loc2);
+  const gallery=document.getElementById('iGallery');
+  if(!gallery) return;
+  const photos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)));
+  if(!photos.length){
+    gallery.innerHTML='<span class="i-gallery-empty">Ch\u01b0a c\xf3 \u1ea3nh \u2014 h\xe3y upload v\xe0o tab Album</span>';
+    const bg=document.getElementById('iHeroBg');
+    if(bg) bg.style.backgroundImage='';
+  } else {
+    gallery.innerHTML=photos.map(a=>`<div class="i-gimg"><img loading="lazy" src="${a.url}" loading="lazy" decoding="async"></div>`).join('');
+    const bg=document.getElementById('iHeroBg');
+    if(bg) bg.style.backgroundImage=`url('${photos[photos.length-1].url}')`;
+  }
+}
+function enableIntroEdit(on){
+  const map={iStatMember:'memberCount',iDesc:'desc',iTime1:'time1',iLoc1:'loc1',iTime2:'time2',iLoc2:'loc2'};
+  Object.keys(map).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.contentEditable=on?'true':'false';
+    el.oninput=on?()=>{clbInfo[map[id]]=el.textContent.trim();debounceSave();}:null;
+  });
+}
+function renderDebtSummary(){
+  const wrap=document.getElementById('quy-debt-wrap');
+  if(!wrap) return;
+  const debtMap={};
+  matches.filter(m=>m.saved&&m.bet>0).forEach(m=>{
+    const bet=+m.bet;
+    if(m.isBetEntry){
+      const name=m.t2p1; if(!name) return;
+      if(!debtMap[name]) debtMap[name]={name,owed:0,matches:[]};
+      if(!m.paid){ debtMap[name].owed+=bet; debtMap[name].matches.push(m); }
+    } else {
+      const w1=+m.s1>+m.s2;
+      const losers=(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
+      losers.forEach(name=>{
+        if(!debtMap[name]) debtMap[name]={name,owed:0,matches:[]};
+        if(!m['paid_'+name]){ debtMap[name].owed+=bet; debtMap[name].matches.push({...m,_loser:name}); }
+      });
+    }
+  });
+  const debtors=Object.values(debtMap).filter(d=>d.owed>0).sort((a,b)=>b.owed-a.owed);
+  if(!debtors.length){ wrap.innerHTML=''; return; }
+  const rows=debtors.map((d,i)=>{
+    const mb=mbOf(d.name);
+    const avHtml=(mb&&mb.photo)
+      ? `<img loading="lazy" src="${mb.photo}" style="width:30px;height:30px;border-radius:8px;object-fit:cover;flex-shrink:0;" loading="lazy" decoding="async">`
+      : `<div class="debt-av ${mb?AVC[mb.color]:''}" ${!mb?'style="background:var(--muted)"':''}>${ini(d.name)}</div>`;
+    const detailRows=d.matches.map(m=>{
+      const w1=+m.s1>+m.s2;
+      const winners=(w1?[m.t1p1,m.t1p2]:[m.t2p1,m.t2p2]).filter(Boolean);
+      return `<div class="debt-match-row">
+        <span class="debt-match-date">${m.date?m.date.slice(5):'--'}</span>
+        <span class="debt-match-teams">Thua <b>${xe(winners.join(' & '))}</b></span>
+        <span class="debt-match-score">-${fmtNum(+m.bet)}&#x1F343;</span>
+      </div>`;
+    }).join('');
+    return `<div>
+      <div class="debt-row" onclick="toggleDebtDetail('ddet-${i}',this)">
+        ${avHtml}
+        <span class="debt-name">${xe(d.name)}</span>
+        <span class="debt-amount">-${fmtNum(d.owed)}&#x1F343;</span>
+        <span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
+      </div>
+      <div class="debt-detail" id="ddet-${i}">${detailRows}</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="debt-block">
+    <div class="debt-block-hdr">
+      <span>&#x274C;</span>
+      <span class="debt-block-title">Ch\u01b0a n\u1ed9p qu\u1ef9</span>
+      <span class="debt-block-count">${debtors.length} ng\u01b0\u1eddi</span>
+    </div>${rows}</div>`;
+}
+function toggleDebtDetail(id,row){
+  const det=document.getElementById(id);
+  const arr=document.getElementById(id+'-arr');
+  if(!det) return;
+  const open=det.classList.toggle('on');
+  if(arr) arr.style.transform=open?'rotate(90deg)':'';
+  if(open) setTimeout(()=>det.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
 // ─── THỐNG KÊ CÁ NHÂN ───
 function renderStats(){
   const picker = document.getElementById('stats-picker');
@@ -4431,7 +4644,7 @@ function renderStats(){
     + members.map(m=>{
         const on = statsSelected===m.name;
         const av = m.photo
-          ? `<img src="${m.photo}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;">`
+          ? `<img loading="lazy" src="${m.photo}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;" decoding="async">`
           : `<div class="${AVC[m.color]}" style="width:36px;height:36px;border-radius:10px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
         return `<div class="stats-member-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\'")}')">
           ${av}
@@ -4500,7 +4713,7 @@ function buildStatsHTML(name){
   const winRate = total ? Math.round(wins/total*100) : 0;
   const mb = mbOf(name);
   const bigAv = mb&&mb.photo
-    ? `<img src="${mb.photo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;">`
+    ? `<img loading="lazy" src="${mb.photo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;" decoding="async">`
     : `<div class="${mb?AVC[mb.color]:''}" style="width:64px;height:64px;border-radius:16px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
 
   // ── Xếp hạng trong CLB ──
@@ -4581,7 +4794,7 @@ function buildStatsHTML(name){
       <div style="font-weight:800;font-size:13px;margin-bottom:10px;">🤝 Đồng đội thường xuyên</div>`;
     topPartners.forEach(([pname,count])=>{
       const pmb=mbOf(pname);
-      const pav=pmb&&pmb.photo?`<img src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+      const pav=pmb&&pmb.photo?`<img loading="lazy" src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
         :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
       const pw = partnerWins[pname]||0;
       const pwr = Math.round(pw/count*100);
@@ -4603,7 +4816,7 @@ function buildStatsHTML(name){
       <div style="font-weight:800;font-size:13px;margin-bottom:10px;">⚔️ Đối thủ thường xuyên</div>`;
     topRivals.forEach(([rname,count])=>{
       const rmb=mbOf(rname);
-      const rav=rmb&&rmb.photo?`<img src="${rmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+      const rav=rmb&&rmb.photo?`<img loading="lazy" src="${rmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
         :`<div class="${rmb?AVC[rmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${rmb?'':'var(--muted)'};">${ini(rname)}</div>`;
       const rl=rivalLosses[rname]||0;
       const rlr=Math.round(rl/count*100);
@@ -4635,7 +4848,7 @@ function buildStatsHTML(name){
       <div style="font-weight:800;font-size:13px;margin-bottom:10px;">💀 Đồng đội... xui xẻo</div>`;
     jinxPartners.forEach(([pname,count,pl,plr])=>{
       const pmb=mbOf(pname);
-      const pav=pmb&&pmb.photo?`<img src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;">`
+      const pav=pmb&&pmb.photo?`<img loading="lazy" src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
         :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
       h += `<div class="partner-row">
         ${pav}
@@ -4773,7 +4986,7 @@ function renderAlbum(){
       h += '<div class="album-grid">';
       photos.forEach(a=>{
         h += '<div style="position:relative;">';
-        h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy">';
+        h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
         if(isAdmin) h += '<button onclick="delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;">✕</button>';
         h += '</div>';
       });
@@ -4814,12 +5027,12 @@ function saveAlbumDayTitle(date){
   // Save into all items of this day so it persists via Firebase
   album.filter(a=>a.date===date).forEach(a=>{ a._dayTitle = title || null; });
   window._albumEditDay = null;
-  save(); renderAlbum();
+  save(); renderAlbum(); renderIntro();
 }
 function delAlbumDay(date){
   if(!isAdmin || !confirm('Xóa toàn bộ mục ngày '+fmtDate(date)+'?')) return;
   album = album.filter(a=>a.date!==date);
-  save(); renderAlbum();
+  save(); renderAlbum(); renderIntro();
 }
 function addAlbumLink(){
   if(!isAdmin) return;
@@ -4830,7 +5043,7 @@ function addAlbumLink(){
   album.push({id:albumUid++, date, type:'link', title, url:link});
   document.getElementById('alb-link').value='';
   document.getElementById('alb-title').value='';
-  save(); renderAlbum();
+  save(); renderAlbum(); renderIntro();
 }
 
 function handleAlbumUpload(e){
@@ -4847,7 +5060,7 @@ function handleAlbumUpload(e){
       if(done===files.length){
         const ti=document.getElementById('alb-title');
         if(ti) ti.value='';
-        save(); renderAlbum();
+        save(); renderAlbum(); renderIntro();
       }
     };
     reader.readAsDataURL(file);
@@ -4867,7 +5080,7 @@ function openLightbox(id){
     const hasPrev = curIdx > 0;
     const hasNext = curIdx < dayPhotos.length - 1;
     lb.innerHTML = `
-      <img src="${cur.url}" onclick="event.stopPropagation()" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;user-select:none;">
+      <img loading="lazy" src="${cur.url}" onclick="event.stopPropagation()" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;user-select:none;" decoding="async">
       <button onclick="this.closest('.album-lightbox').remove()" style="position:fixed;top:16px;right:16px;background:#000a;border:none;border-radius:8px;color:#fff;font-size:20px;padding:4px 12px;cursor:pointer;z-index:1;">✕</button>
       ${dayPhotos.length>1?`<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:#000b;border-radius:24px;padding:6px 14px;">
         <button id="lb-prev" onclick="event.stopPropagation();lbNav(-1)" style="background:none;border:none;color:${hasPrev?'#fff':'#ffffff40'};font-size:22px;cursor:${hasPrev?'pointer':'default'};padding:0 4px;">‹</button>
@@ -4904,7 +5117,7 @@ function openLightbox(id){
 function delAlbumPhoto(id){
   if(!isAdmin||!confirm('Xóa mục này?')) return;
   album=album.filter(a=>a.id!==id);
-  save(); renderAlbum();
+  save(); renderAlbum(); renderIntro();
 }
 
 // ─── BXH ───
@@ -5168,7 +5381,7 @@ function renderHist(){
       const t1=[m.t1p1,m.t1p2].filter(Boolean);
       const t2=[m.t2p1,m.t2p2].filter(Boolean);
       const w1=+m.s1>+m.s2;
-      const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
+      const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
       const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
         ${names.map(n=>av(n)).join('')}
         <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
@@ -5287,6 +5500,7 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   ['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
   renderMembers();
   renderMatches();
+  renderIntro();
   // Nếu có draft bốc thăm đang dở, hiện draw-result ngay
   if(drawTeams.length || (window._matchPairs||[]).length){
     const resultEl = document.getElementById('draw-result');
