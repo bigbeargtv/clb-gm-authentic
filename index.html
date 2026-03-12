@@ -1099,89 +1099,123 @@ nav::-webkit-scrollbar{display:none;}
 <div class="pg on" id="pg-intro">
 <style>
 .iw{padding:14px 14px 90px;}
-.i-hero{position:relative;border-radius:12px;overflow:hidden;margin-bottom:14px;height:180px;display:flex;align-items:flex-end;background:#222;}
+.i-hero{position:relative;border-radius:16px;overflow:hidden;margin-bottom:14px;height:200px;display:flex;align-items:flex-end;background:#1a1a1a;}
 .i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;}
-.i-hero-ov{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.82) 100%);}
+.i-hero-ov{position:absolute;inset:0;background:linear-gradient(170deg,rgba(0,0,0,0) 20%,rgba(0,0,0,0.88) 100%);}
+.i-hero-badge{position:absolute;top:12px;left:12px;background:rgba(240,180,41,0.18);border:1px solid rgba(240,180,41,0.4);backdrop-filter:blur(6px);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
 .i-hero-txt{position:relative;z-index:2;padding:16px;flex:1;}
-.i-hero-txt h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;line-height:1.05;color:#fff;margin-bottom:2px;}
+.i-hero-txt h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:32px;line-height:1.05;color:#fff;margin-bottom:3px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
 .i-hero-txt h2 em{color:var(--gold);font-style:normal;}
-.i-hero-txt p{font-size:12px;color:rgba(255,255,255,0.55);margin:0;}
+.i-hero-txt p{font-size:11.5px;color:rgba(255,255,255,0.5);margin:0;display:flex;align-items:center;gap:6px;}
+.i-hero-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;}
+/* Stats */
 .i-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.i-stat{background:var(--card);border-radius:9px;padding:12px 6px;text-align:center;border:1px solid var(--bdr);}
-.i-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;color:var(--gold);line-height:1;}
-.i-stat-l{font-size:10px;color:var(--muted);margin-top:2px;}
-.i-block{background:var(--card);border-radius:11px;padding:14px;margin-bottom:12px;border:1px solid var(--bdr);}
-.i-block-ttl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-.i-desc{font-size:13.5px;color:var(--text2);line-height:1.75;outline:none;}
-.i-tags{margin-top:10px;}
-.i-tag{display:inline-block;background:rgba(255,255,255,0.07);border-radius:20px;padding:3px 10px;font-size:11.5px;color:var(--muted);margin:3px 3px 0 0;}
-.i-sched{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bdr);}
-.i-sched:last-of-type{border-bottom:none;padding-bottom:0;}
-.i-sched:first-of-type{padding-top:0;}
-.i-sched-day{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--gold);min-width:34px;line-height:1;}
-.i-sched-sep{width:1px;height:26px;background:var(--bdr);flex-shrink:0;}
-.i-sched-info{flex:1;}
-.i-sched-time{font-size:13px;font-weight:600;outline:none;}
-.i-sched-loc{font-size:11.5px;color:var(--muted);margin-top:1px;outline:none;}
-.i-map-btn{display:block;width:100%;margin-top:10px;background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.22);border-radius:8px;color:var(--gold);font-size:12.5px;font-weight:600;padding:9px;text-align:center;text-decoration:none;}
-.i-gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;min-height:84px;}
+.i-stat{background:var(--card);border-radius:11px;padding:13px 6px 10px;text-align:center;border:1px solid var(--bdr);position:relative;overflow:hidden;}
+.i-stat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:2px;background:var(--gold);border-radius:0 0 4px 4px;}
+.i-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;color:var(--gold);line-height:1;}
+.i-stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;}
+/* Block chung */
+.i-block{background:var(--card);border-radius:13px;padding:16px;margin-bottom:12px;border:1px solid var(--bdr);}
+.i-block-ttl{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.i-block-ttl::after{content:'';flex:1;height:1px;background:var(--bdr);}
+/* Mô tả */
+.i-desc{font-size:13.5px;color:var(--text2);line-height:1.8;outline:none;}
+/* Feature cards */
+.i-features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.i-feat{background:var(--s2);border-radius:10px;padding:12px 10px;border:1px solid var(--bdr);display:flex;flex-direction:column;gap:4px;}
+.i-feat-icon{font-size:22px;line-height:1;}
+.i-feat-title{font-size:12px;font-weight:800;color:var(--text);}
+.i-feat-sub{font-size:11px;color:var(--muted);line-height:1.4;}
+/* Schedule */
+.i-sched-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.i-sched{background:var(--s2);border-radius:10px;padding:12px;border:1px solid var(--bdr);}
+.i-sched-day{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;color:var(--gold);line-height:1;margin-bottom:4px;}
+.i-sched-time{font-size:13px;font-weight:700;outline:none;color:var(--text);}
+.i-sched-loc{font-size:11px;color:var(--muted);margin-top:2px;outline:none;line-height:1.4;}
+.i-map-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;background:rgba(240,180,41,0.08);border:1.5px solid rgba(240,180,41,0.22);border-radius:9px;color:var(--gold);font-size:12.5px;font-weight:700;padding:10px;text-align:center;text-decoration:none;transition:background .15s;}
+.i-map-btn:hover{background:rgba(240,180,41,0.14);}
+/* Gallery */
+.i-gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;min-height:88px;scroll-snap-type:x mandatory;}
 .i-gallery::-webkit-scrollbar{height:3px;}
 .i-gallery::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
-.i-gimg{flex:0 0 130px;height:88px;border-radius:8px;overflow:hidden;background:var(--bg2);}
+.i-gimg{flex:0 0 140px;height:92px;border-radius:10px;overflow:hidden;background:var(--bg2);cursor:pointer;scroll-snap-align:start;transition:opacity .15s;}
+.i-gimg:hover{opacity:.85;}
 .i-gimg img{width:100%;height:100%;object-fit:cover;display:block;}
-.i-gallery-empty{font-size:12px;color:var(--muted);padding:20px 0;font-style:italic;}
+.i-gallery-empty{font-size:12px;color:var(--muted);padding:24px 0;font-style:italic;}
+/* Edit */
 .i-edit-hint{font-size:11px;color:rgba(240,180,41,0.5);margin-top:6px;display:none;font-style:italic;}
 body.admin-mode .i-edit-hint{display:block;}
 body.admin-mode .i-editable{border-bottom:1px dashed rgba(240,180,41,0.4);}
 body:not(.admin-mode) .i-editable{pointer-events:none;}
+body.admin-mode .i-feat-icon,
+body.admin-mode .i-feat-title,
+body.admin-mode .i-feat-sub{border-bottom:1px dashed rgba(240,180,41,0.3);cursor:text;}
+body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:10px;}
 </style>
 <div class="iw">
+
+  <!-- HERO -->
   <div class="i-hero">
     <div class="i-hero-bg" id="iHeroBg"></div>
     <div class="i-hero-ov"></div>
+    <div class="i-hero-badge i-editable" id="iHeroBadge">&#x1F3F8; Pickleball Club</div>
     <div class="i-hero-txt">
       <h2>CLB <em>GM Authentic</em></h2>
-      <p>Pickleball &middot; M&#x1EF9; &#x110;&#xEC;nh, H&#xE0; N&#x1ED9;i</p>
+      <p><span class="i-hero-dot"></span>H&#xE0; N&#x1ED9;i&nbsp;<span class="i-hero-dot"></span>&nbsp;Since 2024</p>
     </div>
   </div>
+
+  <!-- STATS -->
   <div class="i-stats">
-    <div class="i-stat"><div class="i-stat-n i-editable" id="iStatMember">~30</div><div class="i-stat-l">th&agrave;nh vi&ecirc;n</div></div>
-    <div class="i-stat"><div class="i-stat-n">2</div><div class="i-stat-l">bu&#x1ED5;i/tu&#x1EA7;n</div></div>
-    <div class="i-stat"><div class="i-stat-n">2h</div><div class="i-stat-l">m&#x1ED7;i bu&#x1ED5;i</div></div>
-  </div>
-  <div class="i-block">
-    <div class="i-block-ttl">V&#x1EC1; CLB</div>
-    <div class="i-desc i-editable" id="iDesc">Nh&#xF3;m nh&#x1ECF; ~30 ng&#x01B0;&#x1EDD;i, ch&#x01A1;i pickleball bu&#x1ED5;i t&#x1ED1;i th&#x1EE9; 3 v&#xE0; th&#x1EE9; 6. Kh&#xF4;ng ph&#xE2;n bi&#x1EC7;t tr&#xEC;nh &#x111;&#x1ED9; &#x2014; m&#x1EDB;i hay c&#x169; &#x111;&#x1EC1;u &#x111;&#x01B0;&#x1EE3;c.</div>
-    <div class="i-edit-hint">&#x270F;&#xFE0F; Ch&#x1EA1;m v&#xE0;o &#x111;&#x1EC3; ch&#x1EC9;nh s&#x1EED;a</div>
-    <div class="i-tags">
-      <span class="i-tag">&#x1F3F8; Pickleball &#x111;&#xF4;i</span>
-      <span class="i-tag">&#x1F3B2; B&#x1ED1;c th&#x103;m chia &#x111;&#x1ED9;i</span>
-      <span class="i-tag">&#x1F4CA; B&#x1EA3;ng x&#x1EBF;p h&#x1EA1;ng</span>
-      <span class="i-tag">&#x1F4B0; Qu&#x1EF9; r&#xF5; r&#xE0;ng</span>
+    <div class="i-stat">
+      <div class="i-stat-n i-editable" id="iStatMember">~30</div>
+      <div class="i-stat-l">Th&agrave;nh vi&ecirc;n</div>
+    </div>
+    <div class="i-stat">
+      <div class="i-stat-n">2</div>
+      <div class="i-stat-l">Bu&#x1ED5;i / tu&#x1EA7;n</div>
+    </div>
+    <div class="i-stat">
+      <div class="i-stat-n">2h</div>
+      <div class="i-stat-l">M&#x1ED7;i bu&#x1ED5;i</div>
     </div>
   </div>
+
+  <!-- VỀ CLB -->
+  <div class="i-block">
+    <div class="i-block-ttl">V&#x1EC1; ch&#xFA;ng t&#xF4;i</div>
+    <div class="i-desc i-editable" id="iDesc">CLB GM Authentic quy t&#x1EE5; TOP nh&#x1EEF;ng tay v&#x1EE3;t t&#xE0;i n&#x0103;ng c&#x1EE7;a H&#xE0; N&#x1ED9;i, sinh ho&#x1EA1;t m&#x1ED7;i t&#x1ED1;i Th&#x1EE9; 3 &amp; Th&#x1EE9; 6 h&#xE0;ng tu&#x1EA7;n. Ch&#xFA;ng t&#xF4;i c&#x01B0;&#x1EDD;i nhi&#x1EC1;u h&#x01A1;n th&#x1EAF;ng, tranh lu&#x1EAD;n nhi&#x1EC1;u h&#x01A1;n t&#x1EAD;p, v&#xE0; c&#xF3; m&#x1ED9;t qu&#x1EF9; CLB ng&#xE0;y c&#xE0;ng ph&#x1ED3;ng to nh&#x1EDD; nh&#x1EEF;ng ng&#x01B0;&#x1EDD;i thua tr&#x1EAD;n kh&#xF4;ng ch&#x1ECB;u th&#x1EEB;a nh&#x1EAD;n m&#xEC;nh d&#x1EDF;.</div>
+    <div class="i-edit-hint">&#x270F;&#xFE0F; Ch&#x1EA1;m v&#xE0;o &#x111;&#x1EC3; ch&#x1EC9;nh s&#x1EED;a</div>
+    <!-- Feature cards -->
+    <div class="i-features" id="iFeatures"></div>
+  </div>
+
+  <!-- LỊCH -->
   <div class="i-block">
     <div class="i-block-ttl">L&#x1ECB;ch sinh ho&#x1EA1;t</div>
-    <div class="i-sched">
-      <div class="i-sched-day">T3</div><div class="i-sched-sep"></div>
-      <div class="i-sched-info">
+    <div class="i-sched-wrap">
+      <div class="i-sched">
+        <div class="i-sched-day">T3</div>
         <div class="i-sched-time i-editable" id="iTime1">18:00 &ndash; 20:00</div>
         <div class="i-sched-loc i-editable" id="iLoc1">S&acirc;n Ocean Pickleball</div>
       </div>
-    </div>
-    <div class="i-sched">
-      <div class="i-sched-day">T6</div><div class="i-sched-sep"></div>
-      <div class="i-sched-info">
+      <div class="i-sched">
+        <div class="i-sched-day">T6</div>
         <div class="i-sched-time i-editable" id="iTime2">18:00 &ndash; 20:00</div>
         <div class="i-sched-loc i-editable" id="iLoc2">S&acirc;n Ocean Pickleball</div>
       </div>
     </div>
-    <a class="i-map-btn" href="https://maps.google.com/?q=99+Le+Duc+Tho,+My+Dinh,+Ha+Noi" target="_blank">&#x1F4CD; 99 L&ecirc; &#x110;&#x1EE9;c Th&#x1ECD;, M&#x1EF9; &#x110;&#xEC;nh, H&#xE0; N&#x1ED9;i &rarr;</a>
+    <a class="i-map-btn" href="https://maps.google.com/?q=99+Le+Duc+Tho,+My+Dinh,+Ha+Noi" target="_blank">
+      &#x1F4CD; 99 L&ecirc; &#x110;&#x1EE9;c Th&#x1ECD;, M&#x1EF9; &#x110;&#xEC;nh, H&#xE0; N&#x1ED9;i &rarr;
+    </a>
   </div>
+
+  <!-- GALLERY -->
   <div class="i-block">
     <div class="i-block-ttl">&#x1EA2;nh ho&#x1EA1;t &#x111;&#x1ED9;ng</div>
     <div class="i-gallery" id="iGallery"><span class="i-gallery-empty">Ch&#x01B0;a c&#xF3; &#x1EA3;nh &#x2014; h&#xE3;y upload v&#xE0;o tab Album</span></div>
   </div>
+
 </div>
 </div>
 
@@ -1443,7 +1477,19 @@ const MONTHS=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6',
 
 // ─── STATE ───
 let members=[], memberUid=1, newGender='m';
-let clbInfo={desc:'Nhom nho ~30 nguoi, choi pickleball buoi toi thu 3 va thu 6.',memberCount:'~30',time1:'18:00–20:00',loc1:'San Ocean Pickleball',time2:'18:00–20:00',loc2:'San Ocean Pickleball'};
+let clbInfo={
+  desc:'CLB GM Authentic quy t\u1ee5 TOP nh\u1eefng tay v\u1ee3t t\u00e0i n\u0103ng c\u1ee7a H\u00e0 N\u1ed9i, sinh ho\u1ea1t m\u1ed7i t\u1ed1i Th\u1ee9 3 & Th\u1ee9 6 h\u00e0ng tu\u1ea7n. Ch\u00fang t\u00f4i c\u01b0\u1eddi nhi\u1ec1u h\u01a1n th\u1eafng, tranh lu\u1eadn nhi\u1ec1u h\u01a1n t\u1eadp, v\u00e0 c\u00f3 m\u1ed9t qu\u1ef9 CLB ng\u00e0y c\u00e0ng ph\u1ed3ng to nh\u1EDD nh\u1EEFng ng\u01b0\u1EDDi thua tr\u1EADn kh\u00f4ng ch\u1ECBu th\u1EEBa nh\u1EADn m\u00ecnh d\u1EDF.',
+  memberCount:'~30',
+  badge:'\ud83c\udff8 Pickleball Club',
+  time1:'18:00\u201320:00',loc1:'S\u00e2n Ocean Pickleball',
+  time2:'18:00\u201320:00',loc2:'S\u00e2n Ocean Pickleball',
+  features:[
+    {icon:'\ud83c\udff8',title:'Pickleball \u0111\u00f4i',sub:'B\u1ed1c th\u0103m chia \u0111\u1ed9i ngay t\u1ea1i s\u00e2n'},
+    {icon:'\ud83d\udcb0',title:'Qu\u1ef9 r\u00f5 r\u00e0ng',sub:'Thua tr\u1eadn n\u1ed9p qu\u1ef9 \u2014 minh b\u1ea1ch 100%'},
+    {icon:'\ud83c\udf7b',title:'\u0102n nh\u1eadu h\u00e0ng th\u00e1ng',sub:'\u0110\u00e1nh xong k\u00e9o nhau \u0103n t\u1ed1i'},
+    {icon:'\ud83c\udf0d',title:'Du l\u1ecbch h\u00e0ng n\u0103m',sub:'Trip CLB m\u1ed7i n\u0103m t\u1eeb qu\u1ef9 chung'}
+  ]
+};
 let tgt=11, cat='nam', matches=[], matchUid=1;
 let sessionDate='', pickerCtx=null;
 
@@ -4546,11 +4592,25 @@ function toggleBetEntryPaid(matchId){
 function renderIntro(){
   const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.textContent=val;};
   set('iStatMember',clbInfo.memberCount);
+  set('iHeroBadge',clbInfo.badge);
   set('iDesc',clbInfo.desc);
   set('iTime1',clbInfo.time1);
   set('iLoc1',clbInfo.loc1);
   set('iTime2',clbInfo.time2);
   set('iLoc2',clbInfo.loc2);
+  // Render feature cards
+  const feats=document.getElementById('iFeatures');
+  if(feats){
+    const editHint=isAdmin?'<span class="i-feat-edit-hint">✏️</span>':'';
+    feats.innerHTML=(clbInfo.features||[]).map((f,i)=>`
+      <div class="i-feat">
+        <div class="i-feat-icon" id="iIcon${i}">${f.icon||'🏸'}</div>
+        <div class="i-feat-title" id="iTitle${i}">${xe(f.title||'')}</div>
+        <div class="i-feat-sub" id="iSub${i}">${xe(f.sub||'')}</div>
+      </div>`).join('');
+    // Re-bind edit if admin
+    if(isAdmin) _bindFeatEdit();
+  }
   const gallery=document.getElementById('iGallery');
   if(!gallery) return;
   const photos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)));
@@ -4559,19 +4619,82 @@ function renderIntro(){
     const bg=document.getElementById('iHeroBg');
     if(bg) bg.style.backgroundImage='';
   } else {
-    gallery.innerHTML=photos.map(a=>`<div class="i-gimg"><img loading="lazy" src="${a.url}" loading="lazy" decoding="async"></div>`).join('');
+    gallery.innerHTML=photos.map((a,i)=>`<div class="i-gimg" onclick="openIntroPhoto(${i})" style="cursor:pointer"><img loading="lazy" src="${a.url}" decoding="async"></div>`).join('');
+    window._introPhotos=photos;
     const bg=document.getElementById('iHeroBg');
     if(bg) bg.style.backgroundImage=`url('${photos[photos.length-1].url}')`;
   }
 }
+function _bindFeatEdit(){
+  (clbInfo.features||[]).forEach((f,i)=>{
+    ['Icon','Title','Sub'].forEach(field=>{
+      const el=document.getElementById('i'+field+i);
+      if(!el) return;
+      el.contentEditable='true';
+      el.style.outline='none';
+      el.oninput=()=>{
+        const key=field.toLowerCase();
+        clbInfo.features[i][key]=el.textContent.trim();
+        debounceSave();
+      };
+    });
+  });
+}
+function openIntroPhoto(startIdx){
+  const photos=window._introPhotos||[];
+  if(!photos.length) return;
+  let curIdx=startIdx;
+  function renderLb(){
+    const cur=photos[curIdx];
+    const hasPrev=curIdx>0, hasNext=curIdx<photos.length-1;
+    lb.innerHTML=`
+      <img loading="lazy" src="${cur.url}" onclick="event.stopPropagation()" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;user-select:none;" decoding="async">
+      <button onclick="this.closest('.album-lightbox').remove()" style="position:fixed;top:16px;right:16px;background:#000a;border:none;border-radius:8px;color:#fff;font-size:20px;padding:4px 12px;cursor:pointer;z-index:1;">✕</button>
+      ${photos.length>1?`<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:#000b;border-radius:24px;padding:6px 14px;">
+        <button onclick="event.stopPropagation();iLbNav(-1)" style="background:none;border:none;color:${hasPrev?'#fff':'#ffffff40'};font-size:28px;cursor:${hasPrev?'pointer':'default'};padding:0 6px;">‹</button>
+        <span style="color:#ffffffa0;font-size:12px;font-weight:700;">${curIdx+1} / ${photos.length}</span>
+        <button onclick="event.stopPropagation();iLbNav(1)" style="background:none;border:none;color:${hasNext?'#fff':'#ffffff40'};font-size:28px;cursor:${hasNext?'pointer':'default'};padding:0 6px;">›</button>
+      </div>`:''}
+      ${cur.title?`<div style="position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#000b;color:#fff;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;max-width:80%;text-align:center;">${xe(cur.title)}</div>`:''}
+    `;
+  }
+  window.iLbNav=function(dir){
+    const next=curIdx+dir;
+    if(next<0||next>=photos.length) return;
+    curIdx=next; renderLb();
+  };
+  const lb=document.createElement('div');
+  lb.className='album-lightbox';
+  lb.onclick=()=>lb.remove();
+  document.body.appendChild(lb);
+  renderLb();
+  const keyHandler=(e)=>{
+    if(!document.body.contains(lb)){document.removeEventListener('keydown',keyHandler);return;}
+    if(e.key==='ArrowRight') window.iLbNav(1);
+    if(e.key==='ArrowLeft') window.iLbNav(-1);
+    if(e.key==='Escape') lb.remove();
+  };
+  document.addEventListener('keydown',keyHandler);
+}
 function enableIntroEdit(on){
-  const map={iStatMember:'memberCount',iDesc:'desc',iTime1:'time1',iLoc1:'loc1',iTime2:'time2',iLoc2:'loc2'};
+  const map={iStatMember:'memberCount',iHeroBadge:'badge',iDesc:'desc',iTime1:'time1',iLoc1:'loc1',iTime2:'time2',iLoc2:'loc2'};
   Object.keys(map).forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
     el.contentEditable=on?'true':'false';
     el.oninput=on?()=>{clbInfo[map[id]]=el.textContent.trim();debounceSave();}:null;
   });
+  // Feature cards
+  if(on){
+    _bindFeatEdit();
+  } else {
+    (clbInfo.features||[]).forEach((_,i)=>{
+      ['Icon','Title','Sub'].forEach(field=>{
+        const el=document.getElementById('i'+field+i);
+        if(el){ el.contentEditable='false'; el.oninput=null; }
+      });
+    });
+  }
 }
 function renderDebtSummary(){
   const wrap=document.getElementById('quy-debt-wrap');
