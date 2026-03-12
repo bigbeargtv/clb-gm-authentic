@@ -1496,37 +1496,40 @@ let sessionDate='', pickerCtx=null;
 // ─── FIREBASE ───
 const FB_URL = 'https://clb-gm-authentic-default-rtdb.asia-southeast1.firebasedatabase.app';
 
+// Safe AbortController - tránh lỗi trong sandbox/iframe
+function makeAbort(ms){
+  try{
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),ms);
+    return {signal:ctrl.signal,clear:()=>clearTimeout(timer)};
+  }catch(e){
+    return {signal:undefined,clear:()=>{}};
+  }
+}
 async function fbGet(path){
   try{
-    const ctrl = new AbortController();
-    const timer = setTimeout(()=>ctrl.abort(), 8000); // timeout 8s
-    const r = await fetch(FB_URL+path+'.json', {signal:ctrl.signal});
-    clearTimeout(timer);
-    if(!r.ok){
-      console.warn('fbGet failed:', r.status, r.statusText);
-      return null;
-    }
+    const {signal,clear}=makeAbort(8000);
+    const opts=signal?{signal}:{};
+    const r=await fetch(FB_URL+path+'.json',opts);
+    clear();
+    if(!r.ok){ console.warn('fbGet failed:',r.status); return null; }
     return await r.json();
   }catch(e){
-    console.warn('fbGet error:', e.message);
+    if(e.name!=='AbortError') console.warn('fbGet error:',e.message);
     return null;
   }
 }
-async function fbSet(path, data){
+async function fbSet(path,data){
   try{
-    const ctrl = new AbortController();
-    const timer = setTimeout(()=>ctrl.abort(), 8000);
-    const r = await fetch(FB_URL+path+'.json',{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(data),
-      signal:ctrl.signal
-    });
-    clearTimeout(timer);
-    if(!r.ok) console.warn('fbSet failed:', r.status, r.statusText);
+    const {signal,clear}=makeAbort(8000);
+    const opts={method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)};
+    if(signal) opts.signal=signal;
+    const r=await fetch(FB_URL+path+'.json',opts);
+    clear();
+    if(!r.ok) console.warn('fbSet failed:',r.status);
     return r.ok;
   }catch(e){
-    console.warn('fbSet error:', e.message);
+    if(e.name!=='AbortError') console.warn('fbSet error:',e.message);
     return false;
   }
 }
