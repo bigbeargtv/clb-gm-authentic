@@ -1568,13 +1568,11 @@ function applyRemoteData(data){
   }
   if(data.matches !== undefined){
     const remote = JSON.stringify(data.matches||[]);
-    // Chỉ so sánh phần saved để tránh unsaved card trigger re-render
     const localSaved = JSON.stringify(matches.filter(m=>m.saved));
     if(remote !== localSaved){
       const unsaved = matches.filter(m=>!m.saved);
-      matches = data.matches||[];
+      matches = [...(data.matches||[]), ...unsaved];
       matchUid = data.matchUid||1;
-      if(unsaved.length) matches = [...matches, ...unsaved];
       changed=true;
     }
   }
@@ -1662,7 +1660,7 @@ async function save(){
   };
   const ok = await fbSet('/clb',{
     members, memberUid,
-    matches, matchUid,
+    matches: matches.filter(m=>m.saved), matchUid,
     tgt, cat, sessionDate,
     drawSessionsMeta,
     drawDraft,
