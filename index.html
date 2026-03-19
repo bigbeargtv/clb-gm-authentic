@@ -207,6 +207,7 @@ nav::-webkit-scrollbar{display:none;}
 .cpill.nam.on{border-color:var(--nam-c);color:var(--nam-c);background:#4a90e214;}
 .cpill.mix.on{border-color:var(--mix-c);color:var(--mix-c);background:#f0b42914;}
 .cpill.nu.on{border-color:var(--nu-c);color:var(--nu-c);background:#e879b014;}
+.cpill.hon.on{border-color:#6a1b9a;color:#6a1b9a;background:#6a1b9a14;}
 
 .add-btn{
   width:100%;padding:14px;margin-bottom:14px;
@@ -245,6 +246,7 @@ nav::-webkit-scrollbar{display:none;}
 .cb-nam{background:#4a90e218;color:var(--nam-c);}
 .cb-mix{background:#f0b42918;color:var(--mix-c);}
 .cb-nu{background:#e879b018;color:var(--nu-c);}
+.cb-hon{background:#6a1b9a18;color:#6a1b9a;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;padding:2px 4px;line-height:1;border-radius:6px;transition:all .15s;}
 .del-btn:hover{color:var(--red);background:#e0555518;}
 
@@ -583,6 +585,8 @@ nav::-webkit-scrollbar{display:none;}
 .bxh-tab.on-nam{background:linear-gradient(135deg,#dceeff,#eef5ff);color:var(--nam-c);box-shadow:0 2px 8px #4a90e220;}
 .bxh-tab.on-mix{background:linear-gradient(135deg,#fff3d0,#fffaec);color:var(--mix-c);box-shadow:0 2px 8px #f0b42920;}
 .bxh-tab.on-nu{background:linear-gradient(135deg,#fce4f0,#fff0f8);color:var(--nu-c);box-shadow:0 2px 8px #e879b020;}
+.bxh-tab.on-all{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);color:#2e7d32;box-shadow:0 2px 8px #2e7d3220;}
+.bxh-tab.on-hon{background:linear-gradient(135deg,#ede7f6,#f3e5f5);color:#6a1b9a;box-shadow:0 2px 8px #6a1b9a20;}
 
 
 /* ── BXH FILTER ── */
@@ -1245,8 +1249,9 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <div class="sl admin-only">Loại trận mới</div>
   <div class="cats admin-only">
     <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')">👨 Đôi Nam</div>
-    <div class="cpill mix" id="cp-mix" onclick="setCat('mix')">👫 Nam - Nữ</div>
     <div class="cpill nu" id="cp-nu" onclick="setCat('nu')">👩 Đôi Nữ</div>
+    <div class="cpill mix" id="cp-mix" onclick="setCat('mix')">👫 Nam - Nữ</div>
+    <div class="cpill hon" id="cp-hon" onclick="setCat('hon')">🎯 Hỗn Hợp</div>
   </div>
   <button class="add-btn admin-only" onclick="addMatch()">＋ Thêm trận đấu</button>
   <div id="mlist"></div>
@@ -1255,9 +1260,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 <!-- BXH -->
 <div class="pg" id="pg-bxh">
   <div class="bxh-tabs">
-    <button class="bxh-tab on-nam" id="btab-nam" onclick="switchBxhTab('nam')">👨 Đôi Nam</button>
+    <button class="bxh-tab on-all" id="btab-all" onclick="switchBxhTab('all')">🏆 Tổng hợp</button>
+    <button class="bxh-tab" id="btab-nam" onclick="switchBxhTab('nam')">👨 Đôi Nam</button>
     <button class="bxh-tab" id="btab-mix" onclick="switchBxhTab('mix')">👫 Nam Nữ</button>
     <button class="bxh-tab" id="btab-nu" onclick="switchBxhTab('nu')">👩 Đôi Nữ</button>
+    <button class="bxh-tab" id="btab-hon" onclick="switchBxhTab('hon')">🎯 Hỗn Hợp</button>
   </div>
 
   <div class="bxh-filter">
@@ -1273,9 +1280,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   </div>
 
   <div id="bxh-result-label"></div>
-  <div id="bxh-nam"></div>
+  <div id="bxh-all"></div>
+  <div id="bxh-nam" style="display:none"></div>
   <div id="bxh-mix" style="display:none"></div>
   <div id="bxh-nu" style="display:none"></div>
+  <div id="bxh-hon" style="display:none"></div>
 </div>
 
 <!-- HISTORY -->
@@ -1472,8 +1481,8 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 <script>
 // ─── CONSTANTS ───
 const AVC=['avc0','avc1','avc2','avc3','avc4','avc5','avc6','avc7','avc8','avc9'];
-const CL={nam:'Đôi Nam',mix:'Nam - Nữ',nu:'Đôi Nữ'};
-const CB={nam:'cb-nam',mix:'cb-mix',nu:'cb-nu'};
+const CL={nam:'Đôi Nam',mix:'Nam - Nữ',nu:'Đôi Nữ',hon:'Hỗn Hợp'};
+const CB={nam:'cb-nam',mix:'cb-mix',nu:'cb-nu',hon:'cb-hon'};
 const DAYS=['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
 const MONTHS=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6','tháng 7','tháng 8','tháng 9','tháng 10','tháng 11','tháng 12'];
 
@@ -2439,7 +2448,7 @@ function renderManualPairBuilder(){
   const el = document.getElementById('draw-match-section');
   if(!el||!drawTeams.length) return;
   const catOpts = [
-    {v:'nam',l:'👨 Đôi Nam'},{v:'mix',l:'👫 Nam Nữ'},{v:'nu',l:'👩 Đôi Nữ'}
+    {v:'nam',l:'👨 Đôi Nam'},{v:'mix',l:'👫 Nam Nữ'},{v:'nu',l:'👩 Đôi Nữ'},{v:'hon',l:'🎯 Hỗn Hợp'}
   ];
   const allPlayers = drawTeams.flatMap(t=>t.players.map(p=>({name:p,team:t.id})));
   const manualPairs = window._manualPairs||[];
@@ -2495,7 +2504,7 @@ function updateManualPair(i,field,val){
   if(!window._manualPairs||!window._manualPairs[i]) return;
   window._manualPairs[i][field]=val;
   // update label
-  const catMap={nam:'👨 Đôi Nam',mix:'👫 Nam Nữ',nu:'👩 Đôi Nữ'};
+  const catMap={nam:'👨 Đôi Nam',mix:'👫 Nam Nữ',nu:'👩 Đôi Nữ',hon:'🎯 Hỗn Hợp'};
   window._manualPairs[i].label = catMap[window._manualPairs[i].cat]||'';
   window._matchPairs = window._manualPairs;
   checkSaveBtn();
@@ -3072,6 +3081,15 @@ function openPicker(matchId,field){
         +'</div>';
       list.innerHTML = colM + colF;
     }
+  } else if(m.cat==='hon'){
+    // Hỗn Hợp: hiện tất cả thành viên, không phân biệt giới tính
+    list.className='pk-list';
+    const all = [...members].sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+    if(!all.length){
+      list.innerHTML='<div class="pk-empty">Chưa có thành viên nào.<br>Thêm ở tab <strong>Thành viên</strong> nhé!</div>';
+    } else {
+      list.innerHTML = all.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
+    }
   } else {
     // Single column filtered by gender, sorted A->Z
     list.className='pk-list';
@@ -3271,7 +3289,7 @@ function logoutAdmin(){
 }
 
 // ─── MATCH ───
-function setCat(c){cat=c;['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});debounceSave();}
+function setCat(c){cat=c;['nam','mix','nu','hon'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});debounceSave();}
 
 function addMatch(){
   if(!isAdmin)return;
@@ -5359,7 +5377,7 @@ function delAlbumPhoto(id){
 
 // ─── BXH ───
 // ─── BXH FILTER ───
-let activeBxhTab = 'nam';
+let activeBxhTab = 'all';
 let bxhFilter = { mode: 'all', from: '', to: '' }; // mode: all | year | month | custom
 
 function initBxhFilter(){
@@ -5451,7 +5469,7 @@ function getFilterLabel(){
 
 function switchBxhTab(ct){
   activeBxhTab = ct;
-  ['nam','mix','nu'].forEach(t=>{
+  ['all','nam','mix','nu','hon'].forEach(t=>{
     document.getElementById('bxh-'+t).style.display = t===ct ? 'block' : 'none';
     const btn = document.getElementById('btab-'+t);
     btn.className = 'bxh-tab' + (t===ct ? ' on-'+t : '');
@@ -5466,37 +5484,40 @@ function renderBXH(){
   const labelEl = document.getElementById('bxh-result-label');
   if(labelEl) labelEl.innerHTML = saved.length ? '<span class="bxh-result-label">'+getFilterLabel()+' · '+saved.length+' trận</span>' : '';
   if(!saved.length){
-    ['nam','mix','nu'].forEach(ct=>{ document.getElementById('bxh-'+ct).innerHTML=emptyHtml; });
+    ['all','nam','mix','nu','hon'].forEach(ct=>{ document.getElementById('bxh-'+ct).innerHTML=emptyHtml; });
     return;
   }
   const stats={};
+  const statsAll={};
   function addP(ct,name,pf,pa,won){
     if(!name||!name.trim())return;
     const k=ct+'|'+name.trim().toLowerCase();
     if(!stats[k]){const mb=mbOf(name);stats[k]={cat:ct,name:name.trim(),mb,w:0,l:0,pf:0,pa:0};}
     stats[k].pf+=pf;stats[k].pa+=pa;
     if(won)stats[k].w++;else stats[k].l++;
+    const ka=name.trim().toLowerCase();
+    if(!statsAll[ka]){const mb=mbOf(name);statsAll[ka]={name:name.trim(),mb,w:0,l:0,pf:0,pa:0};}
+    statsAll[ka].pf+=pf;statsAll[ka].pa+=pa;
+    if(won)statsAll[ka].w++;else statsAll[ka].l++;
   }
   saved.forEach(m=>{
     const s1=+m.s1,s2=+m.s2,w1=s1>s2;
     [m.t1p1,m.t1p2].forEach(p=>addP(m.cat,p,s1,s2,w1));
     [m.t2p1,m.t2p2].forEach(p=>addP(m.cat,p,s2,s1,!w1));
   });
-  const all=Object.values(stats);
   const srt=(a,b)=>{if(b.w!==a.w)return b.w-a.w;const da=a.pf-a.pa,db=b.pf-b.pa;if(db!==da)return db-da;return b.pf-a.pf;};
-  ['nam','mix','nu'].forEach(ct=>{
-    const el = document.getElementById('bxh-'+ct);
-    const players=all.filter(p=>p.cat===ct).sort(srt);
-    if(!players.length){ el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chưa có trận '+CL[ct]+' nào.</div>'; return; }
-    let h = '<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">Hiệu số</div><div class="nc">Điểm</div></div>';
+  function buildTable(players,elId){
+    const el=document.getElementById(elId);
+    if(!players.length){el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chưa có trận nào.</div>';return;}
+    let h='<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">Hiệu số</div><div class="nc">Điểm</div></div>';
     players.forEach((p,i)=>{
       const diff=p.pf-p.pa,ds=(diff>0?'+':'')+diff,dc=diff>=0?'dp':'dn';
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
       const avcls=p.mb?AVC[p.mb.color]:'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-      const bxhAv = (p.mb&&p.mb.photo)
-        ? '<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
-        : '<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
+      const bxhAv=(p.mb&&p.mb.photo)
+        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
+        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
       h+=`<div class="tbl-r ${rc}">
         <div class="rk">${medal||i+1}</div>
         <div class="bxh-player">${bxhAv}<span class="bxh-nm">${xe(p.name)}</span></div>
@@ -5506,9 +5527,13 @@ function renderBXH(){
         <div class="pc">${p.pf}</div>
       </div>`;
     });
-    el.innerHTML = h;
+    el.innerHTML=h;
+  }
+  const allStats=Object.values(stats);
+  buildTable(Object.values(statsAll).sort(srt),'bxh-all');
+  ['nam','mix','nu','hon'].forEach(ct=>{
+    buildTable(allStats.filter(p=>p.cat===ct).sort(srt),'bxh-'+ct);
   });
-  // Restore active tab visibility
   switchBxhTab(activeBxhTab);
 }
 
@@ -5734,7 +5759,7 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
   dateEl.value=sessionDate||todayStr();
   dateEl.addEventListener('change',()=>{sessionDate=dateEl.value;debounceSave();});
   // Set cat/tgt buttons
-  ['nam','mix','nu'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
+  ['nam','mix','nu','hon'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
   renderMembers();
   renderMatches();
   renderIntro();
