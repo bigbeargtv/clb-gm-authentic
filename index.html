@@ -26,7 +26,7 @@
   <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CLB GM AUTHENTIC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -668,7 +668,7 @@ nav::-webkit-scrollbar{display:none;}
 .bet-custom-row{display:flex;gap:8px;align-items:center;}
 .bet-inp{
   flex:1;background:var(--s2);border:1.5px solid var(--bdr2);color:var(--text);
-  border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Nunito',sans-serif;
+  border-radius:10px;padding:8px 12px;font-size:16px;font-family:'Nunito',sans-serif;
   outline:none;transition:border-color .2s;
 }
 .bet-inp:focus{border-color:var(--green);}
@@ -1647,8 +1647,9 @@ let saveTimer=null;
 function debounceSave(){
   clearTimeout(saveTimer);
   setSaveDotPending();
-  // Khi đang nhập trận (unsaved card tồn tại) → delay 2s để tránh SSE echo làm reset UI
-  const delay = matches.some(m=>!m.saved) ? 2000 : 100;
+  // Có unsaved card: 1500ms (tránh SSE echo reset UI khi đang nhập)
+  // Không có unsaved: 800ms (đủ nhanh, không spam Firebase)
+  const delay = matches.some(m=>!m.saved) ? 1500 : 800;
   saveTimer=setTimeout(()=>{ save(); }, delay);
 }
 async function save(){
@@ -1680,7 +1681,7 @@ async function save(){
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
-  setTimeout(()=>{ isSyncing = false; }, 5000);
+  setTimeout(()=>{ isSyncing = false; }, 1500);
   // Auto-snapshot (throttled: max 1 per 5 min)
   if(ok && isAdmin){
     const now = Date.now();
@@ -3082,13 +3083,12 @@ function openPicker(matchId,field){
       list.innerHTML = colM + colF;
     }
   } else if(m.cat==='hon'){
-    // Hỗn Hợp: hiện tất cả thành viên, không phân biệt giới tính
     list.className='pk-list';
-    const all = [...members].sort((a,b)=>a.name.localeCompare(b.name,'vi'));
-    if(!all.length){
+    const allMb = [...members].sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+    if(!allMb.length){
       list.innerHTML='<div class="pk-empty">Chưa có thành viên nào.<br>Thêm ở tab <strong>Thành viên</strong> nhé!</div>';
     } else {
-      list.innerHTML = all.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
+      list.innerHTML = allMb.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
     }
   } else {
     // Single column filtered by gender, sorted A->Z
@@ -3289,7 +3289,7 @@ function logoutAdmin(){
 }
 
 // ─── MATCH ───
-function setCat(c){cat=c;['nam','mix','nu','hon'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});debounceSave();}
+function setCat(c){cat=c;['nam','mix','nu','hon'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===c?' on':'');});}
 
 function addMatch(){
   if(!isAdmin)return;
@@ -3840,14 +3840,14 @@ function setWinner(id, side){
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
   debounceSave(); // ← quan trọng: lưu lên Firebase
 }
+let _scoreTimer=null;
 function upScore(id,f,v){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m[f]=v;
-  // auto-set winner from scores
   const s1=parseInt(m.s1)||0, s2=parseInt(m.s2)||0;
   if(m.s1!==''&&m.s2!==''&&s1!==s2) m.winner=s1>s2?'A':'B';
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
-  // update winner highlight live
+  // chỉ cập nhật DOM, không full re-render
   const mc=document.getElementById('mc'+id);
   if(mc){
     mc.querySelectorAll('.wl-btn').forEach(btn=>{
@@ -3856,7 +3856,10 @@ function upScore(id,f,v){
       btn.classList.toggle('lose', m.winner&&m.winner!==side);
     });
   }
-  debounceSave();
+  // debounce riêng 1s — tránh spam khi gõ số nhanh
+  clearTimeout(_scoreTimer);
+  setSaveDotPending();
+  _scoreTimer=setTimeout(()=>save(), 1000);
 }
 function saveMatch(id){
   if(!isAdmin)return;
@@ -3906,12 +3909,15 @@ function setBet(matchId, val){
   if(mc){ const presets=[0,50000,100000,200000,500000]; mc.querySelectorAll('.bet-pill').forEach((p,i)=>{ p.classList.toggle('on', m.bet===presets[i]); }); }
   debounceSave();
 }
+let _betTimer=null;
 function setBetCustom(matchId, val){
   if(!isAdmin) return;
   const m=matches.find(m=>m.id===matchId);
   if(!m) return;
   m.bet = val===''? 0 : parseInt(val)||0;
-  debounceSave();
+  clearTimeout(_betTimer);
+  setSaveDotPending();
+  _betTimer=setTimeout(()=>save(), 1000);
 }
 
 // ─── QUỸ ───
@@ -5506,7 +5512,7 @@ function renderBXH(){
     [m.t2p1,m.t2p2].forEach(p=>addP(m.cat,p,s2,s1,!w1));
   });
   const srt=(a,b)=>{if(b.w!==a.w)return b.w-a.w;const da=a.pf-a.pa,db=b.pf-b.pa;if(db!==da)return db-da;return b.pf-a.pf;};
-  function buildTable(players,elId){
+  function buildBxhTable(players,elId){
     const el=document.getElementById(elId);
     if(!players.length){el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chưa có trận nào.</div>';return;}
     let h='<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">Hiệu số</div><div class="nc">Điểm</div></div>';
@@ -5530,9 +5536,9 @@ function renderBXH(){
     el.innerHTML=h;
   }
   const allStats=Object.values(stats);
-  buildTable(Object.values(statsAll).sort(srt),'bxh-all');
+  buildBxhTable(Object.values(statsAll).sort(srt),'bxh-all');
   ['nam','mix','nu','hon'].forEach(ct=>{
-    buildTable(allStats.filter(p=>p.cat===ct).sort(srt),'bxh-'+ct);
+    buildBxhTable(allStats.filter(p=>p.cat===ct).sort(srt),'bxh-'+ct);
   });
   switchBxhTab(activeBxhTab);
 }
