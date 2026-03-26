@@ -691,8 +691,50 @@ nav::-webkit-scrollbar{display:none;}
 .stat-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-top:3px;}
 .stat-bar-wrap{background:var(--s1);border-radius:8px;height:10px;overflow:hidden;margin-top:4px;}
 .stat-bar{height:10px;border-radius:8px;transition:width .6s ease;}
-.partner-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);}
+.partner-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);}
 .partner-row:last-child{border-bottom:none;}
+/* Stats redesign */
+.stats-hero{background:linear-gradient(135deg,var(--s2) 0%,var(--s1) 100%);border:1.5px solid var(--bdr2);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.stats-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:var(--gold);opacity:.04;pointer-events:none;}
+.stats-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.stats-kpi-box{background:var(--s1);border-radius:12px;padding:10px 6px;text-align:center;border:1.5px solid var(--bdr);}
+.stats-kpi-box.win{border-color:#1a9e6030;background:#1a9e6008;}
+.stats-kpi-box.lose{border-color:#e5555530;background:#e5555508;}
+.stats-kpi-num{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;line-height:1;}
+.stats-kpi-lbl{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.8px;}
+.stats-winbar{height:8px;border-radius:8px;background:var(--s1);overflow:hidden;margin:4px 0 2px;}
+.stats-winbar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),#8bc34a);transition:width .8s ease;}
+.streak-dots{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.streak-dot{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;}
+.streak-dot.W{background:#1a9e6020;color:var(--green);border:1.5px solid #1a9e6040;}
+.streak-dot.L{background:#e5555518;color:#e55;border:1.5px solid #e5555530;}
+.streak-dot.D{background:var(--s1);color:var(--muted);border:1.5px solid var(--bdr);}
+.stats-section{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.stats-section-title{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+.stats-catbar{margin-bottom:10px;}
+.stats-catbar:last-child{margin-bottom:0;}
+.stats-catbar-head{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:4px;}
+.stats-catbar-track{height:8px;background:var(--s1);border-radius:8px;overflow:hidden;}
+.stats-catbar-fill{height:100%;border-radius:8px;transition:width .7s ease;}
+.stats-pr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.stats-pr:last-child{border-bottom:none;}
+.stats-pr-name{font-weight:800;font-size:13px;cursor:pointer;color:var(--text);}
+.stats-pr-name:hover{color:var(--gold);text-decoration:underline;}
+.stats-pr-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.stats-pr-bar{width:50px;height:6px;background:var(--s1);border-radius:6px;overflow:hidden;flex-shrink:0;}
+.stats-pr-bar-fill{height:100%;border-radius:6px;}
+.stats-match-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);}
+.stats-match-row:last-child{border-bottom:none;}
+.stats-res-badge{font-size:10px;font-weight:900;padding:3px 8px;border-radius:8px;flex-shrink:0;min-width:42px;text-align:center;}
+.stats-res-badge.W{background:#1a9e6020;color:var(--green);}
+.stats-res-badge.L{background:#e5555518;color:#e55;}
+.stats-res-badge.D{background:var(--s1);color:var(--muted);}
+.stats-member-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.stats-mb-chip{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;cursor:pointer;transition:all .15s;}
+.stats-mb-chip:hover,.stats-mb-chip.on{border-color:var(--gold);background:#f0b42910;}
+.stats-mb-chip-name{font-size:11px;font-weight:800;text-align:center;line-height:1.2;color:var(--text);}
+.name-link{cursor:pointer;color:inherit;border-bottom:1px dashed var(--bdr2);transition:color .15s;}
+.name-link:hover{color:var(--gold);border-bottom-color:var(--gold);}
 
 /* ALBUM */
 .album-section{margin-bottom:18px;}
@@ -1348,7 +1390,7 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 
 <!-- THỐNG KÊ CÁ NHÂN -->
 <div class="pg" id="pg-stats">
-  <div id="stats-picker" style="margin-bottom:12px;"></div>
+  <div id="stats-picker"></div>
   <div id="stats-content"></div>
 </div>
 
@@ -1647,8 +1689,7 @@ let saveTimer=null;
 function debounceSave(){
   clearTimeout(saveTimer);
   setSaveDotPending();
-  // Có unsaved card: 1500ms (tránh SSE echo reset UI khi đang nhập)
-  // Không có unsaved: 800ms (đủ nhanh, không spam Firebase)
+  // Khi đang nhập trận (unsaved card tồn tại) → delay 2s để tránh SSE echo làm reset UI
   const delay = matches.some(m=>!m.saved) ? 1500 : 800;
   saveTimer=setTimeout(()=>{ save(); }, delay);
 }
@@ -3091,7 +3132,6 @@ function openPicker(matchId,field){
       list.innerHTML = allMb.map(mb=>pkItemHtml(mb, current===mb.name, !(current===mb.name)&&used.includes(mb.name), false)).join('');
     }
   } else {
-    // Single column filtered by gender, sorted A->Z
     list.className='pk-list';
     const gFilter = m.cat==='nam' ? 'm' : 'f';
     const filtered = [...members].filter(mb=>mb.gender===gFilter).sort((a,b)=>a.name.localeCompare(b.name,'vi'));
@@ -3785,7 +3825,7 @@ function rSaved(m){
   const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
   const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
     ${names.map(n=>av(n)).join('')}
-    <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
+    <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>`<span class=\'name-link\' onclick=\'goStats(\'\'+n.replace(/\'/g,"\\\\'\')+\'\')\' style=\'cursor:pointer;\'>${xe(n)}</span>`).join(' & ')||'Đội'}</span>
     ${won?'<span style="font-size:11px;">🏅</span>':''}
   </div>`;
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
@@ -3840,14 +3880,14 @@ function setWinner(id, side){
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
   debounceSave(); // ← quan trọng: lưu lên Firebase
 }
-let _scoreTimer=null;
 function upScore(id,f,v){
   const m=matches.find(m=>m.id===id);if(!m)return;
   m[f]=v;
+  // auto-set winner from scores
   const s1=parseInt(m.s1)||0, s2=parseInt(m.s2)||0;
   if(m.s1!==''&&m.s2!==''&&s1!==s2) m.winner=s1>s2?'A':'B';
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
-  // chỉ cập nhật DOM, không full re-render
+  // update winner highlight live
   const mc=document.getElementById('mc'+id);
   if(mc){
     mc.querySelectorAll('.wl-btn').forEach(btn=>{
@@ -3856,10 +3896,9 @@ function upScore(id,f,v){
       btn.classList.toggle('lose', m.winner&&m.winner!==side);
     });
   }
-  // debounce riêng 1s — tránh spam khi gõ số nhanh
-  clearTimeout(_scoreTimer);
+  clearTimeout(window._scoreTimer);
   setSaveDotPending();
-  _scoreTimer=setTimeout(()=>save(), 1000);
+  window._scoreTimer=setTimeout(()=>save(),1000);
 }
 function saveMatch(id){
   if(!isAdmin)return;
@@ -3909,15 +3948,14 @@ function setBet(matchId, val){
   if(mc){ const presets=[0,50000,100000,200000,500000]; mc.querySelectorAll('.bet-pill').forEach((p,i)=>{ p.classList.toggle('on', m.bet===presets[i]); }); }
   debounceSave();
 }
-let _betTimer=null;
 function setBetCustom(matchId, val){
   if(!isAdmin) return;
   const m=matches.find(m=>m.id===matchId);
   if(!m) return;
   m.bet = val===''? 0 : parseInt(val)||0;
-  clearTimeout(_betTimer);
+  clearTimeout(window._betTimer);
   setSaveDotPending();
-  _betTimer=setTimeout(()=>save(), 1000);
+  window._betTimer=setTimeout(()=>save(),1000);
 }
 
 // ─── QUỸ ───
@@ -4279,7 +4317,7 @@ function renderQuy(){
     const paidBadge = allPaid ? '<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-left:4px;">Đã Ủng Hộ ✅</span>' : '';
     html += `<div class="quy-row ${rc}">
       <div class="rk">${rk}</div>
-      <div class="quy-player">${avHtml}<div><span class="quy-nm">${xe(p.name)}</span>${paidBadge}</div></div>
+      <div class="quy-player">${avHtml}<div><span class="quy-nm name-link" onclick="goStats('${p.name.replace(/'/g,"\'")}' )">${xe(p.name)}</span>${paidBadge}</div></div>
       <div class="quy-matches">${p.matches}</div>
       <div class="quy-debt">${fmtNum(p.total)}🍃</div>
     </div>`;
@@ -4886,27 +4924,37 @@ function toggleDebtDetail(id,row){
   if(open) setTimeout(()=>det.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
 }
 // ─── THỐNG KÊ CÁ NHÂN ───
+function goStats(name){
+  statsSelected = name;
+  goTab('pg-stats');
+  setTimeout(()=>{
+    renderStats();
+    const sc=document.getElementById('stats-content');
+    if(sc) sc.scrollIntoView({behavior:'smooth',block:'start'});
+  },80);
+}
+
 function renderStats(){
   const picker = document.getElementById('stats-picker');
   const content = document.getElementById('stats-content');
   if(!picker||!content) return;
 
-  // Picker: chọn thành viên
-  picker.innerHTML = '<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👤 Chọn thành viên</div>'
+  // Grid avatar picker
+  picker.innerHTML = '<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-top:4px;">👤 Chọn thành viên</div>'
+    + '<div class="stats-member-grid">'
     + members.map(m=>{
         const on = statsSelected===m.name;
         const av = m.photo
-          ? `<img loading="lazy" src="${m.photo}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;" decoding="async">`
-          : `<div class="${AVC[m.color]}" style="width:36px;height:36px;border-radius:10px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
-        return `<div class="stats-member-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\'")}')">
+          ? `<img loading="lazy" src="${m.photo}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;" decoding="async">`
+          : `<div class="${AVC[m.color]}" style="width:44px;height:44px;border-radius:12px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
+        return `<div class="stats-mb-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\'")}')">
           ${av}
-          <span style="font-weight:800;font-size:13px;">${xe(m.name)}</span>
-          ${m.nickname?`<span style="font-size:11px;color:var(--gold);">"${xe(m.nickname)}"</span>`:''}
-          <span style="margin-left:auto;font-size:11px;color:var(--muted);">${on?'▲':'▶'}</span>
+          <span class="stats-mb-chip-name">${xe(m.name)}</span>
         </div>`;
-      }).join('');
+      }).join('')
+    + '</div>';
 
-  if(!statsSelected){ content.innerHTML=''; return; }
+  if(!statsSelected){ content.innerHTML='<div class="empty" style="margin-top:12px;"><span class="ei">🏅</span>Chọn thành viên<br>để xem thành tích</div>'; return; }
   content.innerHTML = buildStatsHTML(statsSelected);
 }
 
@@ -4923,19 +4971,20 @@ function buildStatsHTML(name){
     [m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
   if(!allM.length) return '<div class="empty"><span class="ei">📊</span>Chưa có trận nào.</div>';
 
-  // ── Tính các chỉ số ──
+  const sorted = allM.slice().sort((a,b)=>a.date.localeCompare(b.date));
   let wins=0, losses=0, draws=0;
-  const catCount={nam:0,mix:0,nu:0};
-  const catWin={nam:0,mix:0,nu:0};
+  const catCount={}, catWin={};
   const partners={}, rivals={}, partnerWins={}, rivalLosses={};
-  let totalPoints=0, totalPointsAgainst=0, maxWinStreak=0, curStreak=0;
-  let lastDate='', firstDate='';
+  let totalPoints=0, totalPointsAgainst=0;
+  let maxWinStreak=0, curStreak=0, curStreakNow=0;
+  let firstDate='', lastDate='';
+  const recentResults = []; // W/L/D for last 10
 
-  allM.forEach(m=>{
+  sorted.forEach(m=>{
     const inT1=[m.t1p1,m.t1p2].includes(name);
     const myScore  = inT1 ? +m.s1 : +m.s2;
     const oppScore = inT1 ? +m.s2 : +m.s1;
-    const w = m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'' );
+    const w = m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
     const won  = inT1 ? w==='A' : w==='B';
     const lost = inT1 ? w==='B' : w==='A';
 
@@ -4949,188 +4998,211 @@ function buildStatsHTML(name){
     catCount[m.cat]=(catCount[m.cat]||0)+1;
     if(won) catWin[m.cat]=(catWin[m.cat]||0)+1;
 
-    // Partner (cùng đội)
     const partner = inT1 ? (m.t1p1===name?m.t1p2:m.t1p1) : (m.t2p1===name?m.t2p2:m.t2p1);
     if(partner){ partners[partner]=(partners[partner]||0)+1; if(won) partnerWins[partner]=(partnerWins[partner]||0)+1; }
 
-    // Rivals (đội đối)
     const oppTeam = inT1 ? [m.t2p1,m.t2p2] : [m.t1p1,m.t1p2];
     oppTeam.filter(Boolean).forEach(r=>{ rivals[r]=(rivals[r]||0)+1; if(lost) rivalLosses[r]=(rivalLosses[r]||0)+1; });
 
     if(!firstDate||m.date<firstDate) firstDate=m.date;
     if(!lastDate||m.date>lastDate)   lastDate=m.date;
+
+    recentResults.push(won?'W':lost?'L':'D');
   });
+
+  // Streak hiện tại (tính từ trận mới nhất)
+  const revResults = [...recentResults].reverse();
+  let curStreakSign = revResults[0]||null;
+  for(let i=0;i<revResults.length;i++){
+    if(revResults[i]===curStreakSign) curStreakNow++;
+    else break;
+  }
 
   const total = wins+losses+draws;
   const winRate = total ? Math.round(wins/total*100) : 0;
   const mb = mbOf(name);
-  const bigAv = mb&&mb.photo
-    ? `<img loading="lazy" src="${mb.photo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;" decoding="async">`
-    : `<div class="${mb?AVC[mb.color]:''}" style="width:64px;height:64px;border-radius:16px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
 
-  // ── Xếp hạng trong CLB ──
+  // Rank
   const rankData = {};
   members.forEach(m2=>{
     const ms2 = matches.filter(x=>x.saved&&!x.isBetEntry&&[x.t1p1,x.t1p2,x.t2p1,x.t2p2].includes(m2.name));
-    let w2=0,l2=0;
-    ms2.forEach(x=>{
-      const inT=([x.t1p1,x.t1p2].includes(m2.name));
-      const ww=x.winner||(x.s1!==''&&x.s2!==''?(+x.s1>+x.s2?'A':+x.s2>+x.s1?'B':''):'');
-      if(inT?ww==='A':ww==='B') w2++;
-      else if(inT?ww==='B':ww==='A') l2++;
-    });
-    rankData[m2.name]={w:w2,total:ms2.length,rate:ms2.length?w2/ms2.length:0};
-  });
+    let w2=0; ms2.forEach(x=>{ const inT=([x.t1p1,x.t1p2].includes(m2.name)); const ww=x.winner||(x.s1!==''&&x.s2!==''?(+x.s1>+x.s2?'A':+x.s2>+x.s1?'B':''):''); if(inT?ww==='A':ww==='B') w2++; }); rankData[m2.name]={w:w2,total:ms2.length,rate:ms2.length?w2/ms2.length:0}; });
   const rankList = Object.entries(rankData).sort((a,b)=>b[1].rate-a[1].rate||b[1].w-a[1].w);
   const myRank = rankList.findIndex(r=>r[0]===name)+1;
 
-  // ── Top partner ──
-  const topPartners = Object.entries(partners).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  // ── Top rival (thua nhiều nhất) ──
-  const topRivals = Object.entries(rivals).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const bigAv = mb&&mb.photo
+    ? `<img loading="lazy" src="${mb.photo}" style="width:60px;height:60px;border-radius:16px;object-fit:cover;" decoding="async">`
+    : `<div class="${mb?AVC[mb.color]:''}" style="width:60px;height:60px;border-radius:16px;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':\' var(--muted)'};background-color:${mb?'':\' var(--muted)'}">${ini(name)}</div>`;
+
+  const streakLabel = curStreakSign==='W'?`🔥 ${curStreakNow} thắng liên tiếp`:curStreakSign==='L'?`❄️ ${curStreakNow} thua liên tiếp`:'';
+  const streakColor = curStreakSign==='W'?'var(--green)':'#e55';
 
   let h = '';
 
-  // Header profile
-  h += `<div class="stat-card" style="display:flex;align-items:center;gap:14px;">
-    ${bigAv}
-    <div style="flex:1;">
-      <div style="font-size:18px;font-weight:900;">${xe(name)}</div>
-      ${mb&&mb.nickname?`<div style="font-size:12px;color:var(--gold);font-weight:700;">"${xe(mb.nickname)}"</div>`:''}
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">${mb?((mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · '):''}Tham gia từ ${fmtDate(firstDate)}</div>
-      <div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
-        <span style="background:var(--gold);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;">🏅 Hạng ${myRank}/${members.length}</span>
-        <span style="background:var(--green);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;">🔥 ${maxWinStreak} trận thắng liên tiếp</span>
+  // ── HERO CARD ──
+  h += `<div class="stats-hero">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+      ${bigAv}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:20px;font-weight:900;line-height:1.1;">${xe(name)}</div>
+        ${mb&&mb.nickname?`<div style="font-size:12px;color:var(--gold);font-weight:700;">"${xe(mb.nickname)}"</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${mb?((mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · '):''} Tham gia ${fmtDate(firstDate)}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <span style="background:var(--s1);border:1.5px solid var(--bdr2);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">🏅 #${myRank}/${members.length}</span>
+          ${streakLabel?`<span style="background:${curStreakSign==='W'?'#1a9e6015':'#e5555515'};border:1.5px solid ${curStreakSign==='W'?'#1a9e6030':'#e5555530'};color:${streakColor};font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">${streakLabel}</span>`:''}
+        </div>
       </div>
     </div>
-  </div>`;
 
-  // Tổng quan
-  h += `<div class="stat-card">
-    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">📊 Tổng quan</div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="stat-num" style="color:var(--gold);">${total}</div><div class="stat-lbl">Trận đã đấu</div></div>
-      <div class="stat-box"><div class="stat-num" style="color:var(--green);">${wins}</div><div class="stat-lbl">Thắng</div></div>
-      <div class="stat-box"><div class="stat-num" style="color:#e55;">${losses}</div><div class="stat-lbl">Thua</div></div>
+    <div class="stats-kpi">
+      <div class="stats-kpi-box"><div class="stats-kpi-num" style="color:var(--gold);">${total}</div><div class="stats-kpi-lbl">Trận</div></div>
+      <div class="stats-kpi-box win"><div class="stats-kpi-num" style="color:var(--green);">${wins}</div><div class="stats-kpi-lbl">Thắng</div></div>
+      <div class="stats-kpi-box lose"><div class="stats-kpi-num" style="color:#e55;">${losses}</div><div class="stats-kpi-lbl">Thua</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:4px;">
-      <span style="color:var(--green);">Tỉ lệ thắng</span>
-      <span style="color:var(--gold);">${winRate}%</span>
+
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:2px;">
+      <span style="color:var(--muted);">Tỉ lệ thắng</span>
+      <span style="color:${winRate>=50?'var(--green)':'#e55'};">${winRate}%</span>
     </div>
-    <div class="stat-bar-wrap"><div class="stat-bar" style="width:${winRate}%;background:linear-gradient(90deg,var(--green),var(--gold));"></div></div>
+    <div class="stats-winbar"><div class="stats-winbar-fill" style="width:${winRate}%;"></div></div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-      <div class="stat-box"><div class="stat-num" style="color:var(--text);font-size:18px;">${totalPoints}</div><div class="stat-lbl">Điểm ghi được</div></div>
-      <div class="stat-box"><div class="stat-num" style="color:#e55;font-size:18px;">${totalPointsAgainst}</div><div class="stat-lbl">Điểm bị ghi</div></div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${totalPoints}</div>
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm ghi</div>
+      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${totalPointsAgainst}</div>
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm bị ghi</div>
+      </div>
     </div>
   </div>`;
 
-  // Theo thể loại
-  h += `<div class="stat-card">
-    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">🎯 Theo thể loại</div>`;
-  ['nam','mix','nu'].forEach(cat=>{
-    if(!catCount[cat]) return;
-    const wr = Math.round((catWin[cat]||0)/catCount[cat]*100);
-    h += `<div style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:3px;">
-        <span>${CL[cat]}</span>
-        <span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · ${wr}%</span>
+  // ── 10 TRẬN GẦN NHẤT — dot streak ──
+  const last10 = recentResults.slice(-10);
+  if(last10.length){
+    h += `<div class="stats-section">
+      <div class="stats-section-title">⚡ ${last10.length} trận gần nhất</div>
+      <div class="streak-dots">
+        ${last10.map(r=>`<div class="streak-dot ${r}">${r==='W'?'T':r==='L'?'B':'H'}</div>`).join('')}
+        ${last10.length<10?'':''}
       </div>
-      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${wr}%;background:${cat==='nam'?'#4a90e2':cat==='mix'?'var(--gold)':'#e27a9a'};"></div></div>
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;font-weight:800;">
+        <span style="color:var(--green);">T: ${last10.filter(r=>r==='W').length}</span>
+        <span style="color:#e55;">B: ${last10.filter(r=>r==='L').length}</span>
+        ${last10.filter(r=>r==='D').length?`<span style="color:var(--muted);">H: ${last10.filter(r=>r==='D').length}</span>`:''}
+        <span style="color:var(--muted);margin-left:auto;">Best streak: 🔥${maxWinStreak}</span>
+      </div>
     </div>`;
-  });
-  h += '</div>';
+  }
 
-  // Đồng đội hay gặp
+  // ── THEO THỂ LOẠI ──
+  const catKeys = Object.keys(catCount);
+  if(catKeys.length){
+    const catColors = {nam:'#4a90e2',mix:'var(--gold)',nu:'#e27a9a',hon:'#9c27b0'};
+    h += `<div class="stats-section">
+      <div class="stats-section-title">🎯 Theo thể loại</div>`;
+    catKeys.forEach(cat=>{
+      const wr = Math.round((catWin[cat]||0)/catCount[cat]*100);
+      h += `<div class="stats-catbar">
+        <div class="stats-catbar-head">
+          <span>${CL[cat]||cat}</span>
+          <span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · <span style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</span></span>
+        </div>
+        <div class="stats-catbar-track"><div class="stats-catbar-fill" style="width:${wr}%;background:${catColors[cat]||'var(--gold)'};"></div></div>
+      </div>`;
+    });
+    h += '</div>';
+  }
+
+  // Helper: avatar nhỏ + tên có thể click
+  function prAv(pname, sz=32){
+    const pmb=mbOf(pname);
+    return pmb&&pmb.photo
+      ?`<img loading="lazy" src="${pmb.photo}" style="width:${sz}px;height:${sz}px;border-radius:${sz/3}px;object-fit:cover;flex-shrink:0;" decoding="async">`
+      :`<div class="${pmb?AVC[pmb.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${sz/3}px;font-size:${sz/2.8|0}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':\' var(--muted)'};flex-shrink:0;">${ini(pname)}</div>`;
+  }
+
+  // ── ĐỒNG ĐỘI THƯỜNG XUYÊN ──
+  const topPartners = Object.entries(partners).sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(topPartners.length){
-    h += `<div class="stat-card">
-      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">🤝 Đồng đội thường xuyên</div>`;
+    h += `<div class="stats-section"><div class="stats-section-title">🤝 Đồng đội thường xuyên</div>`;
     topPartners.forEach(([pname,count])=>{
-      const pmb=mbOf(pname);
-      const pav=pmb&&pmb.photo?`<img loading="lazy" src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
-        :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
-      const pw = partnerWins[pname]||0;
-      const pwr = Math.round(pw/count*100);
-      h += `<div class="partner-row">
-        ${pav}
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:13px;">${xe(pname)}</div>
-          <div style="font-size:11px;color:var(--muted);">${count} trận cùng · thắng ${pw} (${pwr}%)</div>
+      const pw=partnerWins[pname]||0, pwr=Math.round(pw/count*100);
+      const col = pwr>=50?'var(--green)':'#e55';
+      h += `<div class="stats-pr">
+        ${prAv(pname)}
+        <div style="flex:1;min-width:0;">
+          <div class="stats-pr-name" onclick="goStats('${pname.replace(/'/g,"\'")}')">
+            ${xe(pname)}
+          </div>
+          <div class="stats-pr-sub">${count} trận cùng · thắng ${pw} <span style="color:${col};">(${pwr}%)</span></div>
         </div>
-        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${pwr}%;background:var(--green);"></div></div>
+        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${pwr}%;background:${col};"></div></div>
       </div>`;
     });
     h += '</div>';
   }
 
-  // Đối thủ hay gặp
+  // ── ĐỐI THỦ THƯỜNG XUYÊN ──
+  const topRivals = Object.entries(rivals).sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(topRivals.length){
-    h += `<div class="stat-card">
-      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">⚔️ Đối thủ thường xuyên</div>`;
+    h += `<div class="stats-section"><div class="stats-section-title">⚔️ Đối thủ thường xuyên</div>`;
     topRivals.forEach(([rname,count])=>{
-      const rmb=mbOf(rname);
-      const rav=rmb&&rmb.photo?`<img loading="lazy" src="${rmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
-        :`<div class="${rmb?AVC[rmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${rmb?'':'var(--muted)'};">${ini(rname)}</div>`;
-      const rl=rivalLosses[rname]||0;
-      const rlr=Math.round(rl/count*100);
-      h += `<div class="partner-row">
-        ${rav}
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:13px;">${xe(rname)}</div>
-          <div style="font-size:11px;color:var(--muted);">${count} trận đối · thua ${rl} (${rlr}%)</div>
+      const rl=rivalLosses[rname]||0, rlr=Math.round(rl/count*100);
+      const col = rlr>=50?'#e55':'var(--green)';
+      h += `<div class="stats-pr">
+        ${prAv(rname)}
+        <div style="flex:1;min-width:0;">
+          <div class="stats-pr-name" onclick="goStats('${rname.replace(/'/g,"\'")}')">
+            ${xe(rname)}
+          </div>
+          <div class="stats-pr-sub">${count} trận đối · thua ${rl} <span style="color:${col};">(${rlr}%)</span></div>
         </div>
-        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${rlr}%;background:#e55;"></div></div>
+        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${rlr}%;background:${col};"></div></div>
       </div>`;
     });
     h += '</div>';
   }
 
-  // Đồng đội tỉ lệ thua cao (jinx partner)
+  // ── ĐỒNG ĐỘI XUI XẺO ──
   const jinxPartners = Object.entries(partners)
     .filter(([,c])=>c>=2)
-    .map(([pname,count])=>{
-      const pl = count-(partnerWins[pname]||0);
-      return [pname, count, pl, Math.round(pl/count*100)];
-    })
-    .filter(([,,, lr])=>lr>50)
-    .sort((a,b)=>b[3]-a[3]||b[2]-a[2])
-    .slice(0,3);
-
+    .map(([pname,count])=>{ const pl=count-(partnerWins[pname]||0); return [pname,count,pl,Math.round(pl/count*100)]; })
+    .filter(([,,,lr])=>lr>50).sort((a,b)=>b[3]-a[3]||b[2]-a[2]).slice(0,2);
   if(jinxPartners.length){
-    h += `<div class="stat-card">
-      <div style="font-weight:800;font-size:13px;margin-bottom:10px;">💀 Đồng đội... xui xẻo</div>`;
+    h += `<div class="stats-section"><div class="stats-section-title">💀 Đồng đội... xui xẻo</div>`;
     jinxPartners.forEach(([pname,count,pl,plr])=>{
-      const pmb=mbOf(pname);
-      const pav=pmb&&pmb.photo?`<img loading="lazy" src="${pmb.photo}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;" decoding="async">`
-        :`<div class="${pmb?AVC[pmb.color]:''}" style="width:32px;height:32px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pmb?'':'var(--muted)'};">${ini(pname)}</div>`;
-      h += `<div class="partner-row">
-        ${pav}
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:13px;">${xe(pname)}</div>
-          <div style="font-size:11px;color:#e55;">${count} trận cùng · thua ${pl} (${plr}%)</div>
+      h += `<div class="stats-pr">
+        ${prAv(pname)}
+        <div style="flex:1;min-width:0;">
+          <div class="stats-pr-name" onclick="goStats('${pname.replace(/'/g,"\'")}')">
+            ${xe(pname)}
+          </div>
+          <div class="stats-pr-sub" style="color:#e55;">${count} trận cùng · thua ${pl} (${plr}%)</div>
         </div>
-        <div class="stat-bar-wrap" style="width:60px;"><div class="stat-bar" style="width:${plr}%;background:#e55;"></div></div>
+        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${plr}%;background:#e55;"></div></div>
       </div>`;
     });
     h += '</div>';
   }
 
-  // 5 trận gần nhất
+  // ── 5 TRẬN GẦN NHẤT ──
   const recent = allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  h += `<div class="stat-card">
-    <div style="font-weight:800;font-size:13px;margin-bottom:10px;">📅 5 trận gần nhất</div>`;
+  h += `<div class="stats-section"><div class="stats-section-title">📅 5 trận gần nhất</div>`;
   recent.forEach(m=>{
     const inT1=[m.t1p1,m.t1p2].includes(name);
     const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
-    const won=inT1?w==='A':w==='B';
-    const lost=inT1?w==='B':w==='A';
-    const res=won?'Thắng':lost?'Thua':'Hòa';
-    const col=won?'var(--green)':lost?'#e55':'var(--muted)';
-    const opp=inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];
+    const won=inT1?w==='A':w==='B'; const lost=inT1?w==='B':w==='A';
+    const res=won?'W':lost?'L':'D';
+    const opp=(inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
     const sc=(m.s1!==''&&m.s2!=='')?m.s1+' : '+m.s2:'';
-    h += `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);">
-      <span style="font-size:11px;font-weight:900;color:${col};min-width:36px;">${res}</span>
-      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">vs ${opp.filter(Boolean).map(n=>xe(n)).join(' & ')}</div>
-      <span style="font-size:11px;color:var(--muted);flex-shrink:0;">${sc}</span>
+    h += `<div class="stats-match-row">
+      <span class="stats-res-badge ${res}">${won?'Thắng':lost?'Thua':'Hòa'}</span>
+      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        vs ${opp.map(n=>`<span class="name-link" onclick="goStats('${n.replace(/'/g,"\'")}')">${xe(n)}</span>`).join(' & ')}
+      </div>
+      <span style="font-size:11px;color:var(--muted);flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;">${sc}</span>
       <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
     </div>`;
   });
@@ -5138,6 +5210,7 @@ function buildStatsHTML(name){
 
   return h;
 }
+
 
 // ─── ALBUM ───
 function renderAlbum(){
@@ -5522,11 +5595,11 @@ function renderBXH(){
       const avcls=p.mb?AVC[p.mb.color]:'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       const bxhAv=(p.mb&&p.mb.photo)
-        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
-        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
+        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="goStats(\'' + p.name.replace(/'/g,"\\'") + '\'')">'
+        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' style="cursor:pointer;" onclick="goStats(\'' + p.name.replace(/'/g,"\\'") + '\'')>'+ini(p.name)+'</div>';
       h+=`<div class="tbl-r ${rc}">
         <div class="rk">${medal||i+1}</div>
-        <div class="bxh-player">${bxhAv}<span class="bxh-nm">${xe(p.name)}</span></div>
+        <div class="bxh-player">${bxhAv}<span class="bxh-nm" style="cursor:pointer;" onclick="goStats('${p.name.replace(/'/g, "\'")}')">${xe(p.name)}</span></div>
         <div class="nc wc">${p.w}</div>
         <div class="nc lc">${p.l}</div>
         <div class="${dc}">${ds}</div>
