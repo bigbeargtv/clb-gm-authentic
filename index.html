@@ -3121,8 +3121,8 @@ function openPicker(matchId,field){
   } else if(m.cat==='hon'){
     list.className='pk-list';
     const allMb=[...members].sort((a,b)=>a.name.localeCompare(b.name,'vi'));
-    if(!allMb.length){ list.innerHTML='<div class="pk-empty">Chưa có thành viên nào.</div>'; }
-    else { list.innerHTML=allMb.map(mb=>pkItemHtml(mb,current===mb.name,!(current===mb.name)&&used.includes(mb.name),false)).join(''); }
+    if(!allMb.length){list.innerHTML='<div class="pk-empty">Chưa có thành viên nào.</div>';}
+    else{list.innerHTML=allMb.map(mb=>pkItemHtml(mb,current===mb.name,!(current===mb.name)&&used.includes(mb.name),false)).join('');}
   } else {
     list.className='pk-list';
     const gFilter = m.cat==='nam' ? 'm' : 'f';
@@ -4921,39 +4921,28 @@ function goStats(name){
     if(sc) sc.scrollIntoView({behavior:'smooth',block:'start'});
   }, 100);
 }
-
 function renderStats(){
-  const picker=document.getElementById('stats-picker');
-  const cont=document.getElementById('stats-content');
+  const picker=document.getElementById('stats-picker'),cont=document.getElementById('stats-content');
   if(!picker||!cont) return;
-  picker.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-top:4px;">👤 Chọn thành viên</div>'
-    +'<div class="stats-member-grid">'
+  picker.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-top:4px;">👤 Chọn thành viên</div><div class="stats-member-grid">'
     +members.map(m=>{
       const on=statsSelected===m.name;
-      const av=m.photo
-        ?`<img loading="lazy" src="${m.photo}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;" decoding="async">`
-        :`<div class="${AVC[m.color]}" style="width:44px;height:44px;border-radius:12px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
-      return `<div class="stats-mb-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\\'")}')">
-        ${av}<span class="stats-mb-chip-name">${xe(m.name)}</span>
-      </div>`;
+      const av=m.photo?`<img loading="lazy" src="${m.photo}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;" decoding="async">`:`<div class="${AVC[m.color]}" style="width:44px;height:44px;border-radius:12px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
+      return `<div class="stats-mb-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\\'")}'">${av}<span class="stats-mb-chip-name">${xe(m.name)}</span></div>`;
     }).join('')+'</div>';
   if(!statsSelected){cont.innerHTML='<div class="empty" style="margin-top:12px;"><span class="ei">🏅</span>Chọn thành viên<br>để xem thành tích</div>';return;}
   cont.innerHTML=buildStatsHTML(statsSelected);
 }
-
 function selectStats(name){
   statsSelected=statsSelected===name?null:name;
   renderStats();
   if(statsSelected) setTimeout(()=>document.getElementById('stats-content').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
-
 function buildStatsHTML(name){
   const allM=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
   if(!allM.length) return '<div class="empty"><span class="ei">📊</span>Chưa có trận nào.</div>';
   const sorted=allM.slice().sort((a,b)=>a.date.localeCompare(b.date));
-  let wins=0,losses=0,draws=0;
-  const catCount={},catWin={};
-  const partners={},rivals={},partnerWins={},rivalLosses={};
+  let wins=0,losses=0,draws=0,catCount={},catWin={},partners={},rivals={},partnerWins={},rivalLosses={};
   let totalPts=0,totalPtsAgainst=0,maxStreak=0,curStreak=0,firstDate='',lastDate='';
   const allResults=[];
   sorted.forEach(m=>{
@@ -4961,16 +4950,14 @@ function buildStatsHTML(name){
     const myS=inT1?+m.s1:+m.s2,oppS=inT1?+m.s2:+m.s1;
     const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
     const won=inT1?w==='A':w==='B',lost=inT1?w==='B':w==='A';
-    if(won){wins++;curStreak++;maxStreak=Math.max(maxStreak,curStreak);}
-    else if(lost){losses++;curStreak=0;}else draws++;
+    if(won){wins++;curStreak++;maxStreak=Math.max(maxStreak,curStreak);}else if(lost){losses++;curStreak=0;}else draws++;
     if(!isNaN(myS))totalPts+=myS;if(!isNaN(oppS))totalPtsAgainst+=oppS;
     catCount[m.cat]=(catCount[m.cat]||0)+1;if(won)catWin[m.cat]=(catWin[m.cat]||0)+1;
     const partner=inT1?(m.t1p1===name?m.t1p2:m.t1p1):(m.t2p1===name?m.t2p2:m.t2p1);
     if(partner){partners[partner]=(partners[partner]||0)+1;if(won)partnerWins[partner]=(partnerWins[partner]||0)+1;}
     const opp=inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];
     opp.filter(Boolean).forEach(r=>{rivals[r]=(rivals[r]||0)+1;if(lost)rivalLosses[r]=(rivalLosses[r]||0)+1;});
-    if(!firstDate||m.date<firstDate)firstDate=m.date;
-    if(!lastDate||m.date>lastDate)lastDate=m.date;
+    if(!firstDate||m.date<firstDate)firstDate=m.date;if(!lastDate||m.date>lastDate)lastDate=m.date;
     allResults.push(won?'W':lost?'L':'D');
   });
   const total=wins+losses+draws,wr=total?Math.round(wins/total*100):0;
@@ -4978,30 +4965,25 @@ function buildStatsHTML(name){
   const rev=[...allResults].reverse();
   let curSign=rev[0]||null,curStreakNow=0;
   for(let i=0;i<rev.length;i++){if(rev[i]===curSign)curStreakNow++;else break;}
-  // ELO cá nhân
-  const myEloData = calcElo(matches.filter(m=>m.saved&&!m.isBetEntry&&m.date), null);
-  const myElo = (myEloData.find(p=>p.name===name)||{elo:1000,eloChange:0});
-  const eloChg = myElo.eloChange;
-  // Rank
-  const rankList = myEloData.slice().sort((a,b)=>b.elo-a.elo);
-  const myRank = rankList.findIndex(p=>p.name===name)+1;
-  const bigAv=mb&&mb.photo
-    ?`<img loading="lazy" src="${mb.photo}" style="width:60px;height:60px;border-radius:16px;object-fit:cover;" decoding="async">`
-    :`<div class="${mb?AVC[mb.color]:''}" style="width:60px;height:60px;border-radius:16px;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
+  // ELO
+  const allSaved=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date);
+  const eloAll=calcElo(allSaved,null);
+  const myElo=(eloAll.find(p=>p.name===name)||{elo:1000,eloChange:0});
+  const eloRank=eloAll.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
+  const eloChg=myElo.eloChange;
+  const bigAv=mb&&mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:60px;height:60px;border-radius:16px;object-fit:cover;" decoding="async">`:`<div class="${mb?AVC[mb.color]:''}" style="width:60px;height:60px;border-radius:16px;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
   const streakColor=curSign==='W'?'var(--green)':'#e55';
   const streakLabel=curSign==='W'?`🔥 ${curStreakNow} thắng liên tiếp`:curSign==='L'?`❄️ ${curStreakNow} thua liên tiếp`:'';
   function prAv(n,sz=32){const pm=mbOf(n);return pm&&pm.photo?`<img loading="lazy" src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;flex-shrink:0;" decoding="async">`:`<div class="${pm?AVC[pm.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;font-size:${Math.round(sz/2.8)}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pm?'':'var(--muted)'};flex-shrink:0;">${ini(n)}</div>`;}
   let h='';
   h+=`<div class="stats-hero">
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
-      ${bigAv}
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">${bigAv}
       <div style="flex:1;min-width:0;">
         <div style="font-size:20px;font-weight:900;line-height:1.1;">${xe(name)}</div>
         ${mb&&mb.nickname?`<div style="font-size:12px;color:var(--gold);font-weight:700;">"${xe(mb.nickname)}"</div>`:''}
         <div style="font-size:11px;color:var(--muted);margin-top:3px;">${mb?(mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · ':''} Tham gia ${fmtDate(firstDate)}</div>
-        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-          <span style="background:var(--s1);border:1.5px solid var(--bdr2);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">🏅 #${myRank}/${members.length}</span>
-          <span style="background:#f0b42915;border:1.5px solid #f0b42930;color:var(--gold);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">ELO ${myElo.elo} <span style="color:${eloChg>=0?'var(--green)':'#e55'};">(${eloChg>=0?'+':''}${eloChg})</span></span>
+        <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
+          <span style="background:#f0b42915;border:1.5px solid #f0b42940;color:var(--gold);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">⚡ ELO #${eloRank} · ${myElo.elo} <span style="color:${eloChg>=0?'var(--green)':'#e55'};">${eloChg>=0?'+':''}${eloChg}</span></span>
           ${streakLabel?`<span style="background:${curSign==='W'?'#1a9e6015':'#e5555515'};border:1.5px solid ${curSign==='W'?'#1a9e6030':'#e5555530'};color:${streakColor};font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">${streakLabel}</span>`:''}
         </div>
       </div>
@@ -5011,30 +4993,22 @@ function buildStatsHTML(name){
       <div class="stats-kpi-box win"><div class="stats-kpi-num" style="color:var(--green);">${wins}</div><div class="stats-kpi-lbl">Thắng</div></div>
       <div class="stats-kpi-box lose"><div class="stats-kpi-num" style="color:#e55;">${losses}</div><div class="stats-kpi-lbl">Thua</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:2px;">
-      <span style="color:var(--muted);">Tỉ lệ thắng</span><span style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</span>
-    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:2px;"><span style="color:var(--muted);">Tỉ lệ thắng</span><span style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</span></div>
     <div class="stats-winbar"><div class="stats-winbar-fill" style="width:${wr}%;"></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${totalPts}</div>
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm ghi</div>
-      </div>
-      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${totalPtsAgainst}</div>
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm bị ghi</div>
-      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${totalPts}</div><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm ghi</div></div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${totalPtsAgainst}</div><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm bị ghi</div></div>
     </div>
   </div>`;
   const last10=allResults.slice(-10);
   if(last10.length){h+=`<div class="stats-section"><div class="stats-section-title">⚡ ${last10.length} trận gần nhất</div><div class="streak-dots">${last10.map(r=>`<div class="streak-dot ${r}">${r==='W'?'T':r==='L'?'B':'H'}</div>`).join('')}</div><div style="display:flex;gap:14px;margin-top:8px;font-size:11px;font-weight:800;"><span style="color:var(--green);">T: ${last10.filter(r=>r==='W').length}</span><span style="color:#e55;">B: ${last10.filter(r=>r==='L').length}</span>${last10.filter(r=>r==='D').length?`<span style="color:var(--muted);">H: ${last10.filter(r=>r==='D').length}</span>`:''}<span style="color:var(--muted);margin-left:auto;">Best 🔥${maxStreak}</span></div></div>`;}
   const catKeys=Object.keys(catCount);
-  if(catKeys.length){const catColors={nam:'#4a90e2',mix:'var(--gold)',nu:'#e27a9a',hon:'#9c27b0'};h+=`<div class="stats-section"><div class="stats-section-title">🎯 Theo thể loại</div>`;catKeys.forEach(cat=>{const cwr=Math.round((catWin[cat]||0)/catCount[cat]*100);h+=`<div class="stats-catbar"><div class="stats-catbar-head"><span>${CL[cat]||cat}</span><span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · <span style="color:${cwr>=50?'var(--green)':'#e55'};">${cwr}%</span></span></div><div class="stats-catbar-track"><div class="stats-catbar-fill" style="width:${cwr}%;background:${catColors[cat]||'var(--gold)'};"></div></div></div>`;});h+='</div>';}
+  if(catKeys.length){const cc={nam:'#4a90e2',mix:'var(--gold)',nu:'#e27a9a',hon:'#9c27b0'};h+=`<div class="stats-section"><div class="stats-section-title">🎯 Theo thể loại</div>`;catKeys.forEach(cat=>{const cwr=Math.round((catWin[cat]||0)/catCount[cat]*100);h+=`<div class="stats-catbar"><div class="stats-catbar-head"><span>${CL[cat]||cat}</span><span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · <span style="color:${cwr>=50?'var(--green)':'#e55'};">${cwr}%</span></span></div><div class="stats-catbar-track"><div class="stats-catbar-fill" style="width:${cwr}%;background:${cc[cat]||'var(--gold)'};"></div></div></div>`;});h+='</div>';}
   const topP=Object.entries(partners).sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(topP.length){h+=`<div class="stats-section"><div class="stats-section-title">🤝 Đồng đội thường xuyên</div>`;topP.forEach(([pn,cnt])=>{const pw=partnerWins[pn]||0,pwr=Math.round(pw/cnt*100),col=pwr>=50?'var(--green)':'#e55';h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;"><div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div><div style="font-size:11px;color:var(--muted);">${cnt} trận cùng · thắng ${pw} <span style="color:${col};">(${pwr}%)</span></div></div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${pwr}%;background:${col};"></div></div></div>`;});h+='</div>';}
   const topR=Object.entries(rivals).sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(topR.length){h+=`<div class="stats-section"><div class="stats-section-title">⚔️ Đối thủ thường xuyên</div>`;topR.forEach(([rn,cnt])=>{const rl=rivalLosses[rn]||0,rlr=Math.round(rl/cnt*100),col=rlr>=50?'#e55':'var(--green)';h+=`<div class="stats-pr">${prAv(rn)}<div style="flex:1;min-width:0;"><div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(rn)}">${xe(rn)}</div><div style="font-size:11px;color:var(--muted);">${cnt} trận đối · thua ${rl} <span style="color:${col};">(${rlr}%)</span></div></div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${rlr}%;background:${col};"></div></div></div>`;});h+='</div>';}
-  const jinx=Object.entries(partners).filter(([,c])=>c>=2).map(([pn,cnt])=>{const pl=cnt-(partnerWins[pn]||0);return[pn,cnt,pl,Math.round(pl/cnt*100)];}).filter(([,,,lr])=>lr>50).sort((a,b)=>b[3]-a[3]||b[2]-a[2]).slice(0,2);
+  const jinx=Object.entries(partners).filter(([,c])=>c>=2).map(([pn,cnt])=>{const pl=cnt-(partnerWins[pn]||0);return[pn,cnt,pl,Math.round(pl/cnt*100)];}).filter(([,,,lr])=>lr>50).sort((a,b)=>b[3]-a[3]).slice(0,2);
   if(jinx.length){h+=`<div class="stats-section"><div class="stats-section-title">💀 Đồng đội... xui xẻo</div>`;jinx.forEach(([pn,cnt,pl,plr])=>{h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;"><div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div><div style="font-size:11px;color:#e55;">${cnt} trận cùng · thua ${pl} (${plr}%)</div></div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${plr}%;background:#e55;"></div></div></div>`;});h+='</div>';}
   const recent=allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
   h+=`<div class="stats-section"><div class="stats-section-title">📅 5 trận gần nhất</div>`;
@@ -5395,36 +5369,30 @@ function switchBxhTab(ct){
   });
 }
 
-// ── ELO calculation ──
+// ── ELO đôi, K=32, bắt đầu 1000 ──
 function calcElo(matchList, catFilter){
-  const K = 32;
-  const elo = {};
-  const stats = {};
-  function getElo(n){ return elo[n] !== undefined ? elo[n] : 1000; }
-  const sorted = matchList.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  sorted.forEach(m=>{
-    if(catFilter && m.cat !== catFilter) return;
+  const K=32, elo={}, stats={};
+  function ge(n){ return elo[n]!==undefined ? elo[n] : 1000; }
+  matchList.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(m=>{
+    if(catFilter && m.cat!==catFilter) return;
     const s1=+m.s1, s2=+m.s2;
     const w = m.winner||(m.s1!==''&&m.s2!==''?(s1>s2?'A':s2>s1?'B':''):'');
     if(!w) return;
-    const t1=[m.t1p1,m.t1p2].filter(Boolean);
-    const t2=[m.t2p1,m.t2p2].filter(Boolean);
+    const t1=[m.t1p1,m.t1p2].filter(Boolean), t2=[m.t2p1,m.t2p2].filter(Boolean);
     if(!t1.length||!t2.length) return;
-    const eloA = t1.reduce((s,n)=>s+getElo(n),0)/t1.length;
-    const eloB = t2.reduce((s,n)=>s+getElo(n),0)/t2.length;
-    const expA = 1/(1+Math.pow(10,(eloB-eloA)/400));
-    const scoreA = w==='A'?1:w==='B'?0:0.5;
-    const dA = Math.round(K*(scoreA-expA));
-    const dB = Math.round(K*((1-scoreA)-(1-expA)));
+    const eA=t1.reduce((s,n)=>s+ge(n),0)/t1.length;
+    const eB=t2.reduce((s,n)=>s+ge(n),0)/t2.length;
+    const expA=1/(1+Math.pow(10,(eB-eA)/400));
+    const sA=w==='A'?1:w==='B'?0:0.5;
+    const dA=Math.round(K*(sA-expA)), dB=Math.round(K*((1-sA)-(1-expA)));
     t1.forEach(n=>{ elo[n]=(elo[n]||1000)+dA; });
     t2.forEach(n=>{ elo[n]=(elo[n]||1000)+dB; });
-    // track stats
     [...t1.map(n=>({n,side:'A'})),...t2.map(n=>({n,side:'B'}))].forEach(({n,side})=>{
       const won=side===w, lost=(side==='A'&&w==='B')||(side==='B'&&w==='A');
       const myS=side==='A'?s1:s2, oppS=side==='A'?s2:s1;
       if(!stats[n]){const mb=mbOf(n);stats[n]={name:n,mb,w:0,l:0,pf:0,pa:0,games:0};}
       stats[n].games++;
-      if(won)stats[n].w++;else if(lost)stats[n].l++;
+      if(won)stats[n].w++; else if(lost)stats[n].l++;
       if(!isNaN(myS))stats[n].pf+=myS;
       if(!isNaN(oppS))stats[n].pa+=oppS;
     });
@@ -5446,12 +5414,11 @@ function renderBXH(){
     ['all','nam','mix','nu','hon'].forEach(ct=>{ const el=document.getElementById('bxh-'+ct); if(el) el.innerHTML=emptyHtml; });
     return;
   }
-  const srt = (a,b)=>b.elo-a.elo||b.w-a.w;
-  function buildBxhTable(players, elId){
+  function buildTable(players, elId){
     const el=document.getElementById(elId); if(!el) return;
-    const list=players.filter(p=>p.games>0).sort(srt);
+    const list=players.filter(p=>p.games>0).sort((a,b)=>b.elo-a.elo||b.w-a.w);
     if(!list.length){el.innerHTML='<div class="empty"><span class="ei">🎯</span>Chưa có trận nào.</div>';return;}
-    let h='<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T</div><div class="nc">B</div><div class="nc">ELO</div><div class="nc">±</div></div>';
+    let h='<div class="tbl-h"><div></div><div>Tên</div><div class="nc">T/B</div><div class="nc">ELO</div><div class="nc">±</div></div>';
     list.forEach((p,i)=>{
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
@@ -5466,20 +5433,19 @@ function renderBXH(){
       h+=`<div class="tbl-r ${rc}" data-n="${xe(p.name)}" style="cursor:pointer" onclick="goStats(this.dataset.n)">
         <div class="rk">${medal||i+1}</div>
         <div class="bxh-player">${bxhAv}<div style="min-width:0;overflow:hidden;"><span class="bxh-nm">${xe(p.name)}</span><div style="font-size:9px;color:var(--muted);font-weight:700;">${p.games} trận · ${p.w}T${p.l}B</div></div></div>
-        <div class="nc wc">${p.w}</div>
-        <div class="nc lc">${p.l}</div>
-        <div class="nc" style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;color:var(--gold);">${p.elo}</div>
+        <div class="nc"><span style="color:var(--green);font-weight:800;">${p.w}</span><span style="color:var(--muted);">/${p.l}</span></div>
+        <div class="nc" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--gold);">${p.elo}</div>
         <div class="nc">${chgHtml}</div>
       </div>`;
     });
-    h+='<div style="font-size:10px;color:var(--muted);font-weight:600;padding:8px 12px 2px;text-align:center;letter-spacing:.3px;">ELO: bắt đầu 1000 · tự cân bằng theo sức mạnh đối thủ</div>';
+    h+='<div style="font-size:10px;color:var(--muted);font-weight:600;padding:8px 12px 2px;text-align:center;">ELO bắt đầu 1000 · K=32 · tự cân bằng theo sức mạnh đối thủ</div>';
     el.innerHTML=h;
   }
-  buildBxhTable(calcElo(saved,null), 'bxh-all');
-  buildBxhTable(calcElo(saved,'nam'),'bxh-nam');
-  buildBxhTable(calcElo(saved,'mix'),'bxh-mix');
-  buildBxhTable(calcElo(saved,'nu'), 'bxh-nu');
-  buildBxhTable(calcElo(saved,'hon'),'bxh-hon');
+  buildTable(calcElo(saved,null),  'bxh-all');
+  buildTable(calcElo(saved,'nam'), 'bxh-nam');
+  buildTable(calcElo(saved,'mix'), 'bxh-mix');
+  buildTable(calcElo(saved,'nu'),  'bxh-nu');
+  buildTable(calcElo(saved,'hon'), 'bxh-hon');
   switchBxhTab(activeBxhTab);
 }
 // ─── HISTORY ───
