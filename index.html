@@ -5513,13 +5513,12 @@ function renderBXH(){
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
       const avcls=p.mb?AVC[p.mb.color]:'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-      const safeName=p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       const bxhAv=(p.mb&&p.mb.photo)
-        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="goStats(\''+safeName+'\')">  '
-        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' style2="cursor:pointer" onclick="goStats(\''+safeName+'\')"  >'+ini(p.name)+'</div>';
-      h+=`<div class="tbl-r ${rc}">
+        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="goStats(this.closest(\'.tbl-r\').dataset.n)">'
+        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' style="cursor:pointer;" onclick="goStats(this.closest(\'.tbl-r\').dataset.n)">'+ini(p.name)+'</div>';
+      h+=`<div class="tbl-r ${rc}" data-n="${xe(p.name)}" style="cursor:pointer;" onclick="goStats(this.dataset.n)">
         <div class="rk">${medal||i+1}</div>
-        <div class="bxh-player">${bxhAv}<span class="bxh-nm" style="cursor:pointer;" onclick="goStats('${p.name.replace(/\/g,'\\').replace(/'/g,"\'")}' )">${xe(p.name)}</span></div>
+        <div class="bxh-player">${bxhAv}<span class="bxh-nm">${xe(p.name)}</span></div>
         <div class="nc wc">${p.w}</div>
         <div class="nc lc">${p.l}</div>
         <div class="${dc}">${ds}</div>
