@@ -383,8 +383,8 @@ nav::-webkit-scrollbar{display:none;}
 .bxh-head.nu .bxh-title{color:var(--nu-c);}
 .bxh-count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700;}
 
-.tbl-h{display:grid;grid-template-columns:28px 1fr 36px 36px 52px 48px;gap:3px;align-items:center;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
-.tbl-r{display:grid;grid-template-columns:28px 1fr 36px 36px 52px 48px;gap:3px;align-items:center;padding:10px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:5px;transition:all .15s;}
+.tbl-h{display:grid;grid-template-columns:28px 1fr 46px 46px 52px 44px;gap:3px;align-items:center;padding:5px 12px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px;}
+.tbl-r{display:grid;grid-template-columns:28px 1fr 46px 46px 52px 44px;gap:3px;align-items:center;padding:10px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:5px;transition:all .15s;}
 .tbl-r:hover{border-color:var(--bdr2);transform:translateX(2px);}
 .tbl-r.r1{border:2px solid #f5c842;background:linear-gradient(135deg,#fff8e080,#fffdf5cc);box-shadow:0 2px 12px #f5c84230;}
 .tbl-r.r2{border:2px solid #b0b8cc;background:linear-gradient(135deg,#f0f2f880,#f8f9fbcc);box-shadow:0 2px 8px #b0b8cc25;}
@@ -397,6 +397,7 @@ nav::-webkit-scrollbar{display:none;}
 .bxh-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
 .bxh-nm{font-size:13px;font-weight:700;}
 .nc{text-align:center;font-size:13px;font-weight:700;}
+.tbl-h .nc{font-size:9px;}
 .wc{color:var(--green);}
 .lc{color:var(--red);}
 .dp{color:var(--green);text-align:center;font-weight:800;font-size:13px;}
@@ -5531,7 +5532,7 @@ function renderBXH(){
     </div>`;
 
     // Header: số thứ tự | Tên | Thắng | Thua | ELO | ±
-    h+='<div class="tbl-h"><div></div><div>Tên</div><div class="nc" style="color:var(--green);">Thắng</div><div class="nc" style="color:#e55;">Thua</div><div class="nc">ELO</div><div class="nc">±</div></div>';
+    h+='<div class="tbl-h"><div></div><div>Tên</div><div class="nc" style="color:var(--green);" title="Số trận thắng">Thắng</div><div class="nc" style="color:#e55;" title="Số trận thua">Thua</div><div class="nc">ELO</div><div class="nc">±</div></div>';
 
     list.forEach((p,i)=>{
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
