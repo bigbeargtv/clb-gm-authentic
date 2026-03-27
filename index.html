@@ -1121,24 +1121,21 @@ nav::-webkit-scrollbar{display:none;}
 .toast{background:var(--s1);border:1.5px solid var(--bdr2);border-radius:24px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;white-space:nowrap;}
 .toast.out{animation:toastOut .25s ease forwards;}
 @keyframes toastIn{from{opacity:0;transform:translateY(12px) scale(.9);}to{opacity:1;transform:translateY(0) scale(1);}}
-@keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1);}to{opacity:0;transform:translateY(8px) scale(.95);}}
-#app-skeleton{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .3s;}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateY(8px);}}
+#app-skeleton{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s;}
 #app-skeleton.hidden{opacity:0;pointer-events:none;}
-.skel-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 8px 24px rgba(212,134,10,.3);animation:skelPulse 1.5s ease-in-out infinite;}
-.skel-text{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:3px;color:var(--muted);}
+.skel-text{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;letter-spacing:4px;color:var(--gold);}
 .skel-dots{display:flex;gap:6px;}
 .skel-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:.3;}
 .skel-dot:nth-child(1){animation:skelDot 1.2s .0s ease-in-out infinite;}
 .skel-dot:nth-child(2){animation:skelDot 1.2s .2s ease-in-out infinite;}
 .skel-dot:nth-child(3){animation:skelDot 1.2s .4s ease-in-out infinite;}
-@keyframes skelPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 @keyframes skelDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-4px);}}
 .tbl-r:hover{border-color:var(--gold)50;transform:translateX(2px);box-shadow:0 2px 12px rgba(0,0,0,.08);}
 </style>
 </div>
 
 <div id="app-skeleton">
-  <div class="skel-logo">🏓</div>
   <div class="skel-text">GM AUTHENTIC</div>
   <div class="skel-dots"><div class="skel-dot"></div><div class="skel-dot"></div><div class="skel-dot"></div></div>
 </div>
@@ -1751,12 +1748,11 @@ async function save(){
     ledger, ledgerUid,
     clubInitBalance,
     album, albumUid,
-    clbInfo,
-    _saveToken: lastSaveToken
+    clbInfo
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
-  if(!ok) showToast('Lỗi kết nối — vui lòng thử lại','error');
+  if(!ok) showToast('Lỗi kết nối — thử lại','error');
   // Auto-snapshot (throttled: max 1 per 5 min)
   if(ok && isAdmin){
     const now = Date.now();
@@ -5832,7 +5828,6 @@ function initDark(){
     }
   }catch(e){}
 }
-
 // ─── TOAST ───
 function showToast(msg,type='success',duration=2500){
   const icons={success:'✅',error:'❌',info:'💡',warning:'⚠️'};
@@ -5844,16 +5839,14 @@ function showToast(msg,type='success',duration=2500){
   c.appendChild(t);
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),280);},duration);
 }
-
 // ─── SKELETON ───
 function hideSkeleton(){
   const sk=document.getElementById('app-skeleton');
   if(sk){sk.classList.add('hidden');setTimeout(()=>{if(sk.parentNode)sk.remove();},400);}
 }
-setTimeout(hideSkeleton,6000); // fallback
-
+setTimeout(hideSkeleton,6000);
 // ─── INIT ───
-initDark(); // gọi sớm để tránh flash
+initDark();
 (async function(){
   // Show loading state
   document.getElementById('saveLabel').textContent='Đang tải...';
