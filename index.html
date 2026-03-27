@@ -5875,6 +5875,7 @@ function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.le
 function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ─── INIT ───
+initDark(); // chạy sớm để tránh flash of light mode
 (async function(){
   // Show loading state
   document.getElementById('saveLabel').textContent='Đang tải...';
@@ -5899,7 +5900,6 @@ function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
     if(resultEl) resultEl.classList.add('on');
   }
   // Khôi phục tab cuối cùng
-  initDark();
   try{
     const savedTab = localStorage.getItem('activeTab');
     if(savedTab && document.getElementById(savedTab)) goTab(savedTab);
@@ -5947,8 +5947,10 @@ function showToast(msg, type='success', duration=2500){
 // ─── SKELETON HIDE ───
 function hideSkeleton(){
   const sk = document.getElementById('app-skeleton');
-  if(sk){ sk.classList.add('hidden'); setTimeout(()=>sk.remove(),400); }
+  if(sk){ sk.classList.add('hidden'); setTimeout(()=>{ if(sk.parentNode) sk.remove(); },400); }
 }
+// Fallback: ẩn skeleton sau 6s dù Firebase có load được hay không
+setTimeout(hideSkeleton, 6000);
 
 })();
 </script>
