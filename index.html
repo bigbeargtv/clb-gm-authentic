@@ -43,13 +43,44 @@
 html.dark{
   --bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;
   --bdr:#2e3350;--bdr2:#3a4060;
-  --gold:#f0b429;--gold2:#ffcc44;
+  --gold:#f0b429;--gold2:#ffcc44;--blue:#5b9cf6;--pink:#e879b0;
+  --green:#2ecc82;--red:#ff6b6b;
   --muted:#6b7494;--text:#e8ecf4;--text2:#9ba3c0;
 }
-html.dark body::before{background:radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5010 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 85% 90%,#2a1a1010 0%,transparent 60%);}
-html.dark body::after{background-image:radial-gradient(circle,#ffffff04 1px,transparent 1px);}
-html.dark header{background:rgba(15,17,23,.97);}
-html.dark nav{background:var(--s1);}
+html.dark body{background:var(--bg);}
+html.dark body::before{background:radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5008 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 85% 90%,#2a1a1008 0%,transparent 60%);}
+html.dark body::after{background-image:radial-gradient(circle,#ffffff03 1px,transparent 1px);}
+html.dark header{background:rgba(15,17,23,.97);border-color:var(--bdr);}
+html.dark nav{background:var(--s1);border-color:var(--bdr);}
+html.dark .mc{background:var(--s2) !important;border-color:var(--bdr);}
+html.dark .mc-editing{background:var(--s1) !important;}
+html.dark .stat-card{background:var(--s2);border-color:var(--bdr2);}
+html.dark .stats-section{background:var(--s2);border-color:var(--bdr);}
+html.dark .stats-hero{background:var(--s2);border-color:var(--bdr);}
+html.dark .stats-kpi-box{background:var(--s1);border-color:var(--bdr);}
+html.dark .tbl-r{background:var(--s2);border-color:var(--bdr);}
+html.dark .tbl-r.r1{background:linear-gradient(135deg,#2a200530,#1a1d27ee) !important;border-color:var(--gold)80 !important;}
+html.dark .tbl-r.r2{background:linear-gradient(135deg,#2a2a3030,#1a1d27ee) !important;border-color:var(--bdr2) !important;}
+html.dark .tbl-r.r3{background:linear-gradient(135deg,#2a1a0030,#1a1d27ee) !important;border-color:#c8a06a80 !important;}
+html.dark .tbl-h{color:var(--muted);}
+html.dark .bxh-tab{color:var(--muted);}
+html.dark .pslot{background:var(--s2);border-color:var(--bdr);}
+html.dark #picker-box{background:var(--s1);}
+html.dark .pk-list{background:var(--s1);}
+html.dark .i-block{background:var(--s2) !important;border-color:var(--bdr);}
+html.dark .i-stat{background:var(--s2);border-color:var(--bdr);}
+html.dark .i-feat{background:var(--s3);border-color:var(--bdr);}
+html.dark .i-sched{background:var(--s2);border-color:var(--bdr);}
+html.dark .session-banner{background:linear-gradient(135deg,#0a0e1a 0%,#0f1520 100%) !important;}
+html.dark .ldg-card,.html.dark .ldg-section{background:var(--s2);border-color:var(--bdr);}
+html.dark .draw-section{background:var(--s2);}
+html.dark .hi{background:var(--s1);}
+html.dark .hist-session{background:var(--s2);}
+html.dark .sl{color:var(--gold);}
+html.dark input:not([type=file]),html.dark select,html.dark textarea{background:var(--s2) !important;color:var(--text) !important;border-color:var(--bdr2) !important;}
+html.dark .save-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));}
+html.dark .add-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));}
+html.dark .wl-btn{background:var(--s3);color:var(--text2);border-color:var(--bdr);}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;font-size:18px;}
 
@@ -1113,7 +1144,7 @@ nav::-webkit-scrollbar{display:none;}
 .stats-res-badge.W{background:#1a9e6020;color:var(--green);}
 .stats-res-badge.L{background:#e5555518;color:#e55;}
 .stats-res-badge.D{background:var(--s1);color:var(--muted);}
-.name-link{cursor:pointer;border-bottom:1px dashed var(--bdr2);transition:color .15s;}
+.name-link{cursor:pointer;transition:color .15s;}
 .name-link:hover{color:var(--gold)!important;border-bottom-color:var(--gold);}
 .dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
 .dark-toggle:hover{border-color:var(--gold);}
@@ -5146,25 +5177,80 @@ function buildStatsHTML(name){
     });
     h+='</div>';
   }
-  // 5 trận gần nhất
-  const recent=allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  h+=`<div class="stats-section"><div class="stats-section-title">📅 5 trận gần nhất</div>`;
-  recent.forEach(m=>{
+  // Lịch sử trận — xem thêm
+  const allSorted=allM.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const HIST_STEP=5;
+
+  function makeMatchRow(m){
     const inT1=[m.t1p1,m.t1p2].includes(name);
     const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
     const won=inT1?w==='A':w==='B', lost=inT1?w==='B':w==='A';
     const res=won?'W':lost?'L':'D';
+    const partner=(inT1?[m.t1p1,m.t1p2]:[m.t2p1,m.t2p2]).filter(Boolean).filter(n=>n!==name)[0];
     const opp=(inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
-    const sc=(m.s1!==''&&m.s2!=='')?m.s1+' : '+m.s2:'';
-    h+=`<div class="stats-match-row">
+    const myS=inT1?m.s1:m.s2, oppS=inT1?m.s2:m.s1;
+    const sc=(m.s1!==''&&m.s2!=='')?`${myS} - ${oppS}`:'';
+    const nl=(n)=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`;
+    return `<div class="stats-match-row">
       <span class="stats-res-badge ${res}">${won?'Thắng':lost?'Thua':'Hòa'}</span>
-      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">vs ${opp.map(n=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`).join(' & ')}</div>
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);flex-shrink:0;">${sc}</span>
-      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">⚔️ ${opp.map(nl).join(' & ')}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;">
+          ${partner?`<span>🤝 ${nl(partner)}</span>`:''}
+          <span>${fmtDate(m.date)}</span>
+          <span class="cbadge ${CB[m.cat]}" style="font-size:8px;padding:1px 6px;">${CL[m.cat]}</span>
+        </div>
+      </div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${won?'var(--green)':lost?'#e55':'var(--muted)'};flex-shrink:0;min-width:40px;text-align:right;">${sc}</span>
     </div>`;
-  });
-  h+='</div>';
+  }
+
+  function renderHistBlock(count){
+    let rh=`<div class="stats-section" id="stats-hist-block">
+      <div class="stats-section-title">📅 Lịch sử thi đấu <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+    allSorted.slice(0,count).forEach(m=>{ rh+=makeMatchRow(m); });
+    if(count<allSorted.length){
+      rh+=`<button onclick="expandStatsHist(${Math.min(count+HIST_STEP,allSorted.length)})"
+        style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+        onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--muted)'">
+        ▼ Xem thêm ${Math.min(HIST_STEP,allSorted.length-count)} trận
+      </button>`;
+    } else if(allSorted.length>HIST_STEP){
+      rh+=`<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;font-weight:700;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+    }
+    rh+='</div>';
+    return rh;
+  }
+
+  h+=renderHistBlock(HIST_STEP);
+  // Lưu closure để expandStatsHist dùng
+  window._statsHistName = name;
+  window._statsHistMakeRow = makeMatchRow;
+  window._statsHistAll = allSorted;
   return h;
+}
+
+function expandStatsHist(count){
+  const block=document.getElementById('stats-hist-block');
+  if(!block) return;
+  const allSorted=window._statsHistAll||[];
+  const name=window._statsHistName||'';
+  const HIST_STEP=5;
+  const makeMatchRow=window._statsHistMakeRow;
+  let rh=`<div class="stats-section-title">📅 Lịch sử thi đấu <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+  allSorted.slice(0,count).forEach(m=>{ rh+=makeMatchRow(m); });
+  if(count<allSorted.length){
+    rh+=`<button onclick="expandStatsHist(${Math.min(count+HIST_STEP,allSorted.length)})"
+      style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;"
+      onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+      onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--muted)'">
+      ▼ Xem thêm ${Math.min(HIST_STEP,allSorted.length-count)} trận
+    </button>`;
+  } else {
+    rh+=`<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;font-weight:700;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+  }
+  block.innerHTML=rh;
 }
 
 
