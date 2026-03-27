@@ -1156,6 +1156,35 @@ nav::-webkit-scrollbar{display:none;}
 .skel-dot:nth-child(3){animation:skelDot 1.2s .4s ease-in-out infinite;}
 @keyframes skelDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-4px);}}
 .tbl-r:hover{border-color:var(--gold)50;transform:translateX(2px);box-shadow:0 2px 12px rgba(0,0,0,.08);}
+
+/* Hamburger menu for mobile */
+.hamburger-btn{display:none;position:fixed;bottom:20px;right:20px;z-index:999;
+  width:56px;height:56px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#e8a020,#d4860a);
+  box-shadow:0 4px 15px rgba(212,134,10,.4);cursor:pointer;
+  align-items:center;justify-content:center;transition:transform .2s;}
+.hamburger-btn:active{transform:scale(.9);}
+.hamburger-btn svg{width:24px;height:24px;fill:white;}
+.mob-nav-overlay{display:none;position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);}
+.mob-nav-overlay.show{display:block;}
+.mob-nav-panel{display:none;position:fixed;bottom:86px;right:20px;z-index:999;
+  background:var(--s1);border:1px solid var(--bdr);border-radius:16px;
+  padding:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);
+  width:280px;max-height:70vh;overflow-y:auto;}
+.mob-nav-panel.show{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.mob-nav-panel .mn-item{display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:12px 6px;border-radius:12px;border:1px solid var(--bdr);background:var(--s2,#252a40);
+  font-size:11px;font-weight:700;color:var(--text);cursor:pointer;transition:all .15s;
+  font-family:'Nunito',sans-serif;text-transform:uppercase;letter-spacing:.3px;}
+.mob-nav-panel .mn-item:active{transform:scale(.95);}
+.mob-nav-panel .mn-item.on{border-color:#e8a020;background:linear-gradient(135deg,#2a2010,#332818);color:#ffd080;}
+.mob-nav-panel .mn-item .mn-icon{font-size:20px;}
+html.dark .mob-nav-panel{background:#141620;border-color:#2a2d3a;}
+html.dark .mob-nav-panel .mn-item{background:#1a1d2a;border-color:#2a2d3a;}
+@media(max-width:640px){
+  .hamburger-btn{display:flex;}
+  nav{display:none!important;}
+}
 </style>
 </div>
 
@@ -5924,6 +5953,49 @@ initDark();
   const ov = document.getElementById('loadingOverlay');
   if(ov) ov.style.display='none';
 })();
+
+/* Hamburger menu logic */
+function buildMobNav(){
+  const panel=document.getElementById('mobNavPanel');
+  if(!panel)return;
+  const btns=document.querySelectorAll('nav .nt');
+  panel.innerHTML='';
+  btns.forEach(btn=>{
+    if(btn.style.display==='none')return;
+    const item=document.createElement('div');
+    item.className='mn-item'+(btn.classList.contains('on')?' on':'');
+    const parts=btn.textContent.trim();
+    const icon=parts.match(/^[\p{Emoji}]/u);
+    item.innerHTML='<span class="mn-icon">'+(icon?icon[0]:'')+'</span>'
+      +parts.replace(/^[\p{Emoji}]\s*/u,'');
+    item.onclick=()=>{btn.click();closeMobNav();buildMobNav();};
+    panel.appendChild(item);
+  });
+}
+function toggleMobNav(){
+  const panel=document.getElementById('mobNavPanel');
+  const overlay=document.getElementById('mobNavOverlay');
+  const btn=document.getElementById('hamburgerBtn');
+  const isOpen=panel.classList.contains('show');
+  if(isOpen){closeMobNav();}
+  else{buildMobNav();panel.classList.add('show');overlay.classList.add('show');
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path fill="white" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';}
+}
+function closeMobNav(){
+  const panel=document.getElementById('mobNavPanel');
+  const overlay=document.getElementById('mobNavOverlay');
+  const btn=document.getElementById('hamburgerBtn');
+  if(panel)panel.classList.remove('show');
+  if(overlay)overlay.classList.remove('show');
+  if(btn)btn.innerHTML='<svg viewBox="0 0 24 24"><path fill="white" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>';
+}
 </script>
+
+<!-- Hamburger Menu for Mobile -->
+<div class="mob-nav-overlay" id="mobNavOverlay" onclick="closeMobNav()"></div>
+<div class="mob-nav-panel" id="mobNavPanel"></div>
+<button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobNav()" aria-label="Menu">
+<svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+</button>
 </body>
 </html>
