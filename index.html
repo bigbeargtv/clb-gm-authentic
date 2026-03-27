@@ -1696,7 +1696,6 @@ function _loadCache(){ try{const r=localStorage.getItem(CACHE_KEY);if(!r)return 
 
 async function load(){
   setSaveDot(false);
-  // Bước 1: render cache ngay, ẩn skeleton không chờ network
   const cached=_loadCache();
   if(cached){
     _applyData(cached);
@@ -1704,11 +1703,9 @@ async function load(){
     hideSkeleton();
     document.getElementById('saveLabel').textContent='🔄 Đồng bộ...';
   }
-  // Bước 2: fetch Firebase ngầm
   const data=await fbGet('/clb');
   if(data){
-    _applyData(data);
-    _saveCache(data);
+    _applyData(data); _saveCache(data);
     renderIntro(); renderMembers(); renderMatchesSaved();
     setSaveDot(true);
     document.getElementById('saveLabel').textContent='Đã lưu ☁️';
@@ -3913,7 +3910,8 @@ function setWinner(id, side){
     if(sbs[1]) sbs[1].value=m.s2;
   }
   const b=document.getElementById('sb'+id);if(b)b.disabled=!canSave(m);
-  debounceSave(); // ← quan trọng: lưu lên Firebase
+  ignoreSseUntil = Date.now() + 4000;
+  debounceSave();
 }
 function upScore(id,f,v){
   const m=matches.find(m=>m.id===id);if(!m)return;
@@ -5024,21 +5022,20 @@ function buildStatsHTML(name){
   const rev=[...allResults].reverse();
   let curSign=rev[0]||null, curStreakNow=0;
   for(let i=0;i<rev.length;i++){if(rev[i]===curSign)curStreakNow++;else break;}
-  // ELO
   const allSaved=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date);
   const eloData=calcElo(allSaved,null);
   const myElo=eloData.find(p=>p.name===name)||{elo:1000,eloChange:0};
   const eloRank=eloData.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
   const eloChg=myElo.eloChange;
   const bigAv=mb&&mb.photo
-    ?`<img loading="lazy" src="${mb.photo}" style="width:60px;height:60px;border-radius:16px;object-fit:cover;" decoding="async">`
+    ?`<img loading="lazy" src="${mb.photo}" style="width:60px;height:60px;border-radius:16px;object-fit:cover;">`
     :`<div class="${mb?AVC[mb.color]:''}" style="width:60px;height:60px;border-radius:16px;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
   const streakColor=curSign==='W'?'var(--green)':'#e55';
   const streakLabel=curSign==='W'?`🔥 ${curStreakNow} thắng liên tiếp`:curSign==='L'?`❄️ ${curStreakNow} thua liên tiếp`:'';
   function prAv(n,sz=32){
     const pm=mbOf(n);
     return pm&&pm.photo
-      ?`<img loading="lazy" src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;flex-shrink:0;" decoding="async">`
+      ?`<img loading="lazy" src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;flex-shrink:0;">`
       :`<div class="${pm?AVC[pm.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;font-size:${Math.round(sz/2.8)}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pm?'':'var(--muted)'};flex-shrink:0;">${ini(n)}</div>`;
   }
   let h='';
@@ -5047,9 +5044,9 @@ function buildStatsHTML(name){
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
       ${bigAv}
       <div style="flex:1;min-width:0;">
-        <div style="font-size:20px;font-weight:900;line-height:1.1;">${xe(name)}</div>
+        <div style="font-size:20px;font-weight:900;line-height:1.1;color:var(--text);">${xe(name)}</div>
         ${mb&&mb.nickname?`<div style="font-size:12px;color:var(--gold);font-weight:700;">"${xe(mb.nickname)}"</div>`:''}
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${mb?(mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · ':''} Tham gia ${fmtDate(firstDate)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${mb?(mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · ':''} Tham gia ${firstDate||'--'}</div>
         <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
           <span style="background:#f0b42915;border:1.5px solid #f0b42940;color:var(--gold);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">⚡ ELO #${eloRank} · ${myElo.elo} <span style="color:${eloChg>=0?'var(--green)':'#e55'};">${eloChg>=0?'+':''}${eloChg}</span></span>
           ${streakLabel?`<span style="background:${curSign==='W'?'#1a9e6015':'#e5555515'};border:1.5px solid ${curSign==='W'?'#1a9e6030':'#e5555530'};color:${streakColor};font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;">${streakLabel}</span>`:''}
@@ -5061,35 +5058,24 @@ function buildStatsHTML(name){
       <div class="stats-kpi-box win"><div class="stats-kpi-num" style="color:var(--green);">${wins}</div><div class="stats-kpi-lbl">Thắng</div></div>
       <div class="stats-kpi-box lose"><div class="stats-kpi-num" style="color:#e55;">${losses}</div><div class="stats-kpi-lbl">Thua</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:2px;">
-      <span style="color:var(--muted);">Tỉ lệ thắng</span>
-      <span style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</span>
-    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:2px;"><span style="color:var(--muted);">Tỉ lệ thắng</span><span style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</span></div>
     <div class="stats-winbar"><div class="stats-winbar-fill" style="width:${wr}%;"></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${totalPts}</div>
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm ghi</div>
-      </div>
-      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${totalPtsAgainst}</div>
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Điểm bị ghi</div>
-      </div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green);">${totalPts}</div><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;">Điểm ghi</div></div>
+      <div style="background:var(--s1);border-radius:10px;padding:8px 10px;text-align:center;border:1.5px solid var(--bdr);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#e55;">${totalPtsAgainst}</div><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;">Bị ghi</div></div>
     </div>
   </div>`;
-  // Dot streak
+  // Streak dots
   const last10=allResults.slice(-10);
   if(last10.length){
-    h+=`<div class="stats-section">
-      <div class="stats-section-title">⚡ ${last10.length} trận gần nhất</div>
-      <div class="streak-dots">${last10.map(r=>`<div class="streak-dot ${r}">${r==='W'?'T':r==='L'?'B':'H'}</div>`).join('')}</div>
-      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;font-weight:800;">
-        <span style="color:var(--green);">T: ${last10.filter(r=>r==='W').length}</span>
-        <span style="color:#e55;">B: ${last10.filter(r=>r==='L').length}</span>
-        ${last10.filter(r=>r==='D').length?`<span style="color:var(--muted);">H: ${last10.filter(r=>r==='D').length}</span>`:''}
-        <span style="color:var(--muted);margin-left:auto;">Best 🔥${maxStreak}</span>
-      </div>
-    </div>`;
+    h+=`<div class="stats-section"><div class="stats-section-title">⚡ ${last10.length} trận gần nhất</div>
+    <div class="streak-dots">${last10.map(r=>`<div class="streak-dot ${r}">${r==='W'?'T':r==='L'?'B':'H'}</div>`).join('')}</div>
+    <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;font-weight:800;">
+      <span style="color:var(--green);">T: ${last10.filter(r=>r==='W').length}</span>
+      <span style="color:#e55;">B: ${last10.filter(r=>r==='L').length}</span>
+      ${last10.filter(r=>r==='D').length?`<span style="color:var(--muted);">H: ${last10.filter(r=>r==='D').length}</span>`:''}
+      <span style="color:var(--muted);margin-left:auto;">Best 🔥${maxStreak}</span>
+    </div></div>`;
   }
   // Theo thể loại
   const catKeys=Object.keys(catCount);
@@ -5099,7 +5085,7 @@ function buildStatsHTML(name){
     catKeys.forEach(cat=>{
       const cwr=Math.round((catWin[cat]||0)/catCount[cat]*100);
       h+=`<div class="stats-catbar">
-        <div class="stats-catbar-head"><span>${CL[cat]||cat}</span><span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · <span style="color:${cwr>=50?'var(--green)':'#e55'};">${cwr}%</span></span></div>
+        <div class="stats-catbar-head"><span style="color:var(--text);">${CL[cat]||cat}</span><span style="color:var(--muted);">${catWin[cat]||0}/${catCount[cat]} · <span style="color:${cwr>=50?'var(--green)':'#e55'};">${cwr}%</span></span></div>
         <div class="stats-catbar-track"><div class="stats-catbar-fill" style="width:${cwr}%;background:${cc[cat]||'var(--gold)'};"></div></div>
       </div>`;
     });
@@ -5111,13 +5097,10 @@ function buildStatsHTML(name){
     h+=`<div class="stats-section"><div class="stats-section-title">🤝 Đồng đội thường xuyên</div>`;
     topP.forEach(([pn,cnt])=>{
       const pw=partnerWins[pn]||0,pwr=Math.round(pw/cnt*100),col=pwr>=50?'var(--green)':'#e55';
-      h+=`<div class="stats-pr">${prAv(pn)}
-        <div style="flex:1;min-width:0;">
-          <div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
-          <div style="font-size:11px;color:var(--muted);">${cnt} trận cùng · thắng ${pw} <span style="color:${col};">(${pwr}%)</span></div>
-        </div>
-        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${pwr}%;background:${col};"></div></div>
-      </div>`;
+      h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;">
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
+        <div style="font-size:11px;color:var(--muted);">${cnt} trận · thắng ${pw} <span style="color:${col};">(${pwr}%)</span></div>
+      </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${pwr}%;background:${col};"></div></div></div>`;
     });
     h+='</div>';
   }
@@ -5127,52 +5110,82 @@ function buildStatsHTML(name){
     h+=`<div class="stats-section"><div class="stats-section-title">⚔️ Đối thủ thường xuyên</div>`;
     topR.forEach(([rn,cnt])=>{
       const rl=rivalLosses[rn]||0,rlr=Math.round(rl/cnt*100),col=rlr>=50?'#e55':'var(--green)';
-      h+=`<div class="stats-pr">${prAv(rn)}
-        <div style="flex:1;min-width:0;">
-          <div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(rn)}">${xe(rn)}</div>
-          <div style="font-size:11px;color:var(--muted);">${cnt} trận đối · thua ${rl} <span style="color:${col};">(${rlr}%)</span></div>
-        </div>
-        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${rlr}%;background:${col};"></div></div>
-      </div>`;
+      h+=`<div class="stats-pr">${prAv(rn)}<div style="flex:1;min-width:0;">
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(rn)}">${xe(rn)}</div>
+        <div style="font-size:11px;color:var(--muted);">${cnt} trận đối · thua ${rl} <span style="color:${col};">(${rlr}%)</span></div>
+      </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${rlr}%;background:${col};"></div></div></div>`;
     });
     h+='</div>';
   }
-  // Jinx
+  // Xui xẻo
   const jinx=Object.entries(partners).filter(([,c])=>c>=2)
     .map(([pn,cnt])=>{const pl=cnt-(partnerWins[pn]||0);return[pn,cnt,pl,Math.round(pl/cnt*100)];})
     .filter(([,,,lr])=>lr>50).sort((a,b)=>b[3]-a[3]).slice(0,2);
   if(jinx.length){
     h+=`<div class="stats-section"><div class="stats-section-title">💀 Đồng đội... xui xẻo</div>`;
     jinx.forEach(([pn,cnt,pl,plr])=>{
-      h+=`<div class="stats-pr">${prAv(pn)}
-        <div style="flex:1;min-width:0;">
-          <div class="name-link" style="font-weight:800;font-size:13px;" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
-          <div style="font-size:11px;color:#e55;">${cnt} trận cùng · thua ${pl} (${plr}%)</div>
-        </div>
-        <div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${plr}%;background:#e55;"></div></div>
-      </div>`;
+      h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;">
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
+        <div style="font-size:11px;color:#e55;">${cnt} trận · thua ${pl} (${plr}%)</div>
+      </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${plr}%;background:#e55;"></div></div></div>`;
     });
     h+='</div>';
   }
-  // 5 trận gần nhất
-  const recent=allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  h+=`<div class="stats-section"><div class="stats-section-title">📅 5 trận gần nhất</div>`;
-  recent.forEach(m=>{
+  // Lịch sử
+  const allSorted=allM.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const HIST_STEP=5;
+  function makeMatchRow(m){
     const inT1=[m.t1p1,m.t1p2].includes(name);
     const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
     const won=inT1?w==='A':w==='B', lost=inT1?w==='B':w==='A';
     const res=won?'W':lost?'L':'D';
+    const partner=(inT1?[m.t1p1,m.t1p2]:[m.t2p1,m.t2p2]).filter(Boolean).filter(n=>n!==name)[0];
     const opp=(inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
-    const sc=(m.s1!==''&&m.s2!=='')?m.s1+' : '+m.s2:'';
-    h+=`<div class="stats-match-row">
+    const myS=inT1?m.s1:m.s2, oppS=inT1?m.s2:m.s1;
+    const sc=(m.s1!==''&&m.s2!=='')?`${myS}–${oppS}`:'';
+    const nl=(n)=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}" style="color:var(--text2);">${xe(n)}</span>`;
+    return `<div class="stats-match-row">
       <span class="stats-res-badge ${res}">${won?'Thắng':lost?'Thua':'Hòa'}</span>
-      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">vs ${opp.map(n=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`).join(' & ')}</div>
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);flex-shrink:0;">${sc}</span>
-      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">⚔️ ${opp.map(nl).join(' & ')}</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          ${partner?`<span>🤝 ${nl(partner)}</span>`:''}
+          <span style="color:var(--muted);">${m.date||''}</span>
+          <span class="cbadge ${CB[m.cat]}" style="font-size:8px;padding:1px 6px;">${CL[m.cat]}</span>
+        </div>
+      </div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;flex-shrink:0;min-width:40px;text-align:right;color:${won?'var(--green)':lost?'#e55':'var(--muted)'};">${sc}</span>
     </div>`;
-  });
-  h+='</div>';
+  }
+  function renderHistBlock(showN){
+    let rh=`<div class="stats-section" id="stats-hist-block"><div class="stats-section-title">📅 Lịch sử <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+    allSorted.slice(0,showN).forEach(m=>{rh+=makeMatchRow(m);});
+    if(showN<allSorted.length){
+      rh+=`<button onclick="expandStatsHist(${Math.min(showN+HIST_STEP,allSorted.length)})" style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">▼ Xem thêm ${Math.min(HIST_STEP,allSorted.length-showN)} trận</button>`;
+    } else if(allSorted.length>HIST_STEP){
+      rh+=`<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+    }
+    return rh+'</div>';
+  }
+  h+=renderHistBlock(HIST_STEP);
+  window._statsHistName=name; window._statsHistAll=allSorted; window._statsHistMakeRow=makeMatchRow;
   return h;
+}
+
+function expandStatsHist(showN){
+  const block=document.getElementById('stats-hist-block');
+  if(!block) return;
+  const allSorted=window._statsHistAll||[];
+  const makeMatchRow=window._statsHistMakeRow;
+  const HIST_STEP=5;
+  let rh=`<div class="stats-section-title">📅 Lịch sử <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+  allSorted.slice(0,showN).forEach(m=>{rh+=makeMatchRow(m);});
+  if(showN<allSorted.length){
+    rh+=`<button onclick="expandStatsHist(${Math.min(showN+HIST_STEP,allSorted.length)})" style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">▼ Xem thêm ${Math.min(HIST_STEP,allSorted.length-showN)} trận</button>`;
+  } else {
+    rh+=`<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+  }
+  block.innerHTML=rh;
 }
 
 
