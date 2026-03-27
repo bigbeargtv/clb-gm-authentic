@@ -40,6 +40,29 @@
   --muted:#8892b0;--text:#1a1f36;--text2:#4a5270;
   --nam-c:#2c6fca;--mix-c:#c07a00;--nu-c:#c9357a;
 }
+html.dark{--bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;--bdr:#2e3350;--bdr2:#3a4060;--gold:#f0b429;--gold2:#ffcc44;--blue:#5b9cf6;--pink:#e879b0;--green:#2ecc82;--red:#ff6b6b;--muted:#6b7494;--text:#e8ecf4;--text2:#9ba3c0;}
+html.dark body{background:var(--bg);}
+html.dark body::before{background:radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5008 0%,transparent 60%);}
+html.dark body::after{background-image:radial-gradient(circle,#ffffff03 1px,transparent 1px);}
+html.dark header{background:rgba(15,17,23,.97);border-color:var(--bdr);}
+html.dark nav{background:var(--s1);border-color:var(--bdr);}
+html.dark .mc{background:var(--s2) !important;border-color:var(--bdr);}
+html.dark .mc-editing{background:var(--s1) !important;}
+html.dark .stat-card,.stats-section{background:var(--s2);border-color:var(--bdr);}
+html.dark .stats-hero{background:var(--s2);border-color:var(--bdr);}
+html.dark .stats-kpi-box{background:var(--s1);border-color:var(--bdr);}
+html.dark .tbl-r{background:var(--s2);border-color:var(--bdr);}
+html.dark .tbl-r.r1{background:linear-gradient(135deg,#2a200530,#1a1d27ee) !important;border-color:#f0b42980 !important;}
+html.dark .tbl-r.r2{background:linear-gradient(135deg,#2a2a3030,#1a1d27ee) !important;}
+html.dark .tbl-r.r3{background:linear-gradient(135deg,#2a1a0030,#1a1d27ee) !important;}
+html.dark .i-block,.i-stat,.i-feat,.i-sched{background:var(--s2) !important;border-color:var(--bdr);}
+html.dark .session-banner{background:linear-gradient(135deg,#0a0e1a,#0f1520) !important;}
+html.dark .ldg-card{background:var(--s2);border-color:var(--bdr);}
+html.dark .hi{background:var(--s1);}
+html.dark .hist-session{background:var(--s2);}
+html.dark #picker-box,.pk-list{background:var(--s1);}
+html.dark input:not([type=file]),html.dark select,html.dark textarea{background:var(--s2) !important;color:var(--text) !important;border-color:var(--bdr2) !important;}
+html.dark .bxh-tab{color:var(--muted);}
 html.dark{
   --bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;
   --bdr:#2e3350;--bdr2:#3a4060;
@@ -1113,8 +1136,8 @@ nav::-webkit-scrollbar{display:none;}
 .stats-res-badge.W{background:#1a9e6020;color:var(--green);}
 .stats-res-badge.L{background:#e5555518;color:#e55;}
 .stats-res-badge.D{background:var(--s1);color:var(--muted);}
-.name-link{cursor:pointer;border-bottom:1px dashed var(--bdr2);transition:color .15s;}
-.name-link:hover{color:var(--gold)!important;border-bottom-color:var(--gold);}
+.name-link{cursor:pointer;transition:color .15s;}
+.name-link:hover{color:var(--gold)!important;}
 .dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
 .dark-toggle:hover{border-color:var(--gold);}
 #toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;}
@@ -1140,6 +1163,8 @@ nav::-webkit-scrollbar{display:none;}
   <div class="skel-dots"><div class="skel-dot"></div><div class="skel-dot"></div><div class="skel-dot"></div></div>
 </div>
 <div id="toast-container"></div>
+<div id="app-skeleton"><div class="skel-text">GM AUTHENTIC</div><div class="skel-dots"><div class="skel-dot"></div><div class="skel-dot"></div><div class="skel-dot"></div></div></div>
+<div id="toast-container"></div>
 <header>
   <div class="logo-wrap">
     <div class="logo-icon-wrap">
@@ -1152,6 +1177,7 @@ nav::-webkit-scrollbar{display:none;}
     <div class="save-dot saved" id="saveDot"></div>
     <span id="saveLabel">Đã lưu</span>
   </div>
+  <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Chế độ tối/sáng">🌙</button>
   <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Chế độ tối/sáng">🌙</button>
   <button class="admin-lock-btn" id="adminBtn" onclick="toggleAdminModal()">🔒 Admin</button>
   <button class="backup-btn" onclick="openBackup()">💾 Backup</button>
@@ -1667,93 +1693,50 @@ function applyRemoteData(data){
   }
 }
 
-// ─── CACHE ───
-const CACHE_KEY = 'clb_cache_v2';
-
-function applyData(data){
-  if(!data) return;
-  members          = data.members   || [];
-  memberUid        = data.memberUid || 1;
-  matches          = data.matches   || [];
-  matchUid         = data.matchUid  || 1;
-  tgt              = data.tgt       || 11;
-  cat              = data.cat       || 'nam';
-  sessionDate      = data.sessionDate || '';
-  drawSessionsMeta = data.drawSessionsMeta || {};
-  ledger           = data.ledger    || [];
-  ledgerUid        = data.ledgerUid || 1;
-  clubInitBalance  = +data.clubInitBalance || 0;
-  album            = data.album     || [];
-  albumUid         = data.albumUid  || 1;
-  if(data.clbInfo) clbInfo = Object.assign({}, clbInfo, data.clbInfo, {
-    features: (data.clbInfo.features && data.clbInfo.features.length) ? data.clbInfo.features : clbInfo.features,
-    bank: Object.assign({}, clbInfo.bank, data.clbInfo.bank||{})
-  });
-  if(data.drawDraft){
-    const dr        = data.drawDraft;
-    drawSelected    = new Set(dr.selected||[]);
-    drawCustom      = dr.custom||[];
-    drawTeams       = dr.teams||[];
-    drawMatchCounts = dr.matchCounts||{nam:0,mix:0,nu:0};
-    drawTeamCount   = dr.teamCount||2;
-    drawTeamNames   = dr.teamNames||['Đội A','Đội B','Đội C','Đội D'];
-    drawBet         = dr.bet||0;
-    drawWinner      = dr.winner||'';
-    drawMaxPerPerson= dr.maxPerPerson||0;
-    window._matchPairs = dr.pairs||[];
-  }
-}
-
-function saveCache(data){
-  try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data})); }catch(e){}
-}
-
-function loadCache(){
-  try{
-    const raw = localStorage.getItem(CACHE_KEY);
-    if(!raw) return null;
-    const obj = JSON.parse(raw);
-    // Cache hợp lệ 24h
-    if(Date.now() - obj.ts > 86400000) return null;
-    return obj.data;
-  }catch(e){ return null; }
-}
-
 async function load(){
   setSaveDot(false);
-
-  // Bước 1: Load cache ngay lập tức — hiện UI trong <100ms
-  const cached = loadCache();
-  if(cached){
-    applyData(cached);
-    renderIntro();
-    renderMembers();
-    renderMatches();
-    hideSkeleton();
-    document.getElementById('saveLabel').textContent = '🔄 Đang đồng bộ...';
-  }
-
-  // Bước 2: Fetch Firebase ngầm
+  document.getElementById('saveLabel').textContent='Đang tải...';
   const data = await fbGet('/clb');
   if(data){
-    applyData(data);
-    saveCache(data);
+    members   = data.members   || [];
+    memberUid = data.memberUid || 1;
+    matches   = data.matches   || [];
+    matchUid  = data.matchUid  || 1;
+    tgt       = data.tgt       || 11;
+    cat       = data.cat       || 'nam';
+    sessionDate = data.sessionDate || '';
+    drawSessionsMeta = data.drawSessionsMeta || {};
+    ledger = data.ledger || [];
+    ledgerUid = data.ledgerUid || 1;
+    clubInitBalance = +data.clubInitBalance || 0;
+    album = data.album || [];
+    if(data.clbInfo) clbInfo = Object.assign({}, clbInfo, data.clbInfo, {
+      features: (data.clbInfo.features && data.clbInfo.features.length) ? data.clbInfo.features : clbInfo.features,
+      bank: Object.assign({}, clbInfo.bank, data.clbInfo.bank||{})
+    });
     renderIntro();
-    renderMembers();
-    renderMatchesSaved();
-    setSaveDot(true);
-    document.getElementById('saveLabel').textContent = 'Đã lưu ☁️';
-    if(!cached) hideSkeleton();
-  } else {
-    setSaveDot(false);
-    if(!cached){
-      document.getElementById('saveLabel').textContent = '⚠️ Không kết nối Firebase!';
-      hideSkeleton();
-    } else {
-      document.getElementById('saveLabel').textContent = '⚠️ Offline — đang dùng cache';
+    albumUid = data.albumUid || 1;
+    if(data.drawDraft){
+      const dr = data.drawDraft;
+      drawSelected     = new Set(dr.selected||[]);
+      drawCustom       = dr.custom||[];
+      drawTeams        = dr.teams||[];
+      drawMatchCounts  = dr.matchCounts||{nam:0,mix:0,nu:0};
+      drawTeamCount    = dr.teamCount||2;
+      drawTeamNames    = dr.teamNames||['Đội A','Đội B','Đội C','Đội D'];
+      drawBet          = dr.bet||0;
+      drawWinner       = dr.winner||'';
+      drawMaxPerPerson = dr.maxPerPerson||0;
+      window._matchPairs = dr.pairs||[];
     }
+    setSaveDot(true);
+    document.getElementById('saveLabel').textContent='Đã lưu ☁️';
+  } else {
+    // Load thất bại — hiện lỗi rõ
+    document.getElementById('saveLabel').textContent='⚠️ Không kết nối được Firebase!';
+    setSaveDot(false);
   }
-
+  hideSkeleton();
   startRealtimeSync();
 }
 
@@ -1793,20 +1776,7 @@ async function save(){
     album, albumUid,
     clbInfo
   });
-  if(ok){
-    saveCache({
-      members, memberUid,
-      matches: matches.filter(m=>m.saved), matchUid,
-      tgt, cat, sessionDate, drawSessionsMeta,
-      drawDraft:{
-        selected:[...drawSelected], custom:drawCustom, teams:drawTeams,
-        matchCounts:drawMatchCounts, teamCount:drawTeamCount, teamNames:drawTeamNames,
-        bet:drawBet, winner:drawWinner, pairs:window._matchPairs||[],
-        maxPerPerson:drawMaxPerPerson
-      },
-      ledger, ledgerUid, clubInitBalance, album, albumUid, clbInfo
-    });
-  }
+  if(ok) saveCache({members,memberUid,matches:matches.filter(m=>m.saved),matchUid,tgt,cat,sessionDate,drawSessionsMeta,drawDraft:{selected:[...drawSelected],custom:drawCustom,teams:drawTeams,matchCounts:drawMatchCounts,teamCount:drawTeamCount,teamNames:drawTeamNames,bet:drawBet,winner:drawWinner,pairs:window._matchPairs||[],maxPerPerson:drawMaxPerPerson},ledger,ledgerUid,clubInitBalance,album,albumUid,clbInfo});
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
   if(!ok) showToast('Lỗi kết nối — thử lại','error');
@@ -5203,25 +5173,75 @@ function buildStatsHTML(name){
     });
     h+='</div>';
   }
-  // 5 trận gần nhất
-  const recent=allM.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  h+=`<div class="stats-section"><div class="stats-section-title">📅 5 trận gần nhất</div>`;
-  recent.forEach(m=>{
-    const inT1=[m.t1p1,m.t1p2].includes(name);
-    const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
-    const won=inT1?w==='A':w==='B', lost=inT1?w==='B':w==='A';
-    const res=won?'W':lost?'L':'D';
-    const opp=(inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
-    const sc=(m.s1!==''&&m.s2!=='')?m.s1+' : '+m.s2:'';
-    h+=`<div class="stats-match-row">
+  // Lịch sử trận — có thể xem thêm
+  const allSorted = allM.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const HIST_STEP = 5;
+
+  function makeMatchRow(m){
+    const inT1 = [m.t1p1,m.t1p2].includes(name);
+    const w = m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
+    const won = inT1?w==='A':w==='B', lost = inT1?w==='B':w==='A';
+    const res = won?'W':lost?'L':'D';
+    const partner = (inT1?[m.t1p1,m.t1p2]:[m.t2p1,m.t2p2]).filter(Boolean).filter(n=>n!==name)[0];
+    const opp = (inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
+    const myS = inT1?m.s1:m.s2, oppS = inT1?m.s2:m.s1;
+    const sc = (m.s1!==''&&m.s2!=='')?`${myS}–${oppS}`:'';
+    const nl = (n) => `<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}" style="color:var(--text2);">${xe(n)}</span>`;
+    return `<div class="stats-match-row">
       <span class="stats-res-badge ${res}">${won?'Thắng':lost?'Thua':'Hòa'}</span>
-      <div style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">vs ${opp.map(n=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`).join(' & ')}</div>
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);flex-shrink:0;">${sc}</span>
-      <span class="cbadge ${CB[m.cat]}" style="font-size:9px;flex-shrink:0;">${CL[m.cat]}</span>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ⚔️ ${opp.map(nl).join(' & ')}
+        </div>
+        <div style="font-size:10px;color:var(--text2);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          ${partner?`<span style="color:var(--text2);">🤝 ${nl(partner)}</span>`:''}
+          <span style="color:var(--muted);">${m.date||''}</span>
+          <span class="cbadge ${CB[m.cat]}" style="font-size:8px;padding:1px 6px;">${CL[m.cat]}</span>
+        </div>
+      </div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;flex-shrink:0;min-width:40px;text-align:right;color:${won?'var(--green)':lost?'#e55':'var(--muted)'};">${sc}</span>
     </div>`;
-  });
-  h+='</div>';
+  }
+
+  function renderHistBlock(showN){
+    let rh = `<div class="stats-section" id="stats-hist-block">
+      <div class="stats-section-title">📅 Lịch sử <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+    allSorted.slice(0, showN).forEach(m => { rh += makeMatchRow(m); });
+    if(showN < allSorted.length){
+      rh += `<button onclick="expandStatsHist(${Math.min(showN+HIST_STEP, allSorted.length)})"
+        style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
+        ▼ Xem thêm ${Math.min(HIST_STEP, allSorted.length-showN)} trận
+      </button>`;
+    } else if(allSorted.length > HIST_STEP){
+      rh += `<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+    }
+    return rh + '</div>';
+  }
+
+  h += renderHistBlock(HIST_STEP);
+  window._statsHistName = name;
+  window._statsHistAll  = allSorted;
+  window._statsHistMakeRow = makeMatchRow;
   return h;
+}
+
+function expandStatsHist(showN){
+  const block = document.getElementById('stats-hist-block');
+  if(!block) return;
+  const allSorted = window._statsHistAll || [];
+  const makeMatchRow = window._statsHistMakeRow;
+  const HIST_STEP = 5;
+  let rh = `<div class="stats-section-title">📅 Lịch sử <span style="font-weight:600;color:var(--muted);">(${allSorted.length} trận)</span></div>`;
+  allSorted.slice(0, showN).forEach(m => { rh += makeMatchRow(m); });
+  if(showN < allSorted.length){
+    rh += `<button onclick="expandStatsHist(${Math.min(showN+HIST_STEP, allSorted.length)})"
+      style="width:100%;margin-top:10px;padding:9px;border:1.5px solid var(--bdr2);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
+      ▼ Xem thêm ${Math.min(HIST_STEP, allSorted.length-showN)} trận
+    </button>`;
+  } else {
+    rh += `<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">Đã hiển thị tất cả ${allSorted.length} trận</div>`;
+  }
+  block.innerHTML = rh;
 }
 
 
@@ -5864,6 +5884,11 @@ function getHistFilterLabel(){
 function fmtNum(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.length>1?p[p.length-1][0]:name[0]).toUpperCase();}
 function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ─── CACHE ───
+const CACHE_KEY='clb_cache_v2';
+function saveCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(e){}}
+function loadCache(){try{const r=localStorage.getItem(CACHE_KEY);if(!r)return null;const o=JSON.parse(r);if(Date.now()-o.ts>86400000)return null;return o.data;}catch(e){return null;}}
 
 // ─── DARK MODE ───
 function toggleDark(){
