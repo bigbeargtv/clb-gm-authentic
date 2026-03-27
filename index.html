@@ -5216,6 +5216,11 @@ function renderAlbum(){
         <input type="file" id="album-file-inp" accept="image/*" multiple style="display:none;" onchange="handleAlbumUpload(event)">
         <button class="album-upload-btn" style="margin:0;" onclick="document.getElementById('album-file-inp').click()">📷 Chọn ảnh từ máy</button>
       </div>
+      <div style="margin-top:12px;border-top:1px solid var(--bdr);padding-top:10px;">
+        <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px;">⚡ Tối ưu dung lượng</div>
+        <button id="btn-compress-album" class="ldg-btn-in" style="width:100%;padding:8px;font-size:12px;box-sizing:border-box;" onclick="compressAllAlbumImages()">🗜️ Nén toàn bộ ảnh album</button>
+        <div id="compress-status" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+      </div>
     </div>`;
   }
 
@@ -5354,6 +5359,28 @@ function addAlbumLink(){
   save(); renderAlbum(); renderIntro();
 }
 
+function _resizeAlbumImage(file, maxW, maxH, quality){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w=img.width, h=img.height;
+        if(w>maxW||h>maxH){
+          const ratio=Math.min(maxW/w, maxH/h);
+          w=Math.round(w*ratio); h=Math.round(h*ratio);
+        }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ()=>resolve(ev.target.result);
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 function handleAlbumUpload(e){
   const files = [...e.target.files];
   if(!files.length) return;
@@ -5361,22 +5388,64 @@ function handleAlbumUpload(e){
   const date  = (document.getElementById('alb-date')||{}).value||vnDateStr(new Date());
   if(title) album.filter(a=>a.date===date).forEach(a=>{ a._dayTitle=title; });
   let done=0;
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      album.push({id:albumUid++, date, type:'photo', title, url:ev.target.result, _dayTitle:title||null});
-      done++;
-      if(done===files.length){
-        const ti=document.getElementById('alb-title');
-        if(ti) ti.value='';
-        if(!window._albumOpenDays) window._albumOpenDays=new Set();
-        window._albumOpenDays.add('albd-'+date.replace(/-/g,''));
-        save(); renderAlbum(); renderIntro();
-      }
-    };
-    reader.readAsDataURL(file);
+  files.forEach(async file=>{
+    const url = await _resizeAlbumImage(file, 1200, 900, 0.72);
+    album.push({id:albumUid++, date, type:'photo', title, url, _dayTitle:title||null});
+    done++;
+    if(done===files.length){
+      const ti=document.getElementById('alb-title');
+      if(ti) ti.value='';
+      if(!window._albumOpenDays) window._albumOpenDays=new Set();
+      window._albumOpenDays.add('albd-'+date.replace(/-/g,''));
+      save(); renderAlbum(); renderIntro();
+    }
   });
   e.target.value='';
+}
+
+async function compressAllAlbumImages(){
+  const photos = album.filter(a=>(a.type==='photo'||!a.type) && a.url && a.url.startsWith('data:'));
+  if(!photos.length){ showToast('Không có ảnh để nén','info'); return; }
+  const statusEl = document.getElementById('compress-status');
+  const btn = document.getElementById('btn-compress-album');
+  if(btn) btn.disabled = true;
+  let compressed=0, saved=0;
+  for(let i=0; i<photos.length; i++){
+    const a = photos[i];
+    if(statusEl) statusEl.textContent = `Đang nén ${i+1}/${photos.length}...`;
+    const origSize = a.url.length;
+    try{
+      const newUrl = await new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          let w=img.width, h=img.height;
+          const MAX_W=1200, MAX_H=900;
+          if(w>MAX_W||h>MAX_H){
+            const ratio=Math.min(MAX_W/w, MAX_H/h);
+            w=Math.round(w*ratio); h=Math.round(h*ratio);
+          }
+          const c=document.createElement('canvas');
+          c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg', 0.72));
+        };
+        img.onerror = ()=>reject();
+        img.src = a.url;
+      });
+      if(newUrl.length < origSize){
+        saved += origSize - newUrl.length;
+        a.url = newUrl;
+        compressed++;
+      }
+    }catch(e){}
+  }
+  if(compressed > 0){
+    save(); renderAlbum(); renderIntro();
+  }
+  const savedMB = (saved/1024/1024).toFixed(1);
+  if(statusEl) statusEl.textContent = `✅ Đã nén ${compressed}/${photos.length} ảnh, giảm ${savedMB} MB`;
+  if(btn) btn.disabled = false;
+  showToast(`Nén xong! Giảm ${savedMB} MB`,'ok');
 }
 
 function openLightbox(id){
