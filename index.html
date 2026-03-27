@@ -39,30 +39,17 @@
   --green:#1a9e60;--red:#d03030;--purple:#6b3fcf;
   --muted:#8892b0;--text:#1a1f36;--text2:#4a5270;
   --nam-c:#2c6fca;--mix-c:#c07a00;--nu-c:#c9357a;
-  --card:#ffffff;
 }
-/* ── DARK MODE ── */
 html.dark{
   --bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;
   --bdr:#2e3350;--bdr2:#3a4060;
   --gold:#f0b429;--gold2:#ffcc44;
   --muted:#6b7494;--text:#e8ecf4;--text2:#9ba3c0;
-  --card:#1a1d27;
 }
-html.dark body::before{
-  background:
-    radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5010 0%,transparent 60%),
-    radial-gradient(ellipse 50% 50% at 85% 90%,#2a1a1010 0%,transparent 60%);
-}
-html.dark body::after{
-  background-image:radial-gradient(circle,#ffffff04 1px,transparent 1px);
-}
-html.dark header{
-  background:rgba(15,17,23,.97);
-}
-html.dark nav{
-  background:var(--s1);
-}
+html.dark body::before{background:radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5010 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 85% 90%,#2a1a1010 0%,transparent 60%);}
+html.dark body::after{background-image:radial-gradient(circle,#ffffff04 1px,transparent 1px);}
+html.dark header{background:rgba(15,17,23,.97);}
+html.dark nav{background:var(--s1);}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;font-size:18px;}
 
@@ -1128,52 +1115,16 @@ nav::-webkit-scrollbar{display:none;}
 .stats-res-badge.D{background:var(--s1);color:var(--muted);}
 .name-link{cursor:pointer;border-bottom:1px dashed var(--bdr2);transition:color .15s;}
 .name-link:hover{color:var(--gold)!important;border-bottom-color:var(--gold);}
-
-/* ── DARK MODE TOGGLE ── */
-.dark-toggle{
-  background:none;border:1.5px solid var(--bdr2);border-radius:20px;
-  padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;
-  color:var(--text2);transition:all .2s;flex-shrink:0;
-}
-.dark-toggle:hover{border-color:var(--gold);background:var(--gold2)15;}
-
-/* ── TOAST NOTIFICATION ── */
-#toast-container{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  z-index:9999;display:flex;flex-direction:column;gap:8px;
-  pointer-events:none;align-items:center;
-}
-.toast{
-  background:var(--s1);border:1.5px solid var(--bdr2);
-  border-radius:24px;padding:10px 18px;
-  font-size:13px;font-weight:700;color:var(--text);
-  box-shadow:0 8px 32px rgba(0,0,0,.15);
-  display:flex;align-items:center;gap:8px;
-  animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);
-  pointer-events:auto;white-space:nowrap;
-}
-.toast.success{border-color:#1a9e6050;background:var(--s1);}
-.toast.error{border-color:#e5555550;}
-.toast.info{border-color:var(--gold)50;}
-.toast-icon{font-size:16px;flex-shrink:0;}
+.dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
+.dark-toggle:hover{border-color:var(--gold);}
+#toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;}
+.toast{background:var(--s1);border:1.5px solid var(--bdr2);border-radius:24px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;white-space:nowrap;}
 .toast.out{animation:toastOut .25s ease forwards;}
 @keyframes toastIn{from{opacity:0;transform:translateY(12px) scale(.9);}to{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1);}to{opacity:0;transform:translateY(8px) scale(.95);}}
-
-/* ── LOADING SKELETON ── */
-#app-skeleton{
-  position:fixed;inset:0;background:var(--bg);z-index:999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  transition:opacity .3s;
-}
+#app-skeleton{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .3s;}
 #app-skeleton.hidden{opacity:0;pointer-events:none;}
-.skel-logo{
-  width:56px;height:56px;border-radius:16px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;box-shadow:0 8px 24px rgba(212,134,10,.3);
-  animation:skelPulse 1.5s ease-in-out infinite;
-}
+.skel-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 8px 24px rgba(212,134,10,.3);animation:skelPulse 1.5s ease-in-out infinite;}
 .skel-text{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:3px;color:var(--muted);}
 .skel-dots{display:flex;gap:6px;}
 .skel-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:.3;}
@@ -1182,27 +1133,16 @@ nav::-webkit-scrollbar{display:none;}
 .skel-dot:nth-child(3){animation:skelDot 1.2s .4s ease-in-out infinite;}
 @keyframes skelPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 @keyframes skelDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-4px);}}
-
-/* ── BXH ROW IMPROVED ── */
 .tbl-r:hover{border-color:var(--gold)50;transform:translateX(2px);box-shadow:0 2px 12px rgba(0,0,0,.08);}
-html.dark .tbl-r:hover{box-shadow:0 2px 12px rgba(0,0,0,.3);}
 </style>
 </div>
 
-<!-- LOADING SKELETON -->
 <div id="app-skeleton">
   <div class="skel-logo">🏓</div>
   <div class="skel-text">GM AUTHENTIC</div>
-  <div class="skel-dots">
-    <div class="skel-dot"></div>
-    <div class="skel-dot"></div>
-    <div class="skel-dot"></div>
-  </div>
+  <div class="skel-dots"><div class="skel-dot"></div><div class="skel-dot"></div><div class="skel-dot"></div></div>
 </div>
-
-<!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
-
 <header>
   <div class="logo-wrap">
     <div class="logo-icon-wrap">
@@ -1769,9 +1709,9 @@ async function load(){
     setSaveDot(true);
     document.getElementById('saveLabel').textContent='Đã lưu ☁️';
   } else {
+    // Load thất bại — hiện lỗi rõ
     document.getElementById('saveLabel').textContent='⚠️ Không kết nối được Firebase!';
     setSaveDot(false);
-    showToast('Không kết nối được Firebase!', 'error', 4000);
   }
   hideSkeleton();
   startRealtimeSync();
@@ -1816,7 +1756,7 @@ async function save(){
   });
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
-  if(!ok) showToast('Lỗi kết nối — vui lòng thử lại', 'error');
+  if(!ok) showToast('Lỗi kết nối — vui lòng thử lại','error');
   // Auto-snapshot (throttled: max 1 per 5 min)
   if(ok && isAdmin){
     const now = Date.now();
@@ -1899,7 +1839,6 @@ function addMember(){
   members.push({id:memberUid++,name,gender:newGender,color:members.length%10});
   inp.value='';
   renderMembers();debounceSave();
-  showToast('Đã thêm thành viên', 'success', 1500);
 }
 function removeMember(id){
   if(!isAdmin)return;
@@ -4002,8 +3941,8 @@ function saveMatch(id){
   }
   if(!m.date) m.date=document.getElementById('sessionDate').value||todayStr();
   m.saved=true;
+  showToast('Đã lưu kết quả ✓','success',1800);
   renderMatches();
-  showToast('Đã lưu kết quả ✓', 'success', 1800);
   save();
 }
 function editMatch(id){
@@ -4776,7 +4715,6 @@ function addLedgerTx(type){
   document.getElementById('ldg-note').value='';
   save();
   renderLedger();
-  showToast('Đã ghi nhận giao dịch', 'success', 1500);
 }
 
 function quickLedger(name, domId, type){
@@ -5874,8 +5812,48 @@ function fmtNum(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.length>1?p[p.length-1][0]:name[0]).toUpperCase();}
 function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ─── DARK MODE ───
+function toggleDark(){
+  const isDark=document.documentElement.classList.toggle('dark');
+  const btn=document.getElementById('darkToggle');
+  if(btn) btn.textContent=isDark?'☀️':'🌙';
+  try{localStorage.setItem('clb_dark',isDark?'1':'0');}catch(e){}
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content=isDark?'#0f1117':'#1a1f36';
+}
+function initDark(){
+  try{
+    const saved=localStorage.getItem('clb_dark');
+    const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if(saved==='1'||(saved===null&&prefersDark)){
+      document.documentElement.classList.add('dark');
+      const btn=document.getElementById('darkToggle');
+      if(btn) btn.textContent='☀️';
+    }
+  }catch(e){}
+}
+
+// ─── TOAST ───
+function showToast(msg,type='success',duration=2500){
+  const icons={success:'✅',error:'❌',info:'💡',warning:'⚠️'};
+  const c=document.getElementById('toast-container');
+  if(!c) return;
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<span style="font-size:16px">${icons[type]||'💬'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),280);},duration);
+}
+
+// ─── SKELETON ───
+function hideSkeleton(){
+  const sk=document.getElementById('app-skeleton');
+  if(sk){sk.classList.add('hidden');setTimeout(()=>{if(sk.parentNode)sk.remove();},400);}
+}
+setTimeout(hideSkeleton,6000); // fallback
+
 // ─── INIT ───
-initDark(); // chạy sớm để tránh flash of light mode
+initDark(); // gọi sớm để tránh flash
 (async function(){
   // Show loading state
   document.getElementById('saveLabel').textContent='Đang tải...';
@@ -5907,51 +5885,6 @@ initDark(); // chạy sớm để tránh flash of light mode
   // Hide loading overlay
   const ov = document.getElementById('loadingOverlay');
   if(ov) ov.style.display='none';
-
-// ─── DARK MODE ───
-function toggleDark(){
-  const isDark = document.documentElement.classList.toggle('dark');
-  document.getElementById('darkToggle').textContent = isDark ? '☀️' : '🌙';
-  try{ localStorage.setItem('clb_dark', isDark?'1':'0'); }catch(e){}
-  // Update theme-color meta
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.content = isDark ? '#0f1117' : '#1a1f36';
-}
-function initDark(){
-  try{
-    const saved = localStorage.getItem('clb_dark');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if(saved==='1' || (saved===null && prefersDark)){
-      document.documentElement.classList.add('dark');
-      const btn = document.getElementById('darkToggle');
-      if(btn) btn.textContent='☀️';
-    }
-  }catch(e){}
-}
-
-// ─── TOAST NOTIFICATIONS ───
-function showToast(msg, type='success', duration=2500){
-  const icons = {success:'✅', error:'❌', info:'💡', warning:'⚠️'};
-  const container = document.getElementById('toast-container');
-  if(!container) return;
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.innerHTML = `<span class="toast-icon">${icons[type]||'💬'}</span><span>${msg}</span>`;
-  container.appendChild(t);
-  setTimeout(()=>{
-    t.classList.add('out');
-    setTimeout(()=>t.remove(), 280);
-  }, duration);
-}
-
-// ─── SKELETON HIDE ───
-function hideSkeleton(){
-  const sk = document.getElementById('app-skeleton');
-  if(sk){ sk.classList.add('hidden'); setTimeout(()=>{ if(sk.parentNode) sk.remove(); },400); }
-}
-// Fallback: ẩn skeleton sau 6s dù Firebase có load được hay không
-setTimeout(hideSkeleton, 6000);
-
 })();
 </script>
 </body>
