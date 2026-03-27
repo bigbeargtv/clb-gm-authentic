@@ -1113,8 +1113,8 @@ nav::-webkit-scrollbar{display:none;}
 .stats-res-badge.W{background:#1a9e6020;color:var(--green);}
 .stats-res-badge.L{background:#e5555518;color:#e55;}
 .stats-res-badge.D{background:var(--s1);color:var(--muted);}
-.name-link{cursor:pointer;border-bottom:1px dashed var(--bdr2);transition:color .15s;}
-.name-link:hover{color:var(--gold)!important;border-bottom-color:var(--gold);}
+.name-link{cursor:pointer;transition:color .15s;}
+.name-link:hover{color:var(--gold)!important;}
 .dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
 .dark-toggle:hover{border-color:var(--gold);}
 #toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;}
@@ -1667,15 +1667,14 @@ function applyRemoteData(data){
   }
 }
 
-// ── Cache helpers ──
-const CACHE_KEY = 'clb_v3';
+// ── Cache ──
+const CACHE_KEY='clb_v3';
 function _applyData(d){
   if(!d) return;
   members=d.members||[]; memberUid=d.memberUid||1;
   matches=d.matches||[]; matchUid=d.matchUid||1;
   tgt=d.tgt||11; cat=d.cat||'nam';
-  sessionDate=d.sessionDate||'';
-  drawSessionsMeta=d.drawSessionsMeta||{};
+  sessionDate=d.sessionDate||''; drawSessionsMeta=d.drawSessionsMeta||{};
   ledger=d.ledger||[]; ledgerUid=d.ledgerUid||1;
   clubInitBalance=+d.clubInitBalance||0;
   album=d.album||[]; albumUid=d.albumUid||1;
@@ -1692,54 +1691,33 @@ function _applyData(d){
     window._matchPairs=dr.pairs||[];
   }
 }
-function _saveCache(d){
-  try{ localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d})); }catch(e){}
-}
-function _loadCache(){
-  try{
-    const r=localStorage.getItem(CACHE_KEY);
-    if(!r) return null;
-    const o=JSON.parse(r);
-    if(Date.now()-o.ts>86400000) return null; // 24h
-    return o.d;
-  }catch(e){ return null; }
-}
+function _saveCache(d){ try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d}));}catch(e){} }
+function _loadCache(){ try{const r=localStorage.getItem(CACHE_KEY);if(!r)return null;const o=JSON.parse(r);if(Date.now()-o.ts>86400000)return null;return o.d;}catch(e){return null;} }
 
 async function load(){
   setSaveDot(false);
-
-  // Bước 1: Render cache NGAY — không chờ network
-  const cached = _loadCache();
+  // Bước 1: render cache ngay, ẩn skeleton không chờ network
+  const cached=_loadCache();
   if(cached){
     _applyData(cached);
-    renderIntro();
-    renderMembers();
-    renderMatches();
-    hideSkeleton(); // ← ẩn skeleton ngay, user thấy app trong <100ms
+    renderIntro(); renderMembers(); renderMatches();
+    hideSkeleton();
     document.getElementById('saveLabel').textContent='🔄 Đồng bộ...';
   }
-
-  // Bước 2: Fetch Firebase ngầm (không block UI)
-  const data = await fbGet('/clb');
+  // Bước 2: fetch Firebase ngầm
+  const data=await fbGet('/clb');
   if(data){
     _applyData(data);
     _saveCache(data);
-    renderIntro();
-    renderMembers();
-    renderMatchesSaved();
+    renderIntro(); renderMembers(); renderMatchesSaved();
     setSaveDot(true);
     document.getElementById('saveLabel').textContent='Đã lưu ☁️';
     if(!cached) hideSkeleton();
   } else {
     setSaveDot(false);
-    if(cached){
-      document.getElementById('saveLabel').textContent='⚠️ Offline';
-    } else {
-      document.getElementById('saveLabel').textContent='⚠️ Không kết nối Firebase!';
-      hideSkeleton();
-    }
+    document.getElementById('saveLabel').textContent=cached?'⚠️ Offline':'⚠️ Không kết nối Firebase!';
+    if(!cached) hideSkeleton();
   }
-
   startRealtimeSync();
 }
 
@@ -1779,15 +1757,7 @@ async function save(){
     album, albumUid,
     clbInfo
   });
-  if(ok) _saveCache({
-    members, memberUid,
-    matches:matches.filter(m=>m.saved), matchUid,
-    tgt, cat, sessionDate, drawSessionsMeta,
-    drawDraft:{selected:[...drawSelected],custom:drawCustom,teams:drawTeams,
-      matchCounts:drawMatchCounts,teamCount:drawTeamCount,teamNames:drawTeamNames,
-      bet:drawBet,winner:drawWinner,pairs:window._matchPairs||[],maxPerPerson:drawMaxPerPerson},
-    ledger, ledgerUid, clubInitBalance, album, albumUid, clbInfo
-  });
+  if(ok) _saveCache({members,memberUid,matches:matches.filter(m=>m.saved),matchUid,tgt,cat,sessionDate,drawSessionsMeta,drawDraft:{selected:[...drawSelected],custom:drawCustom,teams:drawTeams,matchCounts:drawMatchCounts,teamCount:drawTeamCount,teamNames:drawTeamNames,bet:drawBet,winner:drawWinner,pairs:window._matchPairs||[],maxPerPerson:drawMaxPerPerson},ledger,ledgerUid,clubInitBalance,album,albumUid,clbInfo});
   setSaveDot(ok);
   document.getElementById('saveLabel').textContent = ok ? 'Đã lưu ☁️' : 'Lỗi lưu!';
   if(!ok) showToast('Lỗi kết nối — thử lại','error');
