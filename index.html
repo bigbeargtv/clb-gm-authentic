@@ -1161,20 +1161,21 @@ nav::-webkit-scrollbar{display:none;}
 
 /* Mobile layout optimization */
 @media(max-width:640px){
-  header{height:auto;min-height:44px;padding:6px 10px;gap:8px;flex-wrap:nowrap;}
-  .logo-wrap{flex:1 1 auto;min-width:0;}
-  .logo-name{font-size:14px;}
-  .save-status{display:none;}
-  .backup-btn{display:none;}
-  .admin-lock-btn{font-size:11px;padding:4px 10px;}
-  .dark-toggle{width:36px;height:24px;}
-  nav{position:relative;}
+  header{height:auto!important;min-height:40px;padding:5px 8px!important;gap:6px!important;flex-wrap:nowrap!important;overflow:hidden;}
+  header .logo-wrap{flex:0 1 auto;min-width:0;}
+  header .logo-wrap .logo-icon{width:28px;height:28px;border-radius:8px;}
+  header .logo-name{font-size:13px;}
+  header .save-status{display:none!important;}
+  .admin-mode .backup-btn{display:none!important;}
+  header .admin-lock-btn{font-size:10px;padding:3px 8px;margin-left:auto;}
+  header .dark-toggle{width:32px;height:22px;flex-shrink:0;}
+  nav{position:relative;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;}
   nav::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;
     background:linear-gradient(90deg,transparent,var(--s1));pointer-events:none;z-index:2;}
   nav::before{content:'';position:absolute;left:0;top:0;bottom:0;width:30px;
     background:linear-gradient(270deg,transparent,var(--s1));pointer-events:none;z-index:2;}
-  .nt{min-width:56px;padding:9px 4px 7px;font-size:9px;gap:2px;}
-  .nt .ti{font-size:18px;}
+  .nt{min-width:52px;padding:8px 3px 6px;font-size:8.5px;gap:1px;flex:0 0 auto;}
+  .nt .ic{font-size:18px;}
 }
 </style>
 </div>
