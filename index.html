@@ -1159,8 +1159,15 @@ nav::-webkit-scrollbar{display:none;}
 
 
 
-/* Mobile nav optimization */
+/* Mobile layout optimization */
 @media(max-width:640px){
+  header{height:auto;min-height:44px;padding:6px 10px;gap:8px;flex-wrap:nowrap;}
+  .logo-wrap{flex:1 1 auto;min-width:0;}
+  .logo-name{font-size:14px;}
+  .save-status{display:none;}
+  .backup-btn{display:none;}
+  .admin-lock-btn{font-size:11px;padding:4px 10px;}
+  .dark-toggle{width:36px;height:24px;}
   nav{position:relative;}
   nav::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;
     background:linear-gradient(90deg,transparent,var(--s1));pointer-events:none;z-index:2;}
