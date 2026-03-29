@@ -1213,6 +1213,7 @@ nav::-webkit-scrollbar{display:none;}
   <button class="nt admin-only" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
   <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ic">🏅</span>Thành Tích</button>
   <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ic">📸</span>Album</button>
+<button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">🎉</span>Vui</button>
 </nav>
 
 <!-- INTRO -->
@@ -1271,6 +1272,7 @@ body.admin-mode .i-feat-icon,
 body.admin-mode .i-feat-title,
 body.admin-mode .i-feat-sub{border-bottom:1px dashed rgba(240,180,41,0.3);cursor:text;}
 body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:10px;}
+undefined
 </style>
 <div class="iw">
 
@@ -1466,6 +1468,12 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 <div class="pg" id="pg-stats">
   <div id="stats-picker" style="margin-bottom:12px;"></div>
   <div id="stats-content"></div>
+</div>
+
+
+<!-- THỐNG KÊ VUI -->
+<div class="pg" id="pg-funstats">
+  <div id="funstats-content"></div>
 </div>
 
 <!-- ALBUM -->
@@ -1840,7 +1848,7 @@ function goTab(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
-  const map={'pg-intro':'nt0','pg-members':'nt1','pg-matches':'nt2','pg-bxh':'nt3','pg-hist':'nt4','pg-quy':'nt5','pg-draw':'nt6','pg-ledger':'nt7','pg-stats':'nt8','pg-album':'nt9'};
+  const map={'pg-intro':'nt0','pg-members':'nt1','pg-matches':'nt2','pg-bxh':'nt3','pg-hist':'nt4','pg-quy':'nt5','pg-draw':'nt6','pg-ledger':'nt7','pg-stats':'nt8','pg-album':'nt9','pg-funstats':'nt10'};
   document.getElementById(map[id]).classList.add('on');
   if(id==='pg-intro')renderIntro();
   if(id==='pg-bxh')renderBXH();
@@ -1849,6 +1857,7 @@ function goTab(id){
   if(id==='pg-draw')initDrawTab();
   if(id==='pg-ledger')renderLedger();
   if(id==='pg-stats')renderStats();
+if(id==='pg-funstats')renderFunStats();
   if(id==='pg-album')renderAlbum();
   // Lưu tab hiện tại để F5 giữ nguyên
   try{ localStorage.setItem('activeTab', id); }catch(e){}
@@ -5947,6 +5956,8 @@ initDark();
 })();
 
 
+
+undefined
 </script>
 
 
