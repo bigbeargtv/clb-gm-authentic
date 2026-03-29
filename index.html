@@ -1273,6 +1273,42 @@ body.admin-mode .i-feat-title,
 body.admin-mode .i-feat-sub{border-bottom:1px dashed rgba(240,180,41,0.3);cursor:text;}
 body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:10px;}
 undefined
+
+.fun-header{text-align:center;padding:20px 0 10px;}
+.fun-header .fun-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,#f6d365,#fda085,#f093fb,#4facfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fun-header .fun-month{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;}
+.fun-awards{display:flex;flex-direction:column;gap:12px;padding:0 12px 24px;}
+.fun-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:16px;padding:16px;position:relative;overflow:hidden;}
+.fun-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;}
+.fun-card.gold::before{background:linear-gradient(90deg,#f6d365,#fda085);}
+.fun-card.blue::before{background:linear-gradient(90deg,#4facfe,#00f2fe);}
+.fun-card.pink::before{background:linear-gradient(90deg,#f093fb,#f5576c);}
+.fun-card.green::before{background:linear-gradient(90deg,#43e97b,#38f9d7);}
+.fun-card.purple::before{background:linear-gradient(90deg,#a18cd1,#fbc2eb);}
+.fun-card.orange::before{background:linear-gradient(90deg,#ffa751,#ffe259);}
+.fun-card-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.fun-card-emoji{font-size:36px;line-height:1;flex-shrink:0;}
+.fun-card-info{flex:1;min-width:0;}
+.fun-card-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:2px;}
+.fun-card-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fun-card-av{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--bdr);flex-shrink:0;}
+.fun-card-av-placeholder{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;}
+.fun-card-stat{font-size:13px;color:var(--muted);line-height:1.5;}
+.fun-card-stat b{color:var(--text);font-weight:700;}
+.fun-card-bar{height:6px;border-radius:3px;background:var(--s2);margin-top:8px;overflow:hidden;}
+.fun-card-bar-fill{height:100%;border-radius:3px;}
+.fun-card.gold .fun-card-bar-fill{background:linear-gradient(90deg,#f6d365,#fda085);}
+.fun-card.blue .fun-card-bar-fill{background:linear-gradient(90deg,#4facfe,#00f2fe);}
+.fun-card.pink .fun-card-bar-fill{background:linear-gradient(90deg,#f093fb,#f5576c);}
+.fun-card.green .fun-card-bar-fill{background:linear-gradient(90deg,#43e97b,#38f9d7);}
+.fun-card.purple .fun-card-bar-fill{background:linear-gradient(90deg,#a18cd1,#fbc2eb);}
+.fun-card.orange .fun-card-bar-fill{background:linear-gradient(90deg,#ffa751,#ffe259);}
+.fun-empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
+.fun-streak{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+.fun-streak span{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+.fun-streak .w{background:#22c55e;}
+.fun-streak .l{background:#ef4444;}
+
 </style>
 <div class="iw">
 
@@ -5958,6 +5994,43 @@ initDark();
 
 
 undefined
+
+function renderFunStats(){
+  const el=document.getElementById("funstats-content");
+  if(!el)return;
+  const now=new Date();
+  const curMonth=now.getMonth(),curYear=now.getFullYear();
+  const monthNames=["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+  const mm=matches.filter(m=>{if(!m.saved||m.isBetEntry)return false;if(!m.date)return false;const d=new Date(m.date);return d.getMonth()===curMonth&&d.getFullYear()===curYear;});
+  if(!mm.length){el.innerHTML='<div class="fun-header"><div class="fun-title">Thống Kê Vui</div><div class="fun-month">'+monthNames[curMonth]+' '+curYear+'</div></div><div class="fun-empty">Chưa có trận nào trong tháng này</div>';return;}
+  function av(name){const mb=mbOf(name);if(!mb)return '<div class="fun-card-av-placeholder" style="background:var(--muted)">'+ini(name)+'</div>';return mb.photo?'<img class="fun-card-av" loading="lazy" src="'+mb.photo+'">':'<div class="fun-card-av-placeholder" style="background:'+(AVC[mb.color]||'var(--muted)')+"\">"+ini(name)+"</div>";}
+  const ps={};
+  function ensure(n){if(!n)return;if(!ps[n])ps[n]={w:0,l:0,games:0,dates:new Set(),results:[]};}
+  mm.forEach(m=>{const players=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);const w1=m.winner==="A";const winners=w1?[m.t1p1,m.t1p2]:[m.t2p1,m.t2p2];const losers=w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];const gap=Math.abs((+m.s1||0)-(+m.s2||0));players.forEach(p=>{if(!p)return;ensure(p);ps[p].games++;ps[p].dates.add(m.date);if(winners.includes(p)){ps[p].w++;ps[p].results.push("W");}else if(losers.includes(p)){ps[p].l++;ps[p].results.push("L");}});});
+  const pairs={};mm.forEach(m=>{if(!m.t1p1||!m.t1p2)return;const w1=m.winner==="A";const pA=[m.t1p1,m.t1p2].sort().join("|");if(!pairs[pA])pairs[pA]={w:0,l:0,g:0};pairs[pA].g++;if(w1)pairs[pA].w++;else pairs[pA].l++;const pB=[m.t2p1,m.t2p2].filter(Boolean);if(pB.length===2){const pBk=pB.sort().join("|");if(!pairs[pBk])pairs[pBk]={w:0,l:0,g:0};pairs[pBk].g++;if(!w1)pairs[pBk].w++;else pairs[pBk].l++;}});
+  let bestStreak="",bestStreakN=0;Object.keys(ps).forEach(name=>{let streak=0,maxS=0;ps[name].results.forEach(r=>{if(r==="W"){streak++;if(streak>maxS)maxS=streak;}else streak=0;});if(maxS>bestStreakN){bestStreakN=maxS;bestStreak=name;}});
+  let bestPair="",bestPairW=0,bestPairG=0;Object.keys(pairs).forEach(k=>{if(pairs[k].w>bestPairW){bestPairW=pairs[k].w;bestPairG=pairs[k].g;bestPair=k;}});
+  const sorted=Object.entries(ps).sort((a,b)=>b[1].games-a[1].games);
+  const topWinner=Object.entries(ps).sort((a,b)=>b[1].w-a[1].w)[0];
+  const mostActive=Object.entries(ps).sort((a,b)=>b[1].dates.size-a[1].dates.size)[0];
+  const qualified=Object.entries(ps).filter(e=>e[1].games>=5);const topRate=qualified.sort((a,b)=>(b[1].w/b[1].games)-(a[1].w/a[1].games))[0];
+  const bravest=Object.entries(ps).filter(e=>e[1].l>=3).sort((a,b)=>b[1].l-a[1].l)[0];
+  const betLosses={};mm.forEach(m=>{if(!m.bet||+m.bet===0)return;const w1=m.winner==="A";const losers=w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];losers.filter(Boolean).forEach(p=>{if(!betLosses[p])betLosses[p]=0;betLosses[p]+=+m.bet;});});const topPayer=Object.entries(betLosses).sort((a,b)=>b[1]-a[1])[0];
+  let h='<div class="fun-header"><div class="fun-title">Thống Kê Vui</div><div class="fun-month">'+monthNames[curMonth]+' '+curYear+'</div></div><div class="fun-awards">';
+  if(sorted.length){const[n,s]=sorted[0];h+='<div class="fun-card gold"><div class="fun-card-top"><div class="fun-card-emoji">💪</div><div class="fun-card-info"><div class="fun-card-label">Iron Man</div><div class="fun-card-name">'+xe(n)+'</div></div>'+av(n)+'</div><div class="fun-card-stat"><b>'+s.games+'</b> trận · <b>'+s.dates.size+'</b> buổi · '+s.w+'W-'+s.l+'L</div><div class="fun-card-bar"><div class="fun-card-bar-fill" style="width:100%"></div></div></div>';}
+  if(topWinner){const[n,s]=topWinner;h+='<div class="fun-card blue"><div class="fun-card-top"><div class="fun-card-emoji">🏆</div><div class="fun-card-info"><div class="fun-card-label">Vua Chiến Thắng</div><div class="fun-card-name">'+xe(n)+'</div></div>'+av(n)+'</div><div class="fun-card-stat"><b>'+s.w+'</b> thắng / '+s.games+' trận ('+Math.round(s.w/s.games*100)+'%)</div><div class="fun-card-bar"><div class="fun-card-bar-fill" style="width:'+Math.round(s.w/s.games*100)+'%"></div></div></div>';}
+  if(bestStreak&&bestStreakN>=2){const s=ps[bestStreak];h+='<div class="fun-card pink"><div class="fun-card-top"><div class="fun-card-emoji">🔥</div><div class="fun-card-info"><div class="fun-card-label">Chuỗi Lửa</div><div class="fun-card-name">'+xe(bestStreak)+'</div></div>'+av(bestStreak)+'</div><div class="fun-card-stat"><b>'+bestStreakN+'</b> thắng liên tiếp</div><div class="fun-streak">'+s.results.map(r=>'<span class="'+(r==="W"?"w":"l")+'">'+r+'</span>').join("")+'</div></div>';}
+  if(topRate){const[n,s]=topRate;h+='<div class="fun-card green"><div class="fun-card-top"><div class="fun-card-emoji">🎯</div><div class="fun-card-info"><div class="fun-card-label">Win Rate cao nhất</div><div class="fun-card-name">'+xe(n)+'</div></div>'+av(n)+'</div><div class="fun-card-stat"><b>'+Math.round(s.w/s.games*100)+'%</b> · '+s.w+'W/'+s.l+'L · '+s.games+' trận</div><div class="fun-card-bar"><div class="fun-card-bar-fill" style="width:'+Math.round(s.w/s.games*100)+'%"></div></div></div>';}
+  if(bestPair&&bestPairW>=2){const pp=bestPair.split("|");h+='<div class="fun-card purple"><div class="fun-card-top"><div class="fun-card-emoji">🤝</div><div class="fun-card-info"><div class="fun-card-label">Cặp Đôi Hoàn Hảo</div><div class="fun-card-name">'+xe(pp[0])+' & '+xe(pp[1])+'</div></div><div style="display:flex;gap:4px">'+av(pp[0])+av(pp[1])+'</div></div><div class="fun-card-stat"><b>'+bestPairW+'</b> thắng / '+bestPairG+' trận ('+Math.round(bestPairW/bestPairG*100)+'%)</div><div class="fun-card-bar"><div class="fun-card-bar-fill" style="width:'+Math.round(bestPairW/bestPairG*100)+'%"></div></div></div>';}
+  if(mostActive&&mostActive[1].dates.size>=2){const[n,s]=mostActive;h+='<div class="fun-card orange"><div class="fun-card-top"><div class="fun-card-emoji">📅</div><div class="fun-card-info"><div class="fun-card-label">Chăm Chỉ Nhất</div><div class="fun-card-name">'+xe(n)+'</div></div>'+av(n)+'</div><div class="fun-card-stat">Tham gia <b>'+s.dates.size+'</b> buổi · <b>'+s.games+'</b> trận</div></div>';}
+  if(bravest){const[n,s]=bravest;h+='<div class="fun-card pink"><div class="fun-card-top"><div class="fun-card-emoji">😤</div><div class="fun-card-info"><div class="fun-card-label">Không Bỏ Cuộc</div><div class="fun-card-name">'+xe(n)+'</div></div>'+av(n)+'</div><div class="fun-card-stat">Thua <b>'+s.l+'</b> nhưng vẫn chiến <b>'+s.games+'</b> trận!</div></div>';}
+  if(topPayer){h+='<div class="fun-card gold"><div class="fun-card-top"><div class="fun-card-emoji">💸</div><div class="fun-card-info"><div class="fun-card-label">Ngân Hàng CLB</div><div class="fun-card-name">'+xe(topPayer[0])+'</div></div>'+av(topPayer[0])+'</div><div class="fun-card-stat">Đóng góp <b>'+fmtNum(topPayer[1])+'</b>₫</div></div>';}
+  h+='<div class="fun-card blue"><div class="fun-card-top"><div class="fun-card-emoji">📊</div><div class="fun-card-info"><div class="fun-card-label">BXH Tháng</div></div></div>';
+  sorted.slice(0,10).forEach(([n,s],i)=>{const pct=Math.round(s.w/s.games*100);const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr);">'+av(n)+'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13px;">'+medal+' '+xe(n)+'</div><div style="font-size:11px;color:var(--muted);">'+s.w+'W '+s.l+'L · '+pct+'%</div></div><div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;color:var(--gold);">'+s.games+'</div></div>';});
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+
 </script>
 
 
