@@ -1213,7 +1213,7 @@ nav::-webkit-scrollbar{display:none;}
   <button class="nt admin-only" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
   <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ic">🏅</span>Thành Tích</button>
   <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ic">📸</span>Album</button>
-<button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">🎉</span>Vui</button>
+<button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">📋</span>Tổng Kết</button>
 </nav>
 
 <!-- INTRO -->
@@ -1276,10 +1276,8 @@ undefined
 
 /* === FUN STATS v2 === */
 @keyframes funFadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-@keyframes funPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-@keyframes funShine{0%{background-position:-200% center;}100%{background-position:200% center;}}
-@keyframes funCountUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 @keyframes funFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes funCountUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(60px) rotate(360deg);opacity:0;}}
 .fun-header{text-align:center;padding:24px 0 12px;animation:funFadeUp .6s ease;}
 .fun-header h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--gold),#ff6b35,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;margin:0;}
@@ -1288,31 +1286,27 @@ undefined
 .fun-header .fun-stat-pill{background:var(--s2);border:1.5px solid var(--bdr);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
 .fun-header .fun-stat-pill span{font-size:14px;}
 .fun-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-@media(max-width:420px){.fun-grid{grid-template-columns:1fr;}}
+@media(max-width:480px){.fun-grid{grid-template-columns:1fr;}}
 .fun-award{background:var(--s1);border:1.5px solid var(--bdr);border-radius:16px;padding:0;overflow:hidden;animation:funFadeUp .6s ease backwards;position:relative;}
-.fun-award:nth-child(1){animation-delay:.1s;}.fun-award:nth-child(2){animation-delay:.2s;}.fun-award:nth-child(3){animation-delay:.3s;}.fun-award:nth-child(4){animation-delay:.4s;}.fun-award:nth-child(5){animation-delay:.5s;}.fun-award:nth-child(6){animation-delay:.6s;}
 .fun-award-banner{padding:10px 14px 8px;display:flex;align-items:center;gap:8px;}
-.fun-award.gold .fun-award-banner{background:linear-gradient(135deg,#f0b42918,#ff8c0010);}
-.fun-award.blue .fun-award-banner{background:linear-gradient(135deg,#4a90e218,#2c6fca10);}
-.fun-award.fire .fun-award-banner{background:linear-gradient(135deg,#ff4d4d18,#ff6b3510);}
-.fun-award.green .fun-award-banner{background:linear-gradient(135deg,#1a9e6018,#2ecc8a10);}
-.fun-award.purple .fun-award-banner{background:linear-gradient(135deg,#9b6dff18,#6b3fcf10);}
-.fun-award.pink .fun-award-banner{background:linear-gradient(135deg,#e879b018,#c9357a10);}
-.fun-award-emoji{font-size:24px;animation:funFloat 3s ease-in-out infinite;flex-shrink:0;}
+.fun-award.gold .fun-award-banner{background:linear-gradient(135deg,#f0b42920,#ff8c0012);}
+.fun-award.blue .fun-award-banner{background:linear-gradient(135deg,#4a90e220,#2c6fca12);}
+.fun-award.fire .fun-award-banner{background:linear-gradient(135deg,#ff4d4d20,#ff6b3512);}
+.fun-award.green .fun-award-banner{background:linear-gradient(135deg,#1a9e6020,#2ecc8a12);}
+.fun-award.purple .fun-award-banner{background:linear-gradient(135deg,#9b6dff20,#6b3fcf12);}
+.fun-award.pink .fun-award-banner{background:linear-gradient(135deg,#e879b020,#c9357a12);}
+.fun-award.orange .fun-award-banner{background:linear-gradient(135deg,#ff7b3520,#e8650012);}
+.fun-award-emoji{font-size:22px;animation:funFloat 3s ease-in-out infinite;flex-shrink:0;}
 .fun-award-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);}
-.fun-award-body{padding:12px 14px 14px;display:flex;align-items:center;gap:12px;}
+.fun-award-body{padding:10px 14px 14px;display:flex;align-items:flex-start;gap:12px;}
 .fun-award-av{width:48px;height:48px;border-radius:14px;flex-shrink:0;overflow:hidden;}
 .fun-award-av img{width:100%;height:100%;object-fit:cover;}
-.fun-award-av .av-placeholder{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;}
 .fun-award-info{flex:1;min-width:0;}
-.fun-award-name{font-size:15px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fun-award-detail{font-size:11px;color:var(--text2);font-weight:600;margin-top:2px;line-height:1.4;}
-.fun-award-highlight{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--gold);line-height:1;animation:funCountUp .8s ease backwards;animation-delay:.6s;}
-.fun-streak-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px;}
-.fun-streak-dot{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;}
-.fun-streak-dot.w{background:#1a9e6025;color:var(--green);border:1px solid #1a9e6040;}
-.fun-streak-dot.l{background:#e5555518;color:#e55;border:1px solid #e5555530;}
-.fun-bxh{background:var(--s1);border:1.5px solid var(--bdr);border-radius:16px;overflow:hidden;animation:funFadeUp .6s ease backwards;animation-delay:.7s;}
+.fun-award-name{font-size:14px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.fun-award-lines{display:flex;flex-direction:column;gap:2px;}
+.fun-award-line{font-size:11px;color:var(--text2);font-weight:600;line-height:1.5;}
+.fun-award-line b{color:var(--text);font-weight:800;}
+.fun-bxh{background:var(--s1);border:1.5px solid var(--bdr);border-radius:16px;overflow:hidden;animation:funFadeUp .6s ease backwards;animation-delay:.9s;}
 .fun-bxh-header{padding:14px 16px 10px;background:linear-gradient(135deg,rgba(240,180,41,0.05),rgba(232,149,14,0.03));border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;gap:8px;}
 .fun-bxh-header span{font-size:18px;}
 .fun-bxh-header h3{font-size:13px;font-weight:900;color:var(--text);margin:0;text-transform:uppercase;letter-spacing:1px;}
@@ -1324,7 +1318,6 @@ undefined
 .fun-bxh-row:nth-child(3) .fun-bxh-rank{background:linear-gradient(135deg,#cd7f32,#a0612c);color:#fff;}
 .fun-bxh-av{width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;}
 .fun-bxh-av img{width:100%;height:100%;object-fit:cover;}
-.fun-bxh-av .av-placeholder{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
 .fun-bxh-info{flex:1;min-width:0;}
 .fun-bxh-name{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fun-bxh-stats{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;}
@@ -6026,17 +6019,12 @@ undefined
 function renderFunStats(){
   var el=document.getElementById('funstats-content');
   if(!el)return;
-  function av(name){
+  function av(name,sz){
+    sz=sz||48;var r=Math.floor(sz*.28);
     var mb=mbOf(name);
-    if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:100%;height:100%;object-fit:cover;" decoding="async">';
+    if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:'+r+'px;object-fit:cover;" decoding="async">';
     var cls=mb?AVC[mb.color]:'';
-    return '<div class="av-placeholder '+cls+'" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;">'+ini(name)+'</div>';
-  }
-  function avS(name){
-    var mb=mbOf(name);
-    if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:100%;height:100%;object-fit:cover;" decoding="async">';
-    var cls=mb?AVC[mb.color]:'';
-    return '<div class="av-placeholder '+cls+'" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;">'+ini(name)+'</div>';
+    return '<div class="av-placeholder '+cls+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:'+r+'px;display:flex;align-items:center;justify-content:center;font-size:'+Math.floor(sz*.38)+'px;font-weight:900;color:#fff;">'+ini(name)+'</div>';
   }
   var now=new Date(),cm=now.getMonth(),cy=now.getFullYear();
   var MN=['Th\u00e1ng 1','Th\u00e1ng 2','Th\u00e1ng 3','Th\u00e1ng 4','Th\u00e1ng 5','Th\u00e1ng 6','Th\u00e1ng 7','Th\u00e1ng 8','Th\u00e1ng 9','Th\u00e1ng 10','Th\u00e1ng 11','Th\u00e1ng 12'];
@@ -6044,26 +6032,31 @@ function renderFunStats(){
     if(!m.saved||m.isBetEntry||!m.date)return false;
     var d=new Date(m.date);return d.getMonth()===cm&&d.getFullYear()===cy;
   });
-  if(!mm.length){el.innerHTML='<div class="fun-empty"><span class="ei">\ud83c\udf89</span>Ch\u01b0a c\u00f3 tr\u1eadn \u0111\u1ea5u n\u00e0o trong th\u00e1ng n\u00e0y<br>H\u00e3y ra s\u00e2n n\u00e0o!</div>';return;}
+  if(!mm.length){el.innerHTML='<div class="fun-empty"><span class="ei">\ud83d\udccb</span>Ch\u01b0a c\u00f3 tr\u1eadn \u0111\u1ea5u n\u00e0o trong th\u00e1ng n\u00e0y</div>';return;}
   var ps={};
   mm.forEach(function(m){
     var pl=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
     pl.forEach(function(name){
-      if(!ps[name])ps[name]={w:0,l:0,games:0,dates:{},results:[]};
+      if(!ps[name])ps[name]={w:0,l:0,games:0,dates:{},results:[],partners:{}};
       ps[name].games++;ps[name].dates[m.date]=1;
       var isT1=(name===m.t1p1||name===m.t1p2);
       var won=(m.winner==='A'&&isT1)||(m.winner==='B'&&!isT1);
+      var partner=isT1?(name===m.t1p1?m.t1p2:m.t1p1):(name===m.t2p1?m.t2p2:m.t2p1);
       if(won){ps[name].w++;ps[name].results.push('W');}
       else{ps[name].l++;ps[name].results.push('L');}
+      if(partner){
+        if(!ps[name].partners[partner])ps[name].partners[partner]={w:0,l:0,g:0};
+        ps[name].partners[partner].g++;
+        if(won)ps[name].partners[partner].w++;else ps[name].partners[partner].l++;
+      }
     });
   });
-  function getStreak(res){var mx=0,c=0;res.forEach(function(r){if(r==='W'){c++;if(c>mx)mx=c;}else c=0;});return mx;}
   var pairs={};
   mm.forEach(function(m){
     var t1=[m.t1p1,m.t1p2].filter(Boolean).sort().join(' & ');
     var t2=[m.t2p1,m.t2p2].filter(Boolean).sort().join(' & ');
-    if(t1){if(!pairs[t1])pairs[t1]={w:0,l:0,games:0,p:[m.t1p1,m.t1p2].filter(Boolean)};pairs[t1].games++;if(m.winner==='A')pairs[t1].w++;else pairs[t1].l++;}
-    if(t2){if(!pairs[t2])pairs[t2]={w:0,l:0,games:0,p:[m.t2p1,m.t2p2].filter(Boolean)};pairs[t2].games++;if(m.winner==='B')pairs[t2].w++;else pairs[t2].l++;}
+    if(t1&&m.t1p1&&m.t1p2){if(!pairs[t1])pairs[t1]={w:0,l:0,games:0,p:[m.t1p1,m.t1p2]};pairs[t1].games++;if(m.winner==='A')pairs[t1].w++;else pairs[t1].l++;}
+    if(t2&&m.t2p1&&m.t2p2){if(!pairs[t2])pairs[t2]={w:0,l:0,games:0,p:[m.t2p1,m.t2p2]};pairs[t2].games++;if(m.winner==='B')pairs[t2].w++;else pairs[t2].l++;}
   });
   var betLoss={};
   matches.filter(function(m){
@@ -6077,62 +6070,141 @@ function renderFunStats(){
       losers.forEach(function(n){betLoss[n]=(betLoss[n]||0)+Number(m.bet);});
     }
   });
-  var used={},awards=[];
-  function pick(arr){for(var i=0;i<arr.length;i++){if(!used[arr[i].name])return arr[i];}return null;}
-  var byWins=Object.keys(ps).map(function(n){return{name:n,w:ps[n].w,l:ps[n].l,games:ps[n].games,dates:ps[n].dates,results:ps[n].results};}).sort(function(a,b){return b.w-a.w||a.games-b.games;});
-  var tw=pick(byWins);
-  if(tw){used[tw.name]=1;awards.push({emoji:'\ud83c\udfc6',title:'VUA CHI\u1ebeN TH\u1eaeNG',color:'gold',name:tw.name,detail:tw.w+' th\u1eafng / '+tw.games+' tr\u1eadn ('+Math.round(tw.w/tw.games*100)+'%)',highlight:tw.w+'W'});}
-  var byRate=Object.keys(ps).map(function(n){return{name:n,w:ps[n].w,l:ps[n].l,games:ps[n].games,rate:ps[n].w/ps[n].games};}).filter(function(a){return a.games>=5;}).sort(function(a,b){return b.rate-a.rate||b.w-a.w;});
-  var tr=pick(byRate);
-  if(tr){used[tr.name]=1;awards.push({emoji:'\ud83c\udfaf',title:'T\u1ef6 L\u1ec6 TH\u1eaeNG CAO NH\u1ea4T',color:'green',name:tr.name,detail:Math.round(tr.rate*100)+'% \u00b7 '+tr.w+'W/'+tr.l+'L \u00b7 '+tr.games+' tr\u1eadn',highlight:Math.round(tr.rate*100)+'%'});}
-  var streakData=Object.keys(ps).map(function(n){return{name:n,streak:getStreak(ps[n].results),results:ps[n].results,w:ps[n].w,games:ps[n].games};}).sort(function(a,b){return b.streak-a.streak||b.w-a.w;});
-  var ts=pick(streakData);
-  if(ts&&ts.streak>=2){used[ts.name]=1;var showRes=ts.results.slice(Math.max(0,ts.results.length-12));awards.push({emoji:'\ud83d\udd25',title:'CHU\u1ed6I L\u1eeca',color:'fire',name:ts.name,detail:ts.streak+' th\u1eafng li\u00ean ti\u1ebfp',highlight:ts.streak+'\ud83d\udd25',streak:showRes});}
-  var byGames=Object.keys(ps).map(function(n){return{name:n,w:ps[n].w,l:ps[n].l,games:ps[n].games,dates:ps[n].dates};}).sort(function(a,b){return b.games-a.games||b.w-a.w;});
-  var im=pick(byGames);
-  if(im){var dayCount=Object.keys(im.dates).length;used[im.name]=1;awards.push({emoji:'\ud83d\udcaa',title:'IRON MAN',color:'blue',name:im.name,detail:im.games+' tr\u1eadn \u00b7 '+dayCount+' bu\u1ed5i \u00b7 '+im.w+'W-'+im.l+'L',highlight:im.games});}
-  var pairArr=Object.keys(pairs).map(function(k){return{key:k,w:pairs[k].w,l:pairs[k].l,games:pairs[k].games,p:pairs[k].p,rate:pairs[k].w/pairs[k].games};}).filter(function(p){return p.games>=3;}).sort(function(a,b){return b.rate-a.rate||b.w-a.w;});
-  var bp=pairArr.length?pairArr[0]:null;
-  if(bp){awards.push({emoji:'\ud83e\udd1d',title:'C\u1eb6P \u0110\u00d4I HO\u00c0N H\u1ea2O',color:'purple',name:bp.key,detail:bp.w+' th\u1eafng / '+bp.games+' tr\u1eadn ('+Math.round(bp.rate*100)+'%)',highlight:Math.round(bp.rate*100)+'%',isPair:true,pairNames:bp.p});}
-  var betArr=Object.keys(betLoss).map(function(n){return{name:n,amount:betLoss[n]};}).sort(function(a,b){return b.amount-a.amount;});
-  var tb=betArr.length?(pick(betArr)||betArr[0]):null;
-  if(tb&&tb.amount>0){if(!used[tb.name])used[tb.name]=1;awards.push({emoji:'\ud83d\udcb8',title:'NG\u00c2N H\u00c0NG CLB',color:'pink',name:tb.name,detail:'\u0110\u00f3ng g\u00f3p '+fmtNum(tb.amount)+'\u20ab cho qu\u1ef9',highlight:fmtNum(tb.amount)+'\u20ab'});}
+  function getStreak(res){var mx=0,c=0;res.forEach(function(r){if(r==='W'){c++;if(c>mx)mx=c;}else c=0;});return mx;}
+  function getLStreak(res){var mx=0,c=0;res.forEach(function(r){if(r==='L'){c++;if(c>mx)mx=c;}else c=0;});return mx;}
+  var all=Object.keys(ps).map(function(n){
+    var s=ps[n];var days=Object.keys(s.dates).length;
+    return{name:n,w:s.w,l:s.l,games:s.games,days:days,results:s.results,partners:s.partners,
+      wRate:s.games?s.w/s.games:0,lRate:s.games?s.l/s.games:0,
+      wStreak:getStreak(s.results),lStreak:getLStreak(s.results)};
+  });
+  var minG=5;
+  var qualified=all.filter(function(a){return a.games>=minG;});
+  var avgRate=0,totalW=0,totalG=0;
+  all.forEach(function(a){totalW+=a.w;totalG+=a.games;});
+  avgRate=totalG?totalW/totalG:0.5;
+  var carryScores=[];
+  qualified.forEach(function(p){
+    var carryW=0,carryG=0;
+    Object.keys(p.partners).forEach(function(pName){
+      var pData=all.find(function(x){return x.name===pName;});
+      if(pData&&pData.wRate<avgRate){
+        carryW+=p.partners[pName].w;
+        carryG+=p.partners[pName].g;
+      }
+    });
+    if(carryG>=3){
+      carryScores.push({name:p.name,carryW:carryW,carryG:carryG,carryRate:carryW/carryG,totalW:p.w,wRate:p.wRate,games:p.games});
+    }
+  });
+  carryScores.sort(function(a,b){return b.carryRate-a.carryRate||b.carryW-a.carryW;});
+  var prospect=qualified.slice().sort(function(a,b){
+    var aLast5=a.results.slice(-5),bLast5=b.results.slice(-5);
+    var aRecent=aLast5.filter(function(r){return r==='W';}).length/aLast5.length;
+    var bRecent=bLast5.filter(function(r){return r==='W';}).length/bLast5.length;
+    if(Math.abs(bRecent-aRecent)>0.01)return bRecent-aRecent;
+    return b.wStreak-a.wStreak;
+  });
+  var pairArr=Object.keys(pairs).map(function(k){return{key:k,w:pairs[k].w,l:pairs[k].l,games:pairs[k].games,p:pairs[k].p,rate:pairs[k].w/pairs[k].games};}).filter(function(p){return p.games>=3;});
+  var bestPair=pairArr.slice().sort(function(a,b){return b.rate-a.rate||b.w-a.w;})[0];
+  var worstPair=pairArr.slice().sort(function(a,b){return a.rate-b.rate||b.l-a.l;})[0];
+  var awards=[];
+  function card(emoji,title,color,name,lines,isPair,pairNames){
+    awards.push({emoji:emoji,title:title,color:color,name:name,lines:lines,isPair:!!isPair,pairNames:pairNames||[]});
+  }
+  var topWinRate=qualified.slice().sort(function(a,b){return b.wRate-a.wRate||b.w-a.w;})[0];
+  if(topWinRate)card('\ud83c\udfaf','S\u00e1t Th\u1ee7','gold',topWinRate.name,[
+    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(topWinRate.wRate*100)+'%</b>',
+    'Th\u00e0nh t\u00edch: <b>'+topWinRate.w+'W - '+topWinRate.l+'L</b> / '+topWinRate.games+' tr\u1eadn',
+    'S\u1ed1 bu\u1ed5i: <b>'+topWinRate.days+'</b>'
+  ]);
+  var topLossRate=qualified.slice().sort(function(a,b){return b.lRate-a.lRate||b.l-a.l;})[0];
+  if(topLossRate)card('\ud83e\udee0','Ng\u01b0\u1eddi Hi\u1ebfn D\u00e2ng','pink',topLossRate.name,[
+    'T\u1ef7 l\u1ec7 thua: <b>'+Math.round(topLossRate.lRate*100)+'%</b>',
+    'Th\u00e0nh t\u00edch: <b>'+topLossRate.w+'W - '+topLossRate.l+'L</b> / '+topLossRate.games+' tr\u1eadn',
+    'Chu\u1ed7i thua d\u00e0i nh\u1ea5t: <b>'+topLossRate.lStreak+' tr\u1eadn</b>'
+  ]);
+  var topWins=all.slice().sort(function(a,b){return b.w-a.w||a.games-b.games;})[0];
+  if(topWins)card('\ud83c\udfc6','Vua Chi\u1ebfn Th\u1eafng','gold',topWins.name,[
+    'S\u1ed1 tr\u1eadn th\u1eafng: <b>'+topWins.w+' tr\u1eadn</b>',
+    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topWins.games+'</b> ('+Math.round(topWins.wRate*100)+'%)',
+    'Chu\u1ed7i th\u1eafng d\u00e0i nh\u1ea5t: <b>'+topWins.wStreak+' tr\u1eadn</b>'
+  ]);
+  var topLosses=all.slice().sort(function(a,b){return b.l-a.l||a.games-b.games;})[0];
+  if(topLosses)card('\ud83d\udca5','Chi\u1ebfn Binh B\u1ea5t T\u1eed','fire',topLosses.name,[
+    'S\u1ed1 tr\u1eadn thua: <b>'+topLosses.l+' tr\u1eadn</b>',
+    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topLosses.games+'</b>',
+    'Nh\u01b0ng v\u1eabn chi\u1ebfn \u0111\u1ea5u: <b>'+topLosses.w+' th\u1eafng</b> ('+Math.round(topLosses.wRate*100)+'%)'
+  ]);
+  var topBet=Object.keys(betLoss).map(function(n){return{name:n,amount:betLoss[n]};}).sort(function(a,b){return b.amount-a.amount;})[0];
+  if(topBet&&topBet.amount>0)card('\ud83d\udcb0','Nh\u00e0 T\u00e0i Tr\u1ee3','green',topBet.name,[
+    '\u0110\u00f3ng g\u00f3p: <b>'+fmtNum(topBet.amount)+'\u20ab</b>',
+    'Qua t\u1ed5ng s\u1ed1 tr\u1eadn thua c\u01b0\u1ee3c trong th\u00e1ng',
+    'C\u1ea3m \u01a1n v\u00ec \u0111\u00e3 nu\u00f4i qu\u1ef9! \ud83d\ude4f'
+  ]);
+  var topCarry=carryScores[0];
+  if(topCarry)card('\ud83e\uddbe','Th\u1ea7n G\u00e1nh T\u1ea1','purple',topCarry.name,[
+    'Th\u1eafng <b>'+topCarry.carryW+'/'+topCarry.carryG+'</b> tr\u1eadn khi c\u1eb7p v\u1edbi ng\u01b0\u1eddi y\u1ebfu h\u01a1n',
+    'T\u1ef7 l\u1ec7 g\u00e1nh: <b>'+Math.round(topCarry.carryRate*100)+'%</b>',
+    'T\u1ed5ng th\u1eafng c\u00e1 nh\u00e2n: <b>'+topCarry.totalW+'W</b> ('+Math.round(topCarry.wRate*100)+'%)'
+  ]);
+  var ironMan=all.slice().sort(function(a,b){return b.games-a.games||b.days-a.days;})[0];
+  if(ironMan)card('\ud83d\udcaa','Iron Man','blue',ironMan.name,[
+    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+ironMan.games+' tr\u1eadn</b>',
+    'S\u1ed1 bu\u1ed5i tham gia: <b>'+ironMan.days+' bu\u1ed5i</b>',
+    'Th\u00e0nh t\u00edch: <b>'+ironMan.w+'W - '+ironMan.l+'L</b> ('+Math.round(ironMan.wRate*100)+'%)'
+  ]);
+  var topProspect=prospect[0];
+  if(topProspect){var last5=topProspect.results.slice(-5);var recentW=last5.filter(function(r){return r==='W';}).length;
+    card('\u2b50','Ng\u00f4i Sao \u0110ang L\u00ean','orange',topProspect.name,[
+    '5 tr\u1eadn g\u1ea7n nh\u1ea5t: <b>'+recentW+' th\u1eafng / 5</b>',
+    'Chu\u1ed7i th\u1eafng hi\u1ec7n t\u1ea1i: <b>'+topProspect.wStreak+' tr\u1eadn</b>',
+    'Phong \u0111\u1ed9 \u0111ang r\u1ea5t t\u1ed1t, h\u1eb9n g\u1eb7p th\u00e1ng sau!'
+  ]);}
+  if(bestPair)card('\ud83e\udd1d','C\u1eb7p \u0110\u00f4i Ho\u00e0n H\u1ea3o','purple',bestPair.key,[
+    'Th\u00e0nh t\u00edch: <b>'+bestPair.w+'W - '+bestPair.l+'L</b> / '+bestPair.games+' tr\u1eadn',
+    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(bestPair.rate*100)+'%</b>',
+    'C\u1eb7p \u0111\u00f4i nh\u1ecb\u1ec3 nh\u1ea5t th\u00e1ng!'
+  ],true,bestPair.p);
+  if(worstPair&&worstPair!==bestPair)card('\ud83d\ude2d','C\u1eb7p \u0110\u00f4i Ho\u00e0n C\u1ea3nh','pink',worstPair.key,[
+    'Th\u00e0nh t\u00edch: <b>'+worstPair.w+'W - '+worstPair.l+'L</b> / '+worstPair.games+' tr\u1eadn',
+    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(worstPair.rate*100)+'%</b>',
+    'C\u1ed1 l\u00ean! Th\u00e1ng sau s\u1ebd kh\u00e1c! \ud83d\udcaa'
+  ],true,worstPair.p);
   var totalPlayers=Object.keys(ps).length;
   var totalDays={};mm.forEach(function(m){totalDays[m.date]=1;});
-  var html='<div class="fun-header"><h2>\ud83c\udf89 TH\u1ed0NG K\u00ca VUI</h2>';
+  var html='<div class="fun-header"><h2>\ud83d\udccb T\u1ed4NG K\u1ebeT TH\u00c1NG</h2>';
   html+='<div class="fun-sub">'+MN[cm].toUpperCase()+' '+cy+'</div>';
   html+='<div class="fun-summary">';
   html+='<div class="fun-stat-pill"><span>\ud83c\udff8</span>'+mm.length+' tr\u1eadn</div>';
-  html+='<div class="fun-stat-pill"><span>\ud83d\udc65</span>'+totalPlayers+' ng\u01b0\u1eddi ch\u01a1i</div>';
+  html+='<div class="fun-stat-pill"><span>\ud83d\udc65</span>'+totalPlayers+' ng\u01b0\u1eddi</div>';
   html+='<div class="fun-stat-pill"><span>\ud83d\udcc5</span>'+Object.keys(totalDays).length+' bu\u1ed5i</div>';
   html+='</div></div>';
   html+='<div class="fun-grid">';
   awards.forEach(function(a,i){
-    html+='<div class="fun-award '+a.color+'">';
+    html+='<div class="fun-award '+a.color+'" style="animation-delay:'+(0.1+i*0.08)+'s">';
     html+='<div class="fun-award-banner"><div class="fun-award-emoji">'+a.emoji+'</div><div class="fun-award-title">'+a.title+'</div></div>';
     html+='<div class="fun-award-body">';
-    if(a.isPair&&a.pairNames){
+    if(a.isPair&&a.pairNames&&a.pairNames.length>1){
       html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
-      a.pairNames.forEach(function(n){html+='<div class="fun-award-av" style="width:36px;height:36px;border-radius:10px;">'+av(n)+'</div>';});
+      a.pairNames.forEach(function(n){html+='<div class="fun-award-av" style="width:38px;height:38px;border-radius:11px;">'+av(n,38)+'</div>';});
       html+='</div>';
     }else{html+='<div class="fun-award-av">'+av(a.name)+'</div>';}
     html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.name)+'</div>';
-    html+='<div class="fun-award-detail">'+a.detail+'</div>';
-    if(a.streak){html+='<div class="fun-streak-row">';a.streak.forEach(function(r){html+='<div class="fun-streak-dot '+(r==='W'?'w':'l')+'">'+r+'</div>';});html+='</div>';}
-    html+='</div>';
-    if(a.highlight)html+='<div class="fun-award-highlight">'+a.highlight+'</div>';
-    html+='</div></div>';
+    html+='<div class="fun-award-lines">';
+    a.lines.forEach(function(line){html+='<div class="fun-award-line">'+line+'</div>';});
+    html+='</div></div></div></div>';
   });
   html+='</div>';
-  var bxhArr=Object.keys(ps).map(function(n){return{name:n,w:ps[n].w,l:ps[n].l,games:ps[n].games,rate:ps[n].games>=3?ps[n].w/ps[n].games:0};}).sort(function(a,b){if(b.w!==a.w)return b.w-a.w;if(Math.abs(b.rate-a.rate)>0.001)return b.rate-a.rate;return a.games-b.games;}).slice(0,10);
+  var bxhArr=all.slice().sort(function(a,b){if(b.w!==a.w)return b.w-a.w;if(Math.abs(b.wRate-a.wRate)>0.01)return b.wRate-a.wRate;return a.games-b.games;}).slice(0,10);
   html+='<div class="fun-bxh"><div class="fun-bxh-header"><span>\ud83d\udcca</span><h3>BXH '+MN[cm].toUpperCase()+' '+cy+'</h3></div>';
   bxhArr.forEach(function(p,i){
     var rate=p.games?Math.round(p.w/p.games*100):0;
     html+='<div class="fun-bxh-row">';
     html+='<div class="fun-bxh-rank">'+(i+1)+'</div>';
-    html+='<div class="fun-bxh-av">'+avS(p.name)+'</div>';
+    html+='<div class="fun-bxh-av">'+av(p.name,34)+'</div>';
     html+='<div class="fun-bxh-info"><div class="fun-bxh-name">'+xe(p.name)+'</div>';
-    html+='<div class="fun-bxh-stats">'+p.w+'W '+p.l+'L \u00b7 '+p.games+' tr\u1eadn</div></div>';
+    html+='<div class="fun-bxh-stats">'+p.w+'W '+p.l+'L \u00b7 '+p.games+' tr\u1eadn \u00b7 '+p.days+' bu\u1ed5i</div></div>';
     html+='<div class="fun-bxh-bar"><div class="fun-bxh-bar-fill" style="width:'+rate+'%"></div></div>';
     html+='<div class="fun-bxh-rate"><div class="fun-bxh-rate-num" style="color:'+(rate>=60?'var(--green)':rate>=45?'var(--gold)':'var(--red)')+'">'+rate+'</div>';
     html+='<div class="fun-bxh-rate-pct">%WIN</div></div>';
@@ -6140,7 +6212,7 @@ function renderFunStats(){
   });
   html+='</div>';
   el.innerHTML=html;
-  if(!window._funConfettiDone){window._funConfettiDone=true;var colors=['#f0b429','#e55','#4a90e2','#1a9e60','#9b6dff','#ff6b35'];var co=document.createElement('div');co.className='fun-confetti';for(var i=0;i<40;i++){var pc=document.createElement('div');pc.className='fun-confetti-piece';pc.style.left=Math.random()*100+'%';pc.style.top='-10px';pc.style.background=colors[Math.floor(Math.random()*colors.length)];pc.style.animationDelay=Math.random()*2+'s';pc.style.animationDuration=(2+Math.random()*2)+'s';pc.style.width=(6+Math.random()*6)+'px';pc.style.height=(6+Math.random()*6)+'px';co.appendChild(pc);}document.body.appendChild(co);setTimeout(function(){co.remove();},5000);}
+  if(!window._funConfettiDone){window._funConfettiDone=true;var colors=['#f0b429','#e55','#4a90e2','#1a9e60','#9b6dff','#ff6b35'];var co=document.createElement('div');co.className='fun-confetti';for(var i=0;i<50;i++){var pc=document.createElement('div');pc.className='fun-confetti-piece';pc.style.left=Math.random()*100+'%';pc.style.top='-10px';pc.style.background=colors[Math.floor(Math.random()*colors.length)];pc.style.animationDelay=Math.random()*2+'s';pc.style.animationDuration=(2+Math.random()*2)+'s';pc.style.width=(6+Math.random()*6)+'px';pc.style.height=(6+Math.random()*6)+'px';co.appendChild(pc);}document.body.appendChild(co);setTimeout(function(){co.remove();},5000);}
 }
 
 </script>
