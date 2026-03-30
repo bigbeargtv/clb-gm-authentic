@@ -5109,7 +5109,7 @@ function renderStats(){
         ?`<img loading="lazy" src="${m.photo}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;" decoding="async">`
         :`<div class="${AVC[m.color]}" style="width:44px;height:44px;border-radius:12px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(m.name)}</div>`;
       return `<div class="stats-mb-chip ${on?'on':''}" onclick="selectStats('${m.name.replace(/'/g,"\\'")}')">
-        ${av}<span class="stats-mb-chip-name">${xe(m.name)}</span>
+        ${av}<span class="stats-mb-chip-name">${xe(m.name)} ${getPlayerAwards(m.name).slice(0,3).map(a=>a.emoji).join('')}</span>
       </div>`;
     }).join('')+'</div>';
   if(!statsSelected){
@@ -6195,37 +6195,37 @@ function renderFunStats(){
   function line(icon,text){return{icon:icon,text:text};}
   const byRate=Object.entries(ps).map(([n,s])=>({name:n,rate:s.w/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.w-a.w);
   if(byRate.length&&byRate[0].rate>0){const a=byRate[0];
-    awards.push({emoji:'🎯',title:'SÁT THỦ',color:'gold',name:a.name,badge:'🏅',
+    awards.push({emoji:'🎯',title:'SÁT THỦ',desc:'Người có tỷ lệ thắng cao nhất tháng',color:'gold',name:a.name,badge:'🏅',
       lines:[line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng'),line('🏆',a.w+'W / '+a.l+'L'),line('🎮',a.games+' trận')],
       heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
   const byLR=Object.entries(ps).map(([n,s])=>({name:n,rate:s.l/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.l-a.l);
   if(byLR.length&&byLR[0].rate>0){const a=byLR[0];
-    awards.push({emoji:'💀',title:'NGƯỜI HIẾN DÂNG',color:'pink',name:a.name,badge:'😇',
+    awards.push({emoji:'💀',title:'NGƯỜI HIẾN DÂNG',desc:'Người có tỷ lệ thua cao nhất tháng',color:'pink',name:a.name,badge:'😇',
       lines:[line('📊',Math.round(a.rate*100)+'% tỷ lệ thua'),line('💔',a.l+' trận thua'),line('🎮',a.games+' trận')],
       heroVal:Math.round(a.rate*100),heroUnit:'% LOSE'});}
   const byWins=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.w-a.w||a.games-b.games);
   if(byWins.length){const a=byWins[0];
-    awards.push({emoji:'👑',title:'VUA CHIẾN THẮNG',color:'gold',name:a.name,badge:'👑',
+    awards.push({emoji:'👑',title:'VUA CHIẾN THẮNG',desc:'Người có số trận thắng nhiều nhất tháng',color:'gold',name:a.name,badge:'👑',
       lines:[line('🏆',a.w+' trận thắng'),line('📊',Math.round(a.w/a.games*100)+'% win rate'),line('🎮',a.games+' trận')],
       heroVal:a.w,heroUnit:'WINS'});}
   const byLoss=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.l-a.l||a.games-b.games);
   if(byLoss.length){const a=byLoss[0];
-    awards.push({emoji:'🛡️',title:'CHIẾN BINH BẤT TỬ',color:'fire',name:a.name,badge:'💪',
+    awards.push({emoji:'🛡️',title:'CHIẾN BINH BẤT TỬ',desc:'Người có số trận thua nhiều nhất tháng',color:'fire',name:a.name,badge:'💪',
       lines:[line('💔',a.l+' trận thua'),line('🔥','Không bao giờ bỏ cuộc'),line('🎮',a.games+' trận')],
       heroVal:a.l,heroUnit:'LOSSES'});}
   const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
   if(betArr.length&&betArr[0].amount>0){const a=betArr[0];
-    awards.push({emoji:'💸',title:'NHÀ TÀI TRỢ',color:'green',name:a.name,badge:'💰',
+    awards.push({emoji:'💸',title:'NHÀ TÀI TRỢ',desc:'Người nộp quỹ nhiều nhất tháng',color:'green',name:a.name,badge:'💰',
       lines:[line('💵',fmtNum(a.amount)+'₫ đóng góp'),line('❤️','Cảm ơn bạn!')],
       heroVal:fmtNum(a.amount),heroUnit:'VNĐ'});}
   const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
   if(carryArr.length){const a=carryArr[0];
-    awards.push({emoji:'🏋️',title:'THẦN GÁNH TẠ',color:'purple',name:a.name,badge:'💎',
+    awards.push({emoji:'🏋️',title:'THẦN GÁNH TẠ',desc:'Cặp với người yếu mà vẫn thắng nhiều',color:'purple',name:a.name,badge:'💎',
       lines:[line('💪',Math.round(a.rate*100)+'% thắng khi gánh'),line('🎮',a.cG+' trận carry'),line('🔥',a.cW+' trận gánh thắng')],
       heroVal:Math.round(a.rate*100),heroUnit:'% CARRY'});}
   const byGames=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.games-a.games||b.w-a.w);
   if(byGames.length){const a=byGames[0];
-    awards.push({emoji:'🦾',title:'IRON MAN',color:'blue',name:a.name,badge:'⚡',
+    awards.push({emoji:'🦾',title:'IRON MAN',desc:'Người tham gia nhiều trận nhất tháng',color:'blue',name:a.name,badge:'⚡',
       lines:[line('🎮',a.games+' trận đấu'),line('📅',a.dates.size+' buổi tham gia'),line('📊',a.w+'W - '+a.l+'L')],
       heroVal:a.games,heroUnit:'GAMES'});}
   const prospect=Object.entries(ps).filter(([,s])=>s.results.length>=5).map(([n,s])=>{
@@ -6233,22 +6233,22 @@ function renderFunStats(){
     return{name:n,w5,rate5:w5/5,l5};
   }).sort((a,b)=>b.rate5-a.rate5||b.w5-a.w5);
   if(prospect.length&&prospect[0].rate5>=0.6){const a=prospect[0];
-    awards.push({emoji:'⭐',title:'NGÔI SAO ĐANG LÊN',color:'orange',name:a.name,badge:'🌟',
+    awards.push({emoji:'⭐',title:'NGÔI SAO ĐANG LÊN',desc:'Phong độ tốt nhất 5 trận gần nhất',color:'orange',name:a.name,badge:'🌟',
       lines:[line('📈',a.w5+'/5 trận gần nhất thắng'),line('🔥','Phong độ tuyệt vời')],
       heroVal:a.w5+'/5',heroUnit:'GẦN NHẤT'});}
   const pairArr=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>b.rate-a.rate||b.w-a.w);
   if(pairArr.length){const a=pairArr[0];
-    awards.push({emoji:'💕',title:'CẶP ĐÔI HOÀN HẢO',color:'purple',name:a.key,badge:'💘',isPair:true,pairNames:a.p,
+    awards.push({emoji:'💕',title:'CẶP ĐÔI HOÀN HẢO',desc:'Cặp đôi có tỷ lệ thắng cao nhất',color:'purple',name:a.key,badge:'💘',isPair:true,pairNames:a.p,
       lines:[line('🏆',a.w+' thắng / '+a.games+' trận'),line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng')],
       heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
   const worstP=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>a.rate-b.rate||a.w-b.w);
   if(worstP.length&&worstP[0].rate<0.5){const a=worstP[0];
-    awards.push({emoji:'💔',title:'CẶP ĐÔI HOÀN CẢNH',color:'pink',name:a.key,badge:'😭',isPair:true,pairNames:a.p,
+    awards.push({emoji:'💔',title:'CẶP ĐÔI HOÀN CẢNH',desc:'Cặp đôi có tỷ lệ thắng thấp nhất',color:'pink',name:a.key,badge:'😭',isPair:true,pairNames:a.p,
       lines:[line('💔',a.l+' thua / '+a.games+' trận'),line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng')],
       heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
   const totalPlayers=Object.keys(ps).length;
   const totalDays=new Set();mm.forEach(m=>totalDays.add(m.date));
-  let html='<div class="fun-header"><h2>🏆 TỔNG KẾ T THÁNG</h2>';
+  let html='<div class="fun-header"><h2>🏆 TỔNG KẾT THÁNG</h2>';
   html+='<div class="fun-sub">'+monthNames[cm]+' '+cy+' · GM AUTHENTIC</div>';
   html+='<div class="fun-summary">';
   html+='<div class="fun-stat-pill"><span>🏸</span>'+mm.length+' trận</div>';
@@ -6258,7 +6258,7 @@ function renderFunStats(){
   html+='<div class="fun-grid">';
   awards.forEach((a,i)=>{
     html+='<div class="fun-award '+a.color+'" style="animation-delay:'+(0.05+i*0.05)+'s">';
-    html+='<div class="fun-award-banner"><div class="fun-award-emoji">'+a.emoji+'</div><div class="fun-award-title">'+a.title+'</div></div>';
+    html+='<div class="fun-award-banner"><div class="fun-award-emoji">'+a.emoji+'</div><div class="fun-award-title">'+a.title+'</div>'+(a.desc?'<div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;font-style:italic;">'+a.desc+'</div>':'')+'</div>';
     html+='<div class="fun-award-body">';
     if(a.isPair&&a.pairNames){
       html+='<div class="fun-pair-avs">';
