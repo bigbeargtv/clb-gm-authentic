@@ -1274,21 +1274,21 @@ body.admin-mode .i-feat-sub{border-bottom:1px dashed rgba(240,180,41,0.3);cursor
 body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:10px;}
 undefined
 
-/* === FUN STATS v2 === */
+/* === FUN STATS v4 === */
 @keyframes funFadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
 @keyframes funFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-@keyframes funCountUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes badgePop{0%{transform:scale(0) rotate(-20deg);opacity:0;}60%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);opacity:1;}}
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(60px) rotate(360deg);opacity:0;}}
-.fun-header{text-align:center;padding:24px 0 12px;animation:funFadeUp .6s ease;}
-.fun-header h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--gold),#ff6b35,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;margin:0;}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,0.3);}50%{box-shadow:0 0 20px 6px rgba(240,180,41,0.15);}}
+.fun-header{text-align:center;padding:24px 0 16px;animation:funFadeUp .6s ease;}
+.fun-header h2{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;background:linear-gradient(135deg,var(--gold),#ff6b35,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;margin:0;}
 .fun-header .fun-sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:4px;letter-spacing:1px;text-transform:uppercase;}
 .fun-header .fun-summary{display:flex;justify-content:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
 .fun-header .fun-stat-pill{background:var(--s2);border:1.5px solid var(--bdr);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
 .fun-header .fun-stat-pill span{font-size:14px;}
-.fun-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-@media(max-width:480px){.fun-grid{grid-template-columns:1fr;}}
-.fun-award{background:var(--s1);border:1.5px solid var(--bdr);border-radius:16px;padding:0;overflow:hidden;animation:funFadeUp .6s ease backwards;position:relative;}
-.fun-award-banner{padding:10px 14px 8px;display:flex;align-items:center;gap:8px;}
+.fun-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px;}
+.fun-award{background:var(--s1);border:1.5px solid var(--bdr);border-radius:18px;padding:0;overflow:visible;animation:funFadeUp .6s ease backwards;position:relative;}
+.fun-award-banner{padding:12px 18px 10px;display:flex;align-items:center;gap:10px;border-radius:18px 18px 0 0;}
 .fun-award.gold .fun-award-banner{background:linear-gradient(135deg,#f0b42920,#ff8c0012);}
 .fun-award.blue .fun-award-banner{background:linear-gradient(135deg,#4a90e220,#2c6fca12);}
 .fun-award.fire .fun-award-banner{background:linear-gradient(135deg,#ff4d4d20,#ff6b3512);}
@@ -1296,36 +1296,29 @@ undefined
 .fun-award.purple .fun-award-banner{background:linear-gradient(135deg,#9b6dff20,#6b3fcf12);}
 .fun-award.pink .fun-award-banner{background:linear-gradient(135deg,#e879b020,#c9357a12);}
 .fun-award.orange .fun-award-banner{background:linear-gradient(135deg,#ff7b3520,#e8650012);}
-.fun-award-emoji{font-size:22px;animation:funFloat 3s ease-in-out infinite;flex-shrink:0;}
-.fun-award-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);}
-.fun-award-body{padding:10px 14px 14px;display:flex;align-items:flex-start;gap:12px;}
-.fun-award-av{width:48px;height:48px;border-radius:14px;flex-shrink:0;overflow:hidden;}
+.fun-award-emoji{font-size:26px;animation:funFloat 3s ease-in-out infinite;flex-shrink:0;}
+.fun-award-title{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text);}
+.fun-award-body{padding:14px 18px 18px;display:flex;align-items:flex-start;gap:16px;}
+.fun-award-av-wrap{position:relative;flex-shrink:0;}
+.fun-award-av{width:64px;height:64px;border-radius:18px;overflow:hidden;border:2.5px solid var(--bdr2);animation:pulseGlow 3s ease infinite;}
 .fun-award-av img{width:100%;height:100%;object-fit:cover;}
+.fun-award-badge{position:absolute;bottom:-6px;right:-6px;font-size:22px;animation:badgePop .5s ease backwards;animation-delay:.4s;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));z-index:2;}
 .fun-award-info{flex:1;min-width:0;}
-.fun-award-name{font-size:14px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
-.fun-award-lines{display:flex;flex-direction:column;gap:2px;}
-.fun-award-line{font-size:11px;color:var(--text2);font-weight:600;line-height:1.5;}
+.fun-award-name{font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.fun-award-name .badge-inline{font-size:16px;}
+.fun-award-lines{display:flex;flex-direction:column;gap:4px;}
+.fun-award-line{font-size:13px;color:var(--text2);font-weight:600;line-height:1.6;display:flex;align-items:center;gap:6px;}
 .fun-award-line b{color:var(--text);font-weight:800;}
-.fun-bxh{background:var(--s1);border:1.5px solid var(--bdr);border-radius:16px;overflow:hidden;animation:funFadeUp .6s ease backwards;animation-delay:.9s;}
-.fun-bxh-header{padding:14px 16px 10px;background:linear-gradient(135deg,rgba(240,180,41,0.05),rgba(232,149,14,0.03));border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;gap:8px;}
-.fun-bxh-header span{font-size:18px;}
-.fun-bxh-header h3{font-size:13px;font-weight:900;color:var(--text);margin:0;text-transform:uppercase;letter-spacing:1px;}
-.fun-bxh-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--bdr);transition:background .15s;}
-.fun-bxh-row:last-child{border-bottom:none;}
-.fun-bxh-rank{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0;background:var(--s2);color:var(--muted);}
-.fun-bxh-row:nth-child(1) .fun-bxh-rank{background:linear-gradient(135deg,#f0b429,#e89500);color:#fff;font-size:14px;}
-.fun-bxh-row:nth-child(2) .fun-bxh-rank{background:linear-gradient(135deg,#a8b5c8,#8892a8);color:#fff;}
-.fun-bxh-row:nth-child(3) .fun-bxh-rank{background:linear-gradient(135deg,#cd7f32,#a0612c);color:#fff;}
-.fun-bxh-av{width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;}
-.fun-bxh-av img{width:100%;height:100%;object-fit:cover;}
-.fun-bxh-info{flex:1;min-width:0;}
-.fun-bxh-name{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fun-bxh-stats{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;}
-.fun-bxh-rate{text-align:right;flex-shrink:0;}
-.fun-bxh-rate-num{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;}
-.fun-bxh-rate-pct{font-size:9px;color:var(--muted);font-weight:700;}
-.fun-bxh-bar{width:50px;height:6px;border-radius:6px;background:var(--s3);overflow:hidden;flex-shrink:0;}
-.fun-bxh-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--green),#8bc34a);transition:width .8s ease;}
+.fun-award-line .line-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center;}
+.fun-hero-stat{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;line-height:1;margin-top:8px;display:flex;align-items:baseline;gap:6px;}
+.fun-hero-stat .unit{font-size:16px;font-weight:700;color:var(--muted);}
+.fun-award.gold .fun-hero-stat{color:#d4860a;}
+.fun-award.blue .fun-hero-stat{color:#2c6fca;}
+.fun-award.fire .fun-hero-stat{color:#d03030;}
+.fun-award.green .fun-hero-stat{color:#1a9e60;}
+.fun-award.purple .fun-hero-stat{color:#6b3fcf;}
+.fun-award.pink .fun-hero-stat{color:#c9357a;}
+.fun-award.orange .fun-hero-stat{color:#e86500;}
 .fun-empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:600;}
 .fun-empty .ei{font-size:48px;display:block;margin-bottom:12px;}
 .fun-confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;}
@@ -6020,7 +6013,7 @@ function renderFunStats(){
   var el=document.getElementById('funstats-content');
   if(!el)return;
   function av(name,sz){
-    sz=sz||48;var r=Math.floor(sz*.28);
+    sz=sz||64;var r=Math.floor(sz*.28);
     var mb=mbOf(name);
     if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:'+r+'px;object-fit:cover;" decoding="async">';
     var cls=mb?AVC[mb.color]:'';
@@ -6088,89 +6081,88 @@ function renderFunStats(){
     var carryW=0,carryG=0;
     Object.keys(p.partners).forEach(function(pName){
       var pData=all.find(function(x){return x.name===pName;});
-      if(pData&&pData.wRate<avgRate){
-        carryW+=p.partners[pName].w;
-        carryG+=p.partners[pName].g;
-      }
+      if(pData&&pData.wRate<avgRate){carryW+=p.partners[pName].w;carryG+=p.partners[pName].g;}
     });
-    if(carryG>=3){
-      carryScores.push({name:p.name,carryW:carryW,carryG:carryG,carryRate:carryW/carryG,totalW:p.w,wRate:p.wRate,games:p.games});
-    }
+    if(carryG>=3)carryScores.push({name:p.name,carryW:carryW,carryG:carryG,carryRate:carryW/carryG,totalW:p.w,wRate:p.wRate,games:p.games});
   });
   carryScores.sort(function(a,b){return b.carryRate-a.carryRate||b.carryW-a.carryW;});
   var prospect=qualified.slice().sort(function(a,b){
-    var aLast5=a.results.slice(-5),bLast5=b.results.slice(-5);
-    var aRecent=aLast5.filter(function(r){return r==='W';}).length/aLast5.length;
-    var bRecent=bLast5.filter(function(r){return r==='W';}).length/bLast5.length;
-    if(Math.abs(bRecent-aRecent)>0.01)return bRecent-aRecent;
-    return b.wStreak-a.wStreak;
+    var aL=a.results.slice(-5),bL=b.results.slice(-5);
+    var aR=aL.filter(function(r){return r==='W';}).length/aL.length;
+    var bR=bL.filter(function(r){return r==='W';}).length/bL.length;
+    if(Math.abs(bR-aR)>0.01)return bR-aR;return b.wStreak-a.wStreak;
   });
   var pairArr=Object.keys(pairs).map(function(k){return{key:k,w:pairs[k].w,l:pairs[k].l,games:pairs[k].games,p:pairs[k].p,rate:pairs[k].w/pairs[k].games};}).filter(function(p){return p.games>=3;});
   var bestPair=pairArr.slice().sort(function(a,b){return b.rate-a.rate||b.w-a.w;})[0];
   var worstPair=pairArr.slice().sort(function(a,b){return a.rate-b.rate||b.l-a.l;})[0];
   var awards=[];
-  function card(emoji,title,color,name,lines,isPair,pairNames){
-    awards.push({emoji:emoji,title:title,color:color,name:name,lines:lines,isPair:!!isPair,pairNames:pairNames||[]});
+  function card(emoji,title,color,name,lines,heroVal,heroUnit,badge,isPair,pairNames){
+    awards.push({emoji:emoji,title:title,color:color,name:name,lines:lines,heroVal:heroVal,heroUnit:heroUnit||'',badge:badge||'',isPair:!!isPair,pairNames:pairNames||[]});
   }
   var topWinRate=qualified.slice().sort(function(a,b){return b.wRate-a.wRate||b.w-a.w;})[0];
   if(topWinRate)card('\ud83c\udfaf','S\u00e1t Th\u1ee7','gold',topWinRate.name,[
-    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(topWinRate.wRate*100)+'%</b>',
-    'Th\u00e0nh t\u00edch: <b>'+topWinRate.w+'W - '+topWinRate.l+'L</b> / '+topWinRate.games+' tr\u1eadn',
-    'S\u1ed1 bu\u1ed5i: <b>'+topWinRate.days+'</b>'
-  ]);
+    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+topWinRate.w+'W - '+topWinRate.l+'L</b> / '+topWinRate.games+' tr\u1eadn'},
+    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+topWinRate.days+' bu\u1ed5i</b> trong th\u00e1ng'},
+    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng t\u1ed1t nh\u1ea5t: <b>'+topWinRate.wStreak+' tr\u1eadn</b>'}
+  ],Math.round(topWinRate.wRate*100),'% WIN','\ud83c\udfc5');
+
   var topLossRate=qualified.slice().sort(function(a,b){return b.lRate-a.lRate||b.l-a.l;})[0];
   if(topLossRate)card('\ud83e\udee0','Ng\u01b0\u1eddi Hi\u1ebfn D\u00e2ng','pink',topLossRate.name,[
-    'T\u1ef7 l\u1ec7 thua: <b>'+Math.round(topLossRate.lRate*100)+'%</b>',
-    'Th\u00e0nh t\u00edch: <b>'+topLossRate.w+'W - '+topLossRate.l+'L</b> / '+topLossRate.games+' tr\u1eadn',
-    'Chu\u1ed7i thua d\u00e0i nh\u1ea5t: <b>'+topLossRate.lStreak+' tr\u1eadn</b>'
-  ]);
+    {icon:'\ud83d\udcc9',text:'T\u1ef7 l\u1ec7 thua: <b>'+Math.round(topLossRate.lRate*100)+'%</b>'},
+    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+topLossRate.w+'W - '+topLossRate.l+'L</b> / '+topLossRate.games+' tr\u1eadn'},
+    {icon:'\ud83d\udca2',text:'Chu\u1ed7i thua d\u00e0i nh\u1ea5t: <b>'+topLossRate.lStreak+' tr\u1eadn</b>'}
+  ],Math.round(topLossRate.lRate*100),'% THUA','\ud83c\udf96\ufe0f');
+
   var topWins=all.slice().sort(function(a,b){return b.w-a.w||a.games-b.games;})[0];
   if(topWins)card('\ud83c\udfc6','Vua Chi\u1ebfn Th\u1eafng','gold',topWins.name,[
-    'S\u1ed1 tr\u1eadn th\u1eafng: <b>'+topWins.w+' tr\u1eadn</b>',
-    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topWins.games+'</b> ('+Math.round(topWins.wRate*100)+'%)',
-    'Chu\u1ed7i th\u1eafng d\u00e0i nh\u1ea5t: <b>'+topWins.wStreak+' tr\u1eadn</b>'
-  ]);
+    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topWins.games+'</b> ('+Math.round(topWins.wRate*100)+'% win)'},
+    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng d\u00e0i nh\u1ea5t: <b>'+topWins.wStreak+' tr\u1eadn</b>'},
+    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+topWins.days+' bu\u1ed5i</b>'}
+  ],topWins.w,' TH\u1eaeNG','\ud83e\udd47');
   var topLosses=all.slice().sort(function(a,b){return b.l-a.l||a.games-b.games;})[0];
   if(topLosses)card('\ud83d\udca5','Chi\u1ebfn Binh B\u1ea5t T\u1eed','fire',topLosses.name,[
-    'S\u1ed1 tr\u1eadn thua: <b>'+topLosses.l+' tr\u1eadn</b>',
-    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topLosses.games+'</b>',
-    'Nh\u01b0ng v\u1eabn chi\u1ebfn \u0111\u1ea5u: <b>'+topLosses.w+' th\u1eafng</b> ('+Math.round(topLosses.wRate*100)+'%)'
-  ]);
+    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topLosses.games+'</b>'},
+    {icon:'\ud83d\udcaa',text:'V\u1eabn gi\u00e0nh \u0111\u01b0\u1ee3c <b>'+topLosses.w+' chi\u1ebfn th\u1eafng</b> ('+Math.round(topLosses.wRate*100)+'%)'},
+    {icon:'\ud83d\udcc5',text:'S\u1ed1 bu\u1ed5i: <b>'+topLosses.days+'</b>'}
+  ],topLosses.l,' THUA','\ud83d\udee1\ufe0f');
+
   var topBet=Object.keys(betLoss).map(function(n){return{name:n,amount:betLoss[n]};}).sort(function(a,b){return b.amount-a.amount;})[0];
   if(topBet&&topBet.amount>0)card('\ud83d\udcb0','Nh\u00e0 T\u00e0i Tr\u1ee3','green',topBet.name,[
-    '\u0110\u00f3ng g\u00f3p: <b>'+fmtNum(topBet.amount)+'\u20ab</b>',
-    'Qua t\u1ed5ng s\u1ed1 tr\u1eadn thua c\u01b0\u1ee3c trong th\u00e1ng',
-    'C\u1ea3m \u01a1n v\u00ec \u0111\u00e3 nu\u00f4i qu\u1ef9! \ud83d\ude4f'
-  ]);
+    {icon:'\ud83d\udcb8',text:'T\u1ed5ng \u0111\u00f3ng g\u00f3p qua c\u01b0\u1ee3c thua'},
+    {icon:'\ud83c\udfe6',text:'\u0110\u00e3 nu\u00f4i qu\u1ef9 CLB r\u1ea5t nhi\u1ec1u!'},
+    {icon:'\ud83d\ude4f',text:'C\u1ea3m \u01a1n v\u00ec s\u1ef1 h\u00e0o ph\u00f3ng!'}
+  ],fmtNum(topBet.amount),'\u20ab','\ud83c\udfc5');
+
   var topCarry=carryScores[0];
   if(topCarry)card('\ud83e\uddbe','Th\u1ea7n G\u00e1nh T\u1ea1','purple',topCarry.name,[
-    'Th\u1eafng <b>'+topCarry.carryW+'/'+topCarry.carryG+'</b> tr\u1eadn khi c\u1eb7p v\u1edbi ng\u01b0\u1eddi y\u1ebfu h\u01a1n',
-    'T\u1ef7 l\u1ec7 g\u00e1nh: <b>'+Math.round(topCarry.carryRate*100)+'%</b>',
-    'T\u1ed5ng th\u1eafng c\u00e1 nh\u00e2n: <b>'+topCarry.totalW+'W</b> ('+Math.round(topCarry.wRate*100)+'%)'
-  ]);
+    {icon:'\ud83d\udcaa',text:'Th\u1eafng <b>'+topCarry.carryW+'/'+topCarry.carryG+'</b> khi c\u1eb7p ng\u01b0\u1eddi y\u1ebfu h\u01a1n'},
+    {icon:'\u2b50',text:'T\u1ed5ng th\u1eafng c\u00e1 nh\u00e2n: <b>'+topCarry.totalW+'W</b> ('+Math.round(topCarry.wRate*100)+'%)'},
+    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topCarry.games+'</b>'}
+  ],Math.round(topCarry.carryRate*100),'% G\u00c1NH','\ud83e\uddb8');
+
   var ironMan=all.slice().sort(function(a,b){return b.games-a.games||b.days-a.days;})[0];
   if(ironMan)card('\ud83d\udcaa','Iron Man','blue',ironMan.name,[
-    'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+ironMan.games+' tr\u1eadn</b>',
-    'S\u1ed1 bu\u1ed5i tham gia: <b>'+ironMan.days+' bu\u1ed5i</b>',
-    'Th\u00e0nh t\u00edch: <b>'+ironMan.w+'W - '+ironMan.l+'L</b> ('+Math.round(ironMan.wRate*100)+'%)'
-  ]);
+    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+ironMan.days+' bu\u1ed5i</b>'},
+    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+ironMan.w+'W - '+ironMan.l+'L</b> ('+Math.round(ironMan.wRate*100)+'%)'},
+    {icon:'\ud83d\udd25',text:'Kh\u00f4ng ngh\u1ec9 bu\u1ed5i n\u00e0o!'}
+  ],ironMan.games,' TR\u1eacN','\ud83c\udfc5');
   var topProspect=prospect[0];
   if(topProspect){var last5=topProspect.results.slice(-5);var recentW=last5.filter(function(r){return r==='W';}).length;
     card('\u2b50','Ng\u00f4i Sao \u0110ang L\u00ean','orange',topProspect.name,[
-    '5 tr\u1eadn g\u1ea7n nh\u1ea5t: <b>'+recentW+' th\u1eafng / 5</b>',
-    'Chu\u1ed7i th\u1eafng hi\u1ec7n t\u1ea1i: <b>'+topProspect.wStreak+' tr\u1eadn</b>',
-    'Phong \u0111\u1ed9 \u0111ang r\u1ea5t t\u1ed1t, h\u1eb9n g\u1eb7p th\u00e1ng sau!'
-  ]);}
+    {icon:'\ud83d\udcc8',text:'5 tr\u1eadn g\u1ea7n nh\u1ea5t: <b>'+recentW+' th\u1eafng / 5</b>'},
+    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng: <b>'+topProspect.wStreak+' tr\u1eadn</b>'},
+    {icon:'\ud83c\udf1f',text:'Phong \u0111\u1ed9 xu\u1ea5t s\u1eafc, h\u1eb9n g\u1eb7p th\u00e1ng sau!'}
+  ],recentW+'/5','','\ud83c\udf1f');}
   if(bestPair)card('\ud83e\udd1d','C\u1eb7p \u0110\u00f4i Ho\u00e0n H\u1ea3o','purple',bestPair.key,[
-    'Th\u00e0nh t\u00edch: <b>'+bestPair.w+'W - '+bestPair.l+'L</b> / '+bestPair.games+' tr\u1eadn',
-    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(bestPair.rate*100)+'%</b>',
-    'C\u1eb7p \u0111\u00f4i nh\u1ecb\u1ec3 nh\u1ea5t th\u00e1ng!'
-  ],true,bestPair.p);
+    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+bestPair.w+'W - '+bestPair.l+'L</b> / '+bestPair.games+' tr\u1eadn'},
+    {icon:'\ud83c\udfaf',text:'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(bestPair.rate*100)+'%</b>'},
+    {icon:'\ud83d\udc95',text:'C\u1eb7p \u0111\u00f4i nh\u1ecb\u1ec3 nh\u1ea5t th\u00e1ng!'}
+  ],Math.round(bestPair.rate*100),'% WIN','\ud83d\udc91',true,bestPair.p);
   if(worstPair&&worstPair!==bestPair)card('\ud83d\ude2d','C\u1eb7p \u0110\u00f4i Ho\u00e0n C\u1ea3nh','pink',worstPair.key,[
-    'Th\u00e0nh t\u00edch: <b>'+worstPair.w+'W - '+worstPair.l+'L</b> / '+worstPair.games+' tr\u1eadn',
-    'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(worstPair.rate*100)+'%</b>',
-    'C\u1ed1 l\u00ean! Th\u00e1ng sau s\u1ebd kh\u00e1c! \ud83d\udcaa'
-  ],true,worstPair.p);
+    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+worstPair.w+'W - '+worstPair.l+'L</b> / '+worstPair.games+' tr\u1eadn'},
+    {icon:'\ud83d\udcc9',text:'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(worstPair.rate*100)+'%</b>'},
+    {icon:'\ud83d\udcaa',text:'C\u1ed1 l\u00ean! Th\u00e1ng sau s\u1ebd kh\u00e1c!'}
+  ],Math.round(worstPair.rate*100),'% WIN','\ud83d\udc94',true,worstPair.p);
   var totalPlayers=Object.keys(ps).length;
   var totalDays={};mm.forEach(function(m){totalDays[m.date]=1;});
   var html='<div class="fun-header"><h2>\ud83d\udccb T\u1ed4NG K\u1ebeT TH\u00c1NG</h2>';
@@ -6186,29 +6178,18 @@ function renderFunStats(){
     html+='<div class="fun-award-banner"><div class="fun-award-emoji">'+a.emoji+'</div><div class="fun-award-title">'+a.title+'</div></div>';
     html+='<div class="fun-award-body">';
     if(a.isPair&&a.pairNames&&a.pairNames.length>1){
-      html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
-      a.pairNames.forEach(function(n){html+='<div class="fun-award-av" style="width:38px;height:38px;border-radius:11px;">'+av(n,38)+'</div>';});
+      html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
+      a.pairNames.forEach(function(n){html+='<div class="fun-award-av-wrap"><div class="fun-award-av" style="width:50px;height:50px;border-radius:14px;">'+av(n,50)+'</div><div class="fun-award-badge">'+a.badge+'</div></div>';});
       html+='</div>';
-    }else{html+='<div class="fun-award-av">'+av(a.name)+'</div>';}
+    }else{
+      html+='<div class="fun-award-av-wrap"><div class="fun-award-av">'+av(a.name)+'</div><div class="fun-award-badge">'+a.badge+'</div></div>';
+    }
     html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.name)+'</div>';
     html+='<div class="fun-award-lines">';
-    a.lines.forEach(function(line){html+='<div class="fun-award-line">'+line+'</div>';});
-    html+='</div></div></div></div>';
-  });
-  html+='</div>';
-  var bxhArr=all.slice().sort(function(a,b){if(b.w!==a.w)return b.w-a.w;if(Math.abs(b.wRate-a.wRate)>0.01)return b.wRate-a.wRate;return a.games-b.games;}).slice(0,10);
-  html+='<div class="fun-bxh"><div class="fun-bxh-header"><span>\ud83d\udcca</span><h3>BXH '+MN[cm].toUpperCase()+' '+cy+'</h3></div>';
-  bxhArr.forEach(function(p,i){
-    var rate=p.games?Math.round(p.w/p.games*100):0;
-    html+='<div class="fun-bxh-row">';
-    html+='<div class="fun-bxh-rank">'+(i+1)+'</div>';
-    html+='<div class="fun-bxh-av">'+av(p.name,34)+'</div>';
-    html+='<div class="fun-bxh-info"><div class="fun-bxh-name">'+xe(p.name)+'</div>';
-    html+='<div class="fun-bxh-stats">'+p.w+'W '+p.l+'L \u00b7 '+p.games+' tr\u1eadn \u00b7 '+p.days+' bu\u1ed5i</div></div>';
-    html+='<div class="fun-bxh-bar"><div class="fun-bxh-bar-fill" style="width:'+rate+'%"></div></div>';
-    html+='<div class="fun-bxh-rate"><div class="fun-bxh-rate-num" style="color:'+(rate>=60?'var(--green)':rate>=45?'var(--gold)':'var(--red)')+'">'+rate+'</div>';
-    html+='<div class="fun-bxh-rate-pct">%WIN</div></div>';
+    a.lines.forEach(function(line){html+='<div class="fun-award-line"><span class="line-icon">'+line.icon+'</span>'+line.text+'</div>';});
     html+='</div>';
+    if(a.heroVal!==undefined&&a.heroVal!=='')html+='<div class="fun-hero-stat">'+a.heroVal+'<span class="unit">'+a.heroUnit+'</span></div>';
+    html+='</div></div></div>';
   });
   html+='</div>';
   el.innerHTML=html;
