@@ -1213,7 +1213,7 @@ nav::-webkit-scrollbar{display:none;}
   <button class="nt admin-only" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
   <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ic">🏅</span>Thành Tích</button>
   <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ic">📸</span>Album</button>
-<button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">📋</span>Tổng Kết</button>
+<button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">🏆</span>Tổng Kết</button>
 </nav>
 
 <!-- INTRO -->
@@ -1323,6 +1323,35 @@ undefined
 .fun-empty .ei{font-size:48px;display:block;margin-bottom:12px;}
 .fun-confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;}
 .fun-confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 3s ease-out forwards;}
+.fun-pair-avs{display:flex;gap:6px;flex-shrink:0;}
+.fun-pair-avs .fun-award-av{width:52px;height:52px;border-radius:14px;}
+.fun-watermark{text-align:center;padding:16px;opacity:0.5;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;}
+
+
+.player-badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 4px;animation:funFadeUp .6s ease;}
+.player-badge{display:flex;align-items:center;gap:5px;padding:5px 12px 5px 8px;border-radius:20px;background:linear-gradient(135deg,var(--s2),var(--s1));border:1.5px solid var(--bdr);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.player-badge:active{transform:scale(0.96);}
+.player-badge::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.06) 50%,transparent 60%);background-size:200% 100%;animation:funShine 3s ease-in-out infinite;}
+.player-badge .pb-icon{font-size:18px;flex-shrink:0;animation:funFloat 3s ease-in-out infinite;}
+.player-badge .pb-info{display:flex;flex-direction:column;min-width:0;}
+.player-badge .pb-title{font-size:10px;font-weight:900;letter-spacing:0.8px;text-transform:uppercase;color:var(--text);line-height:1.2;}
+.player-badge .pb-sub{font-size:9px;font-weight:600;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.player-badge.gold{border-color:#f0b42960;background:linear-gradient(135deg,#f0b42915,#ff8c0008);}
+.player-badge.gold .pb-title{color:#f0b429;}
+.player-badge.green{border-color:#1a9e6060;background:linear-gradient(135deg,#1a9e6015,#2ecc8a08);}
+.player-badge.green .pb-title{color:#1a9e60;}
+.player-badge.fire{border-color:#ff4d4d60;background:linear-gradient(135deg,#ff4d4d15,#ff6b3508);}
+.player-badge.fire .pb-title{color:#ff4d4d;}
+.player-badge.blue{border-color:#4a90e260;background:linear-gradient(135deg,#4a90e215,#2c6fca08);}
+.player-badge.blue .pb-title{color:#4a90e2;}
+.player-badge.purple{border-color:#9b6dff60;background:linear-gradient(135deg,#9b6dff15,#6b3fcf08);}
+.player-badge.purple .pb-title{color:#9b6dff;}
+.player-badge.pink{border-color:#e879b060;background:linear-gradient(135deg,#e879b015,#c9357a08);}
+.player-badge.pink .pb-title{color:#e879b0;}
+.player-badge.orange{border-color:#ff7b3560;background:linear-gradient(135deg,#ff7b3515,#e8650008);}
+.player-badge.orange .pb-title{color:#ff7b35;}
+@keyframes funShine{0%{background-position:-200% center;}100%{background-position:200% center;}}
+
 </style>
 <div class="iw">
 
@@ -5096,6 +5125,88 @@ function selectStats(name){
   if(statsSelected) setTimeout(()=>document.getElementById('stats-content').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
+function getPlayerAwards(playerName){
+  const now=new Date(),cm=now.getMonth(),cy=now.getFullYear();
+  const mm=matches.filter(m=>{
+    if(!m.saved||m.isBetEntry||!m.date)return false;
+    const d=new Date(m.date);
+    return d.getMonth()===cm&&d.getFullYear()===cy;
+  });
+  if(!mm.length)return[];
+  const ps={};
+  mm.forEach(m=>{
+    const players=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
+    players.forEach(name=>{
+      if(!ps[name])ps[name]={w:0,l:0,games:0,results:[]};
+      ps[name].games++;
+      const isT1=(name===m.t1p1||name===m.t1p2);
+      const won=(m.winner==='A'&&isT1)||(m.winner==='B'&&!isT1);
+      if(won){ps[name].w++;ps[name].results.push('W');}
+      else{ps[name].l++;ps[name].results.push('L');}
+    });
+  });
+  const pairs={};
+  mm.forEach(m=>{
+    const t1=[m.t1p1,m.t1p2].filter(Boolean).sort().join(' & ');
+    const t2=[m.t2p1,m.t2p2].filter(Boolean).sort().join(' & ');
+    if(t1){if(!pairs[t1])pairs[t1]={w:0,l:0,games:0,p:[m.t1p1,m.t1p2].filter(Boolean)};pairs[t1].games++;if(m.winner==='A')pairs[t1].w++;else pairs[t1].l++;}
+    if(t2){if(!pairs[t2])pairs[t2]={w:0,l:0,games:0,p:[m.t2p1,m.t2p2].filter(Boolean)};pairs[t2].games++;if(m.winner==='B')pairs[t2].w++;else pairs[t2].l++;}
+  });
+  const betLoss={};
+  matches.filter(m=>{if(!m.saved||!m.date)return false;const d=new Date(m.date);return d.getMonth()===cm&&d.getFullYear()===cy;}).forEach(m=>{
+    if(m.bet&&Number(m.bet)>0){
+      const losers=[];
+      if(m.winner==='A'){if(m.t2p1)losers.push(m.t2p1);if(m.t2p2)losers.push(m.t2p2);}
+      else if(m.winner==='B'){if(m.t1p1)losers.push(m.t1p1);if(m.t1p2)losers.push(m.t1p2);}
+      losers.forEach(n=>{betLoss[n]=(betLoss[n]||0)+Number(m.bet);});
+    }
+  });
+  function getStreak(results){let max=0,cur=0;results.forEach(r=>{if(r==='W'){cur++;if(cur>max)max=cur;}else cur=0;});return max;}
+  const allRates=Object.values(ps).filter(s=>s.games>=3).map(s=>s.w/s.games);
+  const avgRate=allRates.length?allRates.reduce((a,b)=>a+b,0)/allRates.length:0.5;
+  const carryStats={};
+  mm.forEach(m=>{
+    const t1=[m.t1p1,m.t1p2].filter(Boolean);
+    const t2=[m.t2p1,m.t2p2].filter(Boolean);
+    [[t1,m.winner==='A'],[t2,m.winner==='B']].forEach(([team,won])=>{
+      if(team.length!==2)return;
+      team.forEach((p,i)=>{
+        const partner=team[1-i];
+        const pS=ps[partner];
+        if(pS&&pS.games>=3&&(pS.w/pS.games)<avgRate){
+          if(!carryStats[p])carryStats[p]={cG:0,cW:0};
+          carryStats[p].cG++;
+          if(won)carryStats[p].cW++;
+        }
+      });
+    });
+  });
+  const awards=[];
+  const p=ps[playerName];
+  if(!p)return[];
+  const byRate=Object.entries(ps).map(([n,s])=>({name:n,rate:s.w/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.w-a.w);
+  if(byRate.length&&byRate[0].name===playerName) awards.push({emoji:'🎯',title:'Sát Thủ',sub:Math.round(byRate[0].rate*100)+'% thắng',color:'gold'});
+  const byWins=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.w-a.w||a.games-b.games);
+  if(byWins.length&&byWins[0].name===playerName) awards.push({emoji:'🏆',title:'Vua Chiến Thắng',sub:byWins[0].w+' trận thắng',color:'gold'});
+  const byLR=Object.entries(ps).map(([n,s])=>({name:n,rate:s.l/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.l-a.l);
+  if(byLR.length&&byLR[0].name===playerName) awards.push({emoji:'💀',title:'Người Hiến Dâng',sub:Math.round(byLR[0].rate*100)+'% thua',color:'pink'});
+  const byLoss=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.l-a.l||a.games-b.games);
+  if(byLoss.length&&byLoss[0].name===playerName) awards.push({emoji:'🛡️',title:'Chiến Binh Bất Tử',sub:byLoss[0].l+' trận thua',color:'fire'});
+  const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
+  if(betArr.length&&betArr[0].name===playerName&&betArr[0].amount>0) awards.push({emoji:'💸',title:'Nhà Tài Trợ',sub:fmtNum(betArr[0].amount)+'₫',color:'green'});
+  const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
+  if(carryArr.length&&carryArr[0].name===playerName) awards.push({emoji:'🏋️',title:'Thần Gánh Tạ',sub:Math.round(carryArr[0].rate*100)+'% carry',color:'purple'});
+  const byGames=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.games-a.games||b.w-a.w);
+  if(byGames.length&&byGames[0].name===playerName) awards.push({emoji:'🦾',title:'Iron Man',sub:byGames[0].games+' trận',color:'blue'});
+  const prospect=Object.entries(ps).filter(([,s])=>s.results.length>=5).map(([n,s])=>{const l5=s.results.slice(-5);return{name:n,w5:l5.filter(r=>r==='W').length};}).sort((a,b)=>b.w5-a.w5);
+  if(prospect.length&&prospect[0].name===playerName&&prospect[0].w5>=3) awards.push({emoji:'⭐',title:'Ngôi Sao Đang Lên',sub:prospect[0].w5+'/5 gần nhất',color:'orange'});
+  const streakD=Object.entries(ps).map(([n,s])=>({name:n,streak:getStreak(s.results),...s})).sort((a,b)=>b.streak-a.streak||b.w-a.w);
+  if(streakD.length&&streakD[0].name===playerName&&streakD[0].streak>=3) awards.push({emoji:'🔥',title:'Chuỗi Lửa',sub:streakD[0].streak+' liên thắng',color:'fire'});
+  const pairArr=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>b.rate-a.rate||b.w-a.w);
+  if(pairArr.length&&pairArr[0].p.includes(playerName)){const ptr=pairArr[0].p.find(n=>n!==playerName)||'';awards.push({emoji:'💕',title:'Cặp Đôi Hoàn Hảo',sub:'cùng '+ptr,color:'purple'});}
+  return awards;
+}
+
 function buildStatsHTML(name){
   const allM=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
   if(!allM.length) return '<div class="empty"><span class="ei">📊</span>Chưa có trận nào.</div>';
@@ -5157,7 +5268,12 @@ function buildStatsHTML(name){
         </div>
       </div>
     </div>
-    <div class="stats-kpi">
+    `;
+    const _aw=getPlayerAwards(name);
+    if(_aw.length){h+='<div class="player-badges">';
+    _aw.forEach(a=>{h+='<div class="player-badge '+a.color+'"><span class="pb-icon">'+a.emoji+'</span><div class="pb-info"><span class="pb-title">'+a.title+'</span><span class="pb-sub">'+a.sub+'</span></div></div>';});
+    h+='</div>';}
+    h+=`<div class="stats-kpi">
       <div class="stats-kpi-box"><div class="stats-kpi-num" style="color:var(--gold);">${total}</div><div class="stats-kpi-lbl">Trận</div></div>
       <div class="stats-kpi-box win"><div class="stats-kpi-num" style="color:var(--green);">${wins}</div><div class="stats-kpi-lbl">Thắng</div></div>
       <div class="stats-kpi-box lose"><div class="stats-kpi-num" style="color:#e55;">${losses}</div><div class="stats-kpi-lbl">Thua</div></div>
@@ -6010,190 +6126,183 @@ initDark();
 undefined
 
 function renderFunStats(){
-  var el=document.getElementById('funstats-content');
+  const el=document.getElementById('funstats-content');
   if(!el)return;
   function av(name,sz){
-    sz=sz||64;var r=Math.floor(sz*.28);
-    var mb=mbOf(name);
-    if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:'+r+'px;object-fit:cover;" decoding="async">';
-    var cls=mb?AVC[mb.color]:'';
-    return '<div class="av-placeholder '+cls+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:'+r+'px;display:flex;align-items:center;justify-content:center;font-size:'+Math.floor(sz*.38)+'px;font-weight:900;color:#fff;">'+ini(name)+'</div>';
+    sz=sz||64;const mb=mbOf(name);
+    if(mb&&mb.photo) return '<img loading="lazy" src="'+mb.photo+'" style="width:100%;height:100%;object-fit:cover;">';
+    const cls=mb?AVC[mb.color]:'';
+    return '<div class="av-placeholder '+cls+'" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:'+(sz*0.34)+'px;font-weight:900;color:#fff;">'+ini(name)+'</div>';
   }
-  var now=new Date(),cm=now.getMonth(),cy=now.getFullYear();
-  var MN=['Th\u00e1ng 1','Th\u00e1ng 2','Th\u00e1ng 3','Th\u00e1ng 4','Th\u00e1ng 5','Th\u00e1ng 6','Th\u00e1ng 7','Th\u00e1ng 8','Th\u00e1ng 9','Th\u00e1ng 10','Th\u00e1ng 11','Th\u00e1ng 12'];
-  var mm=matches.filter(function(m){
+  const now=new Date(),cm=now.getMonth(),cy=now.getFullYear();
+  const monthNames=['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  const mm=matches.filter(m=>{
     if(!m.saved||m.isBetEntry||!m.date)return false;
-    var d=new Date(m.date);return d.getMonth()===cm&&d.getFullYear()===cy;
+    const d=new Date(m.date);
+    return d.getMonth()===cm&&d.getFullYear()===cy;
   });
-  if(!mm.length){el.innerHTML='<div class="fun-empty"><span class="ei">\ud83d\udccb</span>Ch\u01b0a c\u00f3 tr\u1eadn \u0111\u1ea5u n\u00e0o trong th\u00e1ng n\u00e0y</div>';return;}
-  var ps={};
-  mm.forEach(function(m){
-    var pl=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
-    pl.forEach(function(name){
-      if(!ps[name])ps[name]={w:0,l:0,games:0,dates:{},results:[],partners:{}};
-      ps[name].games++;ps[name].dates[m.date]=1;
-      var isT1=(name===m.t1p1||name===m.t1p2);
-      var won=(m.winner==='A'&&isT1)||(m.winner==='B'&&!isT1);
-      var partner=isT1?(name===m.t1p1?m.t1p2:m.t1p1):(name===m.t2p1?m.t2p2:m.t2p1);
+  if(!mm.length){
+    el.innerHTML='<div class="fun-empty"><span class="ei">🏸</span>Chưa có trận đấu nào trong tháng này<br><span style="font-size:12px;opacity:0.6;">Hãy ra sân nào!</span></div>';
+    return;
+  }
+  const ps={};
+  mm.forEach(m=>{
+    const players=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
+    players.forEach(name=>{
+      if(!ps[name])ps[name]={w:0,l:0,games:0,dates:new Set(),results:[]};
+      ps[name].games++;ps[name].dates.add(m.date);
+      const isT1=(name===m.t1p1||name===m.t1p2);
+      const won=(m.winner==='A'&&isT1)||(m.winner==='B'&&!isT1);
       if(won){ps[name].w++;ps[name].results.push('W');}
       else{ps[name].l++;ps[name].results.push('L');}
-      if(partner){
-        if(!ps[name].partners[partner])ps[name].partners[partner]={w:0,l:0,g:0};
-        ps[name].partners[partner].g++;
-        if(won)ps[name].partners[partner].w++;else ps[name].partners[partner].l++;
-      }
     });
   });
-  var pairs={};
-  mm.forEach(function(m){
-    var t1=[m.t1p1,m.t1p2].filter(Boolean).sort().join(' & ');
-    var t2=[m.t2p1,m.t2p2].filter(Boolean).sort().join(' & ');
-    if(t1&&m.t1p1&&m.t1p2){if(!pairs[t1])pairs[t1]={w:0,l:0,games:0,p:[m.t1p1,m.t1p2]};pairs[t1].games++;if(m.winner==='A')pairs[t1].w++;else pairs[t1].l++;}
-    if(t2&&m.t2p1&&m.t2p2){if(!pairs[t2])pairs[t2]={w:0,l:0,games:0,p:[m.t2p1,m.t2p2]};pairs[t2].games++;if(m.winner==='B')pairs[t2].w++;else pairs[t2].l++;}
+  function getStreak(results){let max=0,cur=0;results.forEach(r=>{if(r==='W'){cur++;if(cur>max)max=cur;}else cur=0;});return max;}
+  const pairs={};
+  mm.forEach(m=>{
+    const t1=[m.t1p1,m.t1p2].filter(Boolean).sort().join(' & ');
+    const t2=[m.t2p1,m.t2p2].filter(Boolean).sort().join(' & ');
+    if(t1){if(!pairs[t1])pairs[t1]={w:0,l:0,games:0,p:[m.t1p1,m.t1p2].filter(Boolean)};pairs[t1].games++;if(m.winner==='A')pairs[t1].w++;else pairs[t1].l++;}
+    if(t2){if(!pairs[t2])pairs[t2]={w:0,l:0,games:0,p:[m.t2p1,m.t2p2].filter(Boolean)};pairs[t2].games++;if(m.winner==='B')pairs[t2].w++;else pairs[t2].l++;}
   });
-  var betLoss={};
-  matches.filter(function(m){
-    if(!m.saved||!m.date)return false;
-    var d=new Date(m.date);return d.getMonth()===cm&&d.getFullYear()===cy;
-  }).forEach(function(m){
+  const betLoss={};
+  matches.filter(m=>{if(!m.saved||!m.date)return false;const d=new Date(m.date);return d.getMonth()===cm&&d.getFullYear()===cy;}).forEach(m=>{
     if(m.bet&&Number(m.bet)>0){
-      var losers=[];
+      const losers=[];
       if(m.winner==='A'){if(m.t2p1)losers.push(m.t2p1);if(m.t2p2)losers.push(m.t2p2);}
       else if(m.winner==='B'){if(m.t1p1)losers.push(m.t1p1);if(m.t1p2)losers.push(m.t1p2);}
-      losers.forEach(function(n){betLoss[n]=(betLoss[n]||0)+Number(m.bet);});
+      losers.forEach(n=>{betLoss[n]=(betLoss[n]||0)+Number(m.bet);});
     }
   });
-  function getStreak(res){var mx=0,c=0;res.forEach(function(r){if(r==='W'){c++;if(c>mx)mx=c;}else c=0;});return mx;}
-  function getLStreak(res){var mx=0,c=0;res.forEach(function(r){if(r==='L'){c++;if(c>mx)mx=c;}else c=0;});return mx;}
-  var all=Object.keys(ps).map(function(n){
-    var s=ps[n];var days=Object.keys(s.dates).length;
-    return{name:n,w:s.w,l:s.l,games:s.games,days:days,results:s.results,partners:s.partners,
-      wRate:s.games?s.w/s.games:0,lRate:s.games?s.l/s.games:0,
-      wStreak:getStreak(s.results),lStreak:getLStreak(s.results)};
-  });
-  var minG=5;
-  var qualified=all.filter(function(a){return a.games>=minG;});
-  var avgRate=0,totalW=0,totalG=0;
-  all.forEach(function(a){totalW+=a.w;totalG+=a.games;});
-  avgRate=totalG?totalW/totalG:0.5;
-  var carryScores=[];
-  qualified.forEach(function(p){
-    var carryW=0,carryG=0;
-    Object.keys(p.partners).forEach(function(pName){
-      var pData=all.find(function(x){return x.name===pName;});
-      if(pData&&pData.wRate<avgRate){carryW+=p.partners[pName].w;carryG+=p.partners[pName].g;}
+  const allRates=Object.values(ps).filter(s=>s.games>=3).map(s=>s.w/s.games);
+  const avgRate=allRates.length?allRates.reduce((a,b)=>a+b,0)/allRates.length:0.5;
+  const carryStats={};
+  mm.forEach(m=>{
+    const t1=[m.t1p1,m.t1p2].filter(Boolean);
+    const t2=[m.t2p1,m.t2p2].filter(Boolean);
+    [[t1,m.winner==='A'],[t2,m.winner==='B']].forEach(([team,won])=>{
+      if(team.length!==2)return;
+      team.forEach((p,i)=>{
+        const partner=team[1-i];const pS=ps[partner];
+        if(pS&&pS.games>=3&&(pS.w/pS.games)<avgRate){
+          if(!carryStats[p])carryStats[p]={cG:0,cW:0};
+          carryStats[p].cG++;if(won)carryStats[p].cW++;
+        }
+      });
     });
-    if(carryG>=3)carryScores.push({name:p.name,carryW:carryW,carryG:carryG,carryRate:carryW/carryG,totalW:p.w,wRate:p.wRate,games:p.games});
   });
-  carryScores.sort(function(a,b){return b.carryRate-a.carryRate||b.carryW-a.carryW;});
-  var prospect=qualified.slice().sort(function(a,b){
-    var aL=a.results.slice(-5),bL=b.results.slice(-5);
-    var aR=aL.filter(function(r){return r==='W';}).length/aL.length;
-    var bR=bL.filter(function(r){return r==='W';}).length/bL.length;
-    if(Math.abs(bR-aR)>0.01)return bR-aR;return b.wStreak-a.wStreak;
-  });
-  var pairArr=Object.keys(pairs).map(function(k){return{key:k,w:pairs[k].w,l:pairs[k].l,games:pairs[k].games,p:pairs[k].p,rate:pairs[k].w/pairs[k].games};}).filter(function(p){return p.games>=3;});
-  var bestPair=pairArr.slice().sort(function(a,b){return b.rate-a.rate||b.w-a.w;})[0];
-  var worstPair=pairArr.slice().sort(function(a,b){return a.rate-b.rate||b.l-a.l;})[0];
-  var awards=[];
-  function card(emoji,title,color,name,lines,heroVal,heroUnit,badge,isPair,pairNames){
-    awards.push({emoji:emoji,title:title,color:color,name:name,lines:lines,heroVal:heroVal,heroUnit:heroUnit||'',badge:badge||'',isPair:!!isPair,pairNames:pairNames||[]});
-  }
-  var topWinRate=qualified.slice().sort(function(a,b){return b.wRate-a.wRate||b.w-a.w;})[0];
-  if(topWinRate)card('\ud83c\udfaf','S\u00e1t Th\u1ee7','gold',topWinRate.name,[
-    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+topWinRate.w+'W - '+topWinRate.l+'L</b> / '+topWinRate.games+' tr\u1eadn'},
-    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+topWinRate.days+' bu\u1ed5i</b> trong th\u00e1ng'},
-    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng t\u1ed1t nh\u1ea5t: <b>'+topWinRate.wStreak+' tr\u1eadn</b>'}
-  ],Math.round(topWinRate.wRate*100),'% WIN','\ud83c\udfc5');
-
-  var topLossRate=qualified.slice().sort(function(a,b){return b.lRate-a.lRate||b.l-a.l;})[0];
-  if(topLossRate)card('\ud83e\udee0','Ng\u01b0\u1eddi Hi\u1ebfn D\u00e2ng','pink',topLossRate.name,[
-    {icon:'\ud83d\udcc9',text:'T\u1ef7 l\u1ec7 thua: <b>'+Math.round(topLossRate.lRate*100)+'%</b>'},
-    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+topLossRate.w+'W - '+topLossRate.l+'L</b> / '+topLossRate.games+' tr\u1eadn'},
-    {icon:'\ud83d\udca2',text:'Chu\u1ed7i thua d\u00e0i nh\u1ea5t: <b>'+topLossRate.lStreak+' tr\u1eadn</b>'}
-  ],Math.round(topLossRate.lRate*100),'% THUA','\ud83c\udf96\ufe0f');
-
-  var topWins=all.slice().sort(function(a,b){return b.w-a.w||a.games-b.games;})[0];
-  if(topWins)card('\ud83c\udfc6','Vua Chi\u1ebfn Th\u1eafng','gold',topWins.name,[
-    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topWins.games+'</b> ('+Math.round(topWins.wRate*100)+'% win)'},
-    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng d\u00e0i nh\u1ea5t: <b>'+topWins.wStreak+' tr\u1eadn</b>'},
-    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+topWins.days+' bu\u1ed5i</b>'}
-  ],topWins.w,' TH\u1eaeNG','\ud83e\udd47');
-  var topLosses=all.slice().sort(function(a,b){return b.l-a.l||a.games-b.games;})[0];
-  if(topLosses)card('\ud83d\udca5','Chi\u1ebfn Binh B\u1ea5t T\u1eed','fire',topLosses.name,[
-    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topLosses.games+'</b>'},
-    {icon:'\ud83d\udcaa',text:'V\u1eabn gi\u00e0nh \u0111\u01b0\u1ee3c <b>'+topLosses.w+' chi\u1ebfn th\u1eafng</b> ('+Math.round(topLosses.wRate*100)+'%)'},
-    {icon:'\ud83d\udcc5',text:'S\u1ed1 bu\u1ed5i: <b>'+topLosses.days+'</b>'}
-  ],topLosses.l,' THUA','\ud83d\udee1\ufe0f');
-
-  var topBet=Object.keys(betLoss).map(function(n){return{name:n,amount:betLoss[n]};}).sort(function(a,b){return b.amount-a.amount;})[0];
-  if(topBet&&topBet.amount>0)card('\ud83d\udcb0','Nh\u00e0 T\u00e0i Tr\u1ee3','green',topBet.name,[
-    {icon:'\ud83d\udcb8',text:'T\u1ed5ng \u0111\u00f3ng g\u00f3p qua c\u01b0\u1ee3c thua'},
-    {icon:'\ud83c\udfe6',text:'\u0110\u00e3 nu\u00f4i qu\u1ef9 CLB r\u1ea5t nhi\u1ec1u!'},
-    {icon:'\ud83d\ude4f',text:'C\u1ea3m \u01a1n v\u00ec s\u1ef1 h\u00e0o ph\u00f3ng!'}
-  ],fmtNum(topBet.amount),'\u20ab','\ud83c\udfc5');
-
-  var topCarry=carryScores[0];
-  if(topCarry)card('\ud83e\uddbe','Th\u1ea7n G\u00e1nh T\u1ea1','purple',topCarry.name,[
-    {icon:'\ud83d\udcaa',text:'Th\u1eafng <b>'+topCarry.carryW+'/'+topCarry.carryG+'</b> khi c\u1eb7p ng\u01b0\u1eddi y\u1ebfu h\u01a1n'},
-    {icon:'\u2b50',text:'T\u1ed5ng th\u1eafng c\u00e1 nh\u00e2n: <b>'+topCarry.totalW+'W</b> ('+Math.round(topCarry.wRate*100)+'%)'},
-    {icon:'\ud83c\udff8',text:'T\u1ed5ng s\u1ed1 tr\u1eadn: <b>'+topCarry.games+'</b>'}
-  ],Math.round(topCarry.carryRate*100),'% G\u00c1NH','\ud83e\uddb8');
-
-  var ironMan=all.slice().sort(function(a,b){return b.games-a.games||b.days-a.days;})[0];
-  if(ironMan)card('\ud83d\udcaa','Iron Man','blue',ironMan.name,[
-    {icon:'\ud83d\udcc5',text:'Tham gia <b>'+ironMan.days+' bu\u1ed5i</b>'},
-    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+ironMan.w+'W - '+ironMan.l+'L</b> ('+Math.round(ironMan.wRate*100)+'%)'},
-    {icon:'\ud83d\udd25',text:'Kh\u00f4ng ngh\u1ec9 bu\u1ed5i n\u00e0o!'}
-  ],ironMan.games,' TR\u1eacN','\ud83c\udfc5');
-  var topProspect=prospect[0];
-  if(topProspect){var last5=topProspect.results.slice(-5);var recentW=last5.filter(function(r){return r==='W';}).length;
-    card('\u2b50','Ng\u00f4i Sao \u0110ang L\u00ean','orange',topProspect.name,[
-    {icon:'\ud83d\udcc8',text:'5 tr\u1eadn g\u1ea7n nh\u1ea5t: <b>'+recentW+' th\u1eafng / 5</b>'},
-    {icon:'\ud83d\udd25',text:'Chu\u1ed7i th\u1eafng: <b>'+topProspect.wStreak+' tr\u1eadn</b>'},
-    {icon:'\ud83c\udf1f',text:'Phong \u0111\u1ed9 xu\u1ea5t s\u1eafc, h\u1eb9n g\u1eb7p th\u00e1ng sau!'}
-  ],recentW+'/5','','\ud83c\udf1f');}
-  if(bestPair)card('\ud83e\udd1d','C\u1eb7p \u0110\u00f4i Ho\u00e0n H\u1ea3o','purple',bestPair.key,[
-    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+bestPair.w+'W - '+bestPair.l+'L</b> / '+bestPair.games+' tr\u1eadn'},
-    {icon:'\ud83c\udfaf',text:'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(bestPair.rate*100)+'%</b>'},
-    {icon:'\ud83d\udc95',text:'C\u1eb7p \u0111\u00f4i nh\u1ecb\u1ec3 nh\u1ea5t th\u00e1ng!'}
-  ],Math.round(bestPair.rate*100),'% WIN','\ud83d\udc91',true,bestPair.p);
-  if(worstPair&&worstPair!==bestPair)card('\ud83d\ude2d','C\u1eb7p \u0110\u00f4i Ho\u00e0n C\u1ea3nh','pink',worstPair.key,[
-    {icon:'\u2694\ufe0f',text:'Th\u00e0nh t\u00edch: <b>'+worstPair.w+'W - '+worstPair.l+'L</b> / '+worstPair.games+' tr\u1eadn'},
-    {icon:'\ud83d\udcc9',text:'T\u1ef7 l\u1ec7 th\u1eafng: <b>'+Math.round(worstPair.rate*100)+'%</b>'},
-    {icon:'\ud83d\udcaa',text:'C\u1ed1 l\u00ean! Th\u00e1ng sau s\u1ebd kh\u00e1c!'}
-  ],Math.round(worstPair.rate*100),'% WIN','\ud83d\udc94',true,worstPair.p);
-  var totalPlayers=Object.keys(ps).length;
-  var totalDays={};mm.forEach(function(m){totalDays[m.date]=1;});
-  var html='<div class="fun-header"><h2>\ud83d\udccb T\u1ed4NG K\u1ebeT TH\u00c1NG</h2>';
-  html+='<div class="fun-sub">'+MN[cm].toUpperCase()+' '+cy+'</div>';
+  const awards=[];
+  function line(icon,text){return{icon:icon,text:text};}
+  const byRate=Object.entries(ps).map(([n,s])=>({name:n,rate:s.w/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.w-a.w);
+  if(byRate.length&&byRate[0].rate>0){const a=byRate[0];
+    awards.push({emoji:'🎯',title:'SÁT THỦ',color:'gold',name:a.name,badge:'🏅',
+      lines:[line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng'),line('🏆',a.w+'W / '+a.l+'L'),line('🎮',a.games+' trận')],
+      heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
+  const byLR=Object.entries(ps).map(([n,s])=>({name:n,rate:s.l/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.l-a.l);
+  if(byLR.length&&byLR[0].rate>0){const a=byLR[0];
+    awards.push({emoji:'💀',title:'NGƯỜI HIẾN DÂNG',color:'pink',name:a.name,badge:'😇',
+      lines:[line('📊',Math.round(a.rate*100)+'% tỷ lệ thua'),line('💔',a.l+' trận thua'),line('🎮',a.games+' trận')],
+      heroVal:Math.round(a.rate*100),heroUnit:'% LOSE'});}
+  const byWins=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.w-a.w||a.games-b.games);
+  if(byWins.length){const a=byWins[0];
+    awards.push({emoji:'👑',title:'VUA CHIẾN THẮNG',color:'gold',name:a.name,badge:'👑',
+      lines:[line('🏆',a.w+' trận thắng'),line('📊',Math.round(a.w/a.games*100)+'% win rate'),line('🎮',a.games+' trận')],
+      heroVal:a.w,heroUnit:'WINS'});}
+  const byLoss=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.l-a.l||a.games-b.games);
+  if(byLoss.length){const a=byLoss[0];
+    awards.push({emoji:'🛡️',title:'CHIẾN BINH BẤT TỬ',color:'fire',name:a.name,badge:'💪',
+      lines:[line('💔',a.l+' trận thua'),line('🔥','Không bao giờ bỏ cuộc'),line('🎮',a.games+' trận')],
+      heroVal:a.l,heroUnit:'LOSSES'});}
+  const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
+  if(betArr.length&&betArr[0].amount>0){const a=betArr[0];
+    awards.push({emoji:'💸',title:'NHÀ TÀI TRỢ',color:'green',name:a.name,badge:'💰',
+      lines:[line('💵',fmtNum(a.amount)+'₫ đóng góp'),line('❤️','Cảm ơn bạn!')],
+      heroVal:fmtNum(a.amount),heroUnit:'VNĐ'});}
+  const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
+  if(carryArr.length){const a=carryArr[0];
+    awards.push({emoji:'🏋️',title:'THẦN GÁNH TẠ',color:'purple',name:a.name,badge:'💎',
+      lines:[line('💪',Math.round(a.rate*100)+'% thắng khi gánh'),line('🎮',a.cG+' trận carry'),line('🔥',a.cW+' trận gánh thắng')],
+      heroVal:Math.round(a.rate*100),heroUnit:'% CARRY'});}
+  const byGames=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.games-a.games||b.w-a.w);
+  if(byGames.length){const a=byGames[0];
+    awards.push({emoji:'🦾',title:'IRON MAN',color:'blue',name:a.name,badge:'⚡',
+      lines:[line('🎮',a.games+' trận đấu'),line('📅',a.dates.size+' buổi tham gia'),line('📊',a.w+'W - '+a.l+'L')],
+      heroVal:a.games,heroUnit:'GAMES'});}
+  const prospect=Object.entries(ps).filter(([,s])=>s.results.length>=5).map(([n,s])=>{
+    const l5=s.results.slice(-5);const w5=l5.filter(r=>r==='W').length;
+    return{name:n,w5,rate5:w5/5,l5};
+  }).sort((a,b)=>b.rate5-a.rate5||b.w5-a.w5);
+  if(prospect.length&&prospect[0].rate5>=0.6){const a=prospect[0];
+    awards.push({emoji:'⭐',title:'NGÔI SAO ĐANG LÊN',color:'orange',name:a.name,badge:'🌟',
+      lines:[line('📈',a.w5+'/5 trận gần nhất thắng'),line('🔥','Phong độ tuyệt vời')],
+      heroVal:a.w5+'/5',heroUnit:'GẦN NHẤT'});}
+  const pairArr=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>b.rate-a.rate||b.w-a.w);
+  if(pairArr.length){const a=pairArr[0];
+    awards.push({emoji:'💕',title:'CẶP ĐÔI HOÀN HẢO',color:'purple',name:a.key,badge:'💘',isPair:true,pairNames:a.p,
+      lines:[line('🏆',a.w+' thắng / '+a.games+' trận'),line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng')],
+      heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
+  const worstP=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>a.rate-b.rate||a.w-b.w);
+  if(worstP.length&&worstP[0].rate<0.5){const a=worstP[0];
+    awards.push({emoji:'💔',title:'CẶP ĐÔI HOÀN CẢNH',color:'pink',name:a.key,badge:'😭',isPair:true,pairNames:a.p,
+      lines:[line('💔',a.l+' thua / '+a.games+' trận'),line('📊',Math.round(a.rate*100)+'% tỷ lệ thắng')],
+      heroVal:Math.round(a.rate*100),heroUnit:'% WIN'});}
+  const totalPlayers=Object.keys(ps).length;
+  const totalDays=new Set();mm.forEach(m=>totalDays.add(m.date));
+  let html='<div class="fun-header"><h2>🏆 TỔNG KẾ T THÁNG</h2>';
+  html+='<div class="fun-sub">'+monthNames[cm]+' '+cy+' · GM AUTHENTIC</div>';
   html+='<div class="fun-summary">';
-  html+='<div class="fun-stat-pill"><span>\ud83c\udff8</span>'+mm.length+' tr\u1eadn</div>';
-  html+='<div class="fun-stat-pill"><span>\ud83d\udc65</span>'+totalPlayers+' ng\u01b0\u1eddi</div>';
-  html+='<div class="fun-stat-pill"><span>\ud83d\udcc5</span>'+Object.keys(totalDays).length+' bu\u1ed5i</div>';
+  html+='<div class="fun-stat-pill"><span>🏸</span>'+mm.length+' trận</div>';
+  html+='<div class="fun-stat-pill"><span>👥</span>'+totalPlayers+' VĐV</div>';
+  html+='<div class="fun-stat-pill"><span>📅</span>'+totalDays.size+' buổi</div>';
   html+='</div></div>';
   html+='<div class="fun-grid">';
-  awards.forEach(function(a,i){
-    html+='<div class="fun-award '+a.color+'" style="animation-delay:'+(0.1+i*0.08)+'s">';
+  awards.forEach((a,i)=>{
+    html+='<div class="fun-award '+a.color+'" style="animation-delay:'+(0.05+i*0.05)+'s">';
     html+='<div class="fun-award-banner"><div class="fun-award-emoji">'+a.emoji+'</div><div class="fun-award-title">'+a.title+'</div></div>';
     html+='<div class="fun-award-body">';
-    if(a.isPair&&a.pairNames&&a.pairNames.length>1){
-      html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
-      a.pairNames.forEach(function(n){html+='<div class="fun-award-av-wrap"><div class="fun-award-av" style="width:50px;height:50px;border-radius:14px;">'+av(n,50)+'</div><div class="fun-award-badge">'+a.badge+'</div></div>';});
+    if(a.isPair&&a.pairNames){
+      html+='<div class="fun-pair-avs">';
+      a.pairNames.forEach(n=>{html+='<div class="fun-award-av">'+av(n,52)+'</div>';});
       html+='</div>';
-    }else{
-      html+='<div class="fun-award-av-wrap"><div class="fun-award-av">'+av(a.name)+'</div><div class="fun-award-badge">'+a.badge+'</div></div>';
+    } else {
+      html+='<div class="fun-award-av-wrap"><div class="fun-award-av">'+av(a.name)+'</div>';
+      if(a.badge)html+='<div class="fun-award-badge">'+a.badge+'</div>';
+      html+='</div>';
     }
-    html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.name)+'</div>';
+    html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.isPair?a.name:a.name)+'</div>';
     html+='<div class="fun-award-lines">';
-    a.lines.forEach(function(line){html+='<div class="fun-award-line"><span class="line-icon">'+line.icon+'</span>'+line.text+'</div>';});
-    html+='</div>';
-    if(a.heroVal!==undefined&&a.heroVal!=='')html+='<div class="fun-hero-stat">'+a.heroVal+'<span class="unit">'+a.heroUnit+'</span></div>';
-    html+='</div></div></div>';
+    a.lines.forEach(l=>{
+      html+='<div class="fun-award-line"><span class="al-icon">'+l.icon+'</span><span>'+l.text+'</span></div>';
+    });
+    html+='</div></div>';
+    if(a.heroVal!==undefined){
+      html+='<div class="fun-hero-stat"><div class="fhs-val">'+a.heroVal+'</div><div class="fhs-unit">'+a.heroUnit+'</div></div>';
+    }
+    html+='</div></div>';
   });
   html+='</div>';
+  html+='<div class="fun-watermark">GM AUTHENTIC PICKLEBALL CLUB · '+monthNames[cm].toUpperCase()+' '+cy+'</div>';
   el.innerHTML=html;
-  if(!window._funConfettiDone){window._funConfettiDone=true;var colors=['#f0b429','#e55','#4a90e2','#1a9e60','#9b6dff','#ff6b35'];var co=document.createElement('div');co.className='fun-confetti';for(var i=0;i<50;i++){var pc=document.createElement('div');pc.className='fun-confetti-piece';pc.style.left=Math.random()*100+'%';pc.style.top='-10px';pc.style.background=colors[Math.floor(Math.random()*colors.length)];pc.style.animationDelay=Math.random()*2+'s';pc.style.animationDuration=(2+Math.random()*2)+'s';pc.style.width=(6+Math.random()*6)+'px';pc.style.height=(6+Math.random()*6)+'px';co.appendChild(pc);}document.body.appendChild(co);setTimeout(function(){co.remove();},5000);}
+  if(!window._funConfettiDone){
+    window._funConfettiDone=true;
+    const colors=['#f0b429','#e55','#4a90e2','#1a9e60','#9b6dff','#ff6b35','#e879b0'];
+    const container=document.createElement('div');
+    container.className='fun-confetti';
+    for(let i=0;i<50;i++){
+      const p=document.createElement('div');
+      p.className='fun-confetti-piece';
+      p.style.left=Math.random()*100+'%';
+      p.style.top='-10px';
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDelay=Math.random()*2+'s';
+      p.style.animationDuration=(2+Math.random()*2)+'s';
+      p.style.width=(6+Math.random()*8)+'px';
+      p.style.height=(6+Math.random()*8)+'px';
+      container.appendChild(p);
+    }
+    document.body.appendChild(container);
+    setTimeout(()=>container.remove(),5000);
+  }
 }
 
 </script>
