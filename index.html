@@ -1206,7 +1206,7 @@ nav::-webkit-scrollbar{display:none;}
   <button class="nt on" onclick="goTab('pg-intro')" id="nt0"><span class="ic">🏠</span>CLB</button>
   <button class="nt admin-only" onclick="goTab('pg-members')" id="nt1"><span class="ic">👥</span>Thành viên</button>
   <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="ic">⚡</span>Trận đấu</button>
-  <button class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="ic">🏆</span>BXH</button>
+  <button class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="ic">📊</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="ic">💰</span>Quỹ</button>
   <button class="nt admin-only" onclick="goTab('pg-draw')" id="nt6"><span class="ic">🎲</span>Bốc thăm</button>
@@ -5126,7 +5126,24 @@ function selectStats(name){
 }
 
 function getPlayerAwards(playerName){
-  const now=new Date(),cm=now.getMonth(),cy=now.getFullYear();
+  // --- Month selector ---
+  const _allMK={};
+  matches.filter(m=>m.saved&&m.date).forEach(m=>{
+    const _d=new Date(m.date);if(isNaN(_d))return;
+    const _k=_d.getFullYear()*100+_d.getMonth();
+    _allMK[_k]=(_allMK[_k]||0)+1;
+  });
+  const _sortedMK=Object.keys(_allMK).map(Number).sort((a,b)=>b-a);
+  window._funMonths=_sortedMK;
+  if(!_sortedMK.length){
+    el.innerHTML='<div class="fun-empty"><span class="ei">\u{1F50D}</span>Ch\u01B0a c\u00F3 tr\u1EADn \u0111\u1EA5u n\u00E0o<br><span style="font-size:12px;opacity:0.6;">H\u00E3y ra s\u00E2n n\u00E0o!</span></div>';
+    return;
+  }
+  if(window._funMK===undefined||!_allMK[window._funMK]) window._funMK=_sortedMK[0];
+  const cm=window._funMK%100, cy=Math.floor(window._funMK/100);
+  const _mkIdx=_sortedMK.indexOf(window._funMK);
+  const _hasPrev=_mkIdx<_sortedMK.length-1;
+  const _hasNext=_mkIdx>0;
   const mm=matches.filter(m=>{
     if(!m.saved||m.isBetEntry||!m.date)return false;
     const d=new Date(m.date);
@@ -5253,7 +5270,11 @@ function buildStatsHTML(name){
       ?`<img loading="lazy" src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;flex-shrink:0;">`
       :`<div class="${pm?AVC[pm.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;font-size:${Math.round(sz/2.8)}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pm?'':'var(--muted)'};flex-shrink:0;">${ini(n)}</div>`;
   }
-  let h='';
+  let h='<div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 0 10px;position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(245,241,235,1) 80%,transparent);">';
+  h+=_hasPrev?'<button onclick="funPrevMonth()" style="background:var(--accent);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);">\u25C0</button>':'<div style="width:36px"></div>';
+  h+='<div style="font-weight:800;font-size:17px;color:var(--accent);letter-spacing:0.5px;">'+monthNames[cm]+' '+cy+'</div>';
+  h+=_hasNext?'<button onclick="funNextMonth()" style="background:var(--accent);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);">\u25B6</button>':'<div style="width:36px"></div>';
+  h+='</div>';
   // Hero card
   h+=`<div class="stats-hero">
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
@@ -6125,6 +6146,17 @@ initDark();
 
 undefined
 
+// --- Fun Stats Month Navigation ---
+window._funMK=undefined;
+window._funMonths=[];
+function funPrevMonth(){
+  const i=window._funMonths.indexOf(window._funMK);
+  if(i<window._funMonths.length-1){window._funMK=window._funMonths[i+1];renderFunStats();}
+}
+function funNextMonth(){
+  const i=window._funMonths.indexOf(window._funMK);
+  if(i>0){window._funMK=window._funMonths[i-1];renderFunStats();}
+}
 function renderFunStats(){
   const el=document.getElementById('funstats-content');
   if(!el)return;
@@ -6141,11 +6173,7 @@ function renderFunStats(){
     const d=new Date(m.date);
     return d.getMonth()===cm&&d.getFullYear()===cy;
   });
-  if(!mm.length){
-    el.innerHTML='<div class="fun-empty"><span class="ei">🏸</span>Chưa có trận đấu nào trong tháng này<br><span style="font-size:12px;opacity:0.6;">Hãy ra sân nào!</span></div>';
-    return;
-  }
-  const ps={};
+    const ps={};
   mm.forEach(m=>{
     const players=[m.t1p1,m.t1p2,m.t2p1,m.t2p2].filter(Boolean);
     players.forEach(name=>{
