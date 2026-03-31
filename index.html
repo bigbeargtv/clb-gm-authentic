@@ -1736,7 +1736,7 @@ async function fbGet(path){
 }
 async function fbSet(path,data){
   try{
-    const {signal,clear}=makeAbort(8000);
+    const {signal,clear}=makeAbort(30000);
     const opts={method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)};
     if(signal) opts.signal=signal;
     const r=await fetch(FB_URL+path+'.json',opts);
