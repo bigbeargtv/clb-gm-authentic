@@ -1287,7 +1287,7 @@ undefined
 .fun-header .fun-stat-pill{background:var(--s2);border:1.5px solid var(--bdr);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
 .fun-header .fun-stat-pill span{font-size:14px;}
 .fun-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px;}
-.fun-award{background:var(--s1);border:1.5px solid var(--bdr);border-radius:18px;padding:0;overflow:visible;animation:funFadeUp .6s ease backwards;position:relative;}
+.fun-award{background:var(--s1);border:1.5px solid var(--bdr);border-radius:18px;padding:0;overflow:hidden;animation:funFadeUp .6s ease backwards;position:relative;}
 .fun-award-banner{padding:12px 18px 10px;display:flex;align-items:center;gap:10px;border-radius:18px 18px 0 0;}
 .fun-award.gold .fun-award-banner{background:linear-gradient(135deg,#f0b42920,#ff8c0012);}
 .fun-award.blue .fun-award-banner{background:linear-gradient(135deg,#4a90e220,#2c6fca12);}
@@ -1298,7 +1298,7 @@ undefined
 .fun-award.orange .fun-award-banner{background:linear-gradient(135deg,#ff7b3520,#e8650012);}
 .fun-award-emoji{font-size:26px;animation:funFloat 3s ease-in-out infinite;flex-shrink:0;}
 .fun-award-title{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text);}
-.fun-award-body{padding:14px 18px 18px;display:flex;align-items:flex-start;gap:16px;}
+.fun-award-body{padding:14px 18px 18px;display:flex;align-items:flex-start;gap:16px;overflow:hidden;}
 .fun-award-av-wrap{position:relative;flex-shrink:0;}
 .fun-award-av{width:64px;height:64px;border-radius:18px;overflow:hidden;border:2.5px solid var(--bdr2);animation:pulseGlow 3s ease infinite;}
 .fun-award-av img{width:100%;height:100%;object-fit:cover;}
@@ -1310,7 +1310,7 @@ undefined
 .fun-award-line{font-size:13px;color:var(--text2);font-weight:600;line-height:1.6;display:flex;align-items:center;gap:6px;}
 .fun-award-line b{color:var(--text);font-weight:800;}
 .fun-award-line .line-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center;}
-.fun-hero-stat{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;line-height:1;margin-top:8px;display:flex;align-items:baseline;gap:6px;}
+.fun-hero-stat{font-family:'Barlow Condensed',sans-serif;font-size:clamp(26px,7vw,42px);font-weight:900;line-height:1;margin-top:8px;display:flex;align-items:baseline;gap:6px;white-space:nowrap;min-width:0;flex-shrink:1;}
 .fun-hero-stat .unit{font-size:16px;font-weight:700;color:var(--muted);}
 .fun-award.gold .fun-hero-stat{color:#d4860a;}
 .fun-award.blue .fun-hero-stat{color:#2c6fca;}
