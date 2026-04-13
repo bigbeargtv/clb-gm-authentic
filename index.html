@@ -4351,8 +4351,8 @@ function renderQuyQR(){
       💳 Chuyển khoản nộp quỹ<span style="flex:1;height:1px;background:var(--bdr);display:block;"></span>
     </div>
     <div style="display:flex;gap:14px;align-items:center;">
-      ${qrUrl?`<div style="flex-shrink:0;background:#fff;border-radius:12px;padding:6px;width:110px;height:110px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <img src="${qrUrl}" style="width:98px;height:98px;object-fit:contain;" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<span style=font-size:10px;color:#999;text-align:center>QR không tải được</span>'">
+      ${qrUrl?`<div style="flex-shrink:0;background:#fff;border-radius:12px;padding:6px;width:180px;height:180pxx;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <img src="${qrUrl}" style="width:168px;height:168pxx;object-fit:contain;" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<span style=font-size:10px;color:#999;text-align:center>QR không tải được</span>'">
       </div>`:''}
       <div style="flex:1;min-width:0;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${xe(bank)}</div>
@@ -4408,7 +4408,7 @@ function saveBankInfo(btn){
     amount:(document.getElementById('bk-amount').value||'').trim(),
     note:(document.getElementById('bk-note').value||'').trim(),
   };
-  debounceSave();
+  save();
   if(modal) modal.remove();
   renderQuyQR();
 }
