@@ -8,16 +8,26 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GM Authentic PB">
 
+  <!-- SEO -->
+  <meta name="description" content="GM Authentic Pickleball Club - Bảng xếp hạng ELO, lịch sử trận đấu, quỹ CLB, thành tích và album ảnh thành viên. Hệ thống quản lý CLB Pickleball hiện đại.">
+  <meta name="keywords" content="GM Authentic, Pickleball, CLB Pickleball, bảng xếp hạng, ELO, Hà Nội">
+  <meta name="author" content="GM Authentic Pickleball Club">
+  <link rel="canonical" href="https://gmauthentic.pro/">
+
   <!-- OG / Share thumbnail -->
-  <meta property="og:title" content="GM Authentic Pickleball Club">
-  <meta property="og:description" content="Bảng Xếp Hạng và Thống Kê CLB">
+  <meta property="og:title" content="GM Authentic Pickleball Club - Bảng Xếp Hạng & Quản Lý CLB">
+  <meta property="og:description" content="Bảng xếp hạng ELO, lịch sử trận đấu, quỹ, thành tích và album CLB Pickleball GM Authentic.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://bigbeargtv.github.io/clb-gm-authentic/">
-  <meta property="og:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png?v=2">
+  <meta property="og:site_name" content="GM Authentic Pickleball Club">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:url" content="https://gmauthentic.pro/">
+  <meta property="og:image" content="https://gmauthentic.pro/og-image.png?v=3">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://bigbeargtv.github.io/clb-gm-authentic/og-image.png?v=2">
+  <meta name="twitter:title" content="GM Authentic Pickleball Club">
+  <meta name="twitter:description" content="Bảng xếp hạng ELO, lịch sử trận đấu, quỹ và thành tích CLB Pickleball.">
+  <meta name="twitter:image" content="https://gmauthentic.pro/og-image.png?v=3">
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -27,7 +37,7 @@
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLB GM AUTHENTIC</title>
+<title>GM Authentic Pickleball Club - Bảng Xếp Hạng & Quản Lý CLB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +47,7 @@
   --bdr:#dde1ee;--bdr2:#c8cedf;
   --gold:#d4860a;--gold2:#e8950e;--blue:#2c6fca;--pink:#c9357a;
   --green:#1a9e60;--red:#d03030;--purple:#6b3fcf;
-  --muted:#8892b0;--text:#1a1f36;--text2:#4a5270;
+  --muted:#6b7599;--text:#1a1f36;--text2:#3e4664;
   --nam-c:#2c6fca;--mix-c:#c07a00;--nu-c:#c9357a;
 }
 html.dark{
@@ -75,7 +85,14 @@ html.dark .draw-team-card.teamC{background:linear-gradient(135deg,#142518,#1a302
 html.dark .draw-team-card.teamD{background:linear-gradient(135deg,#2a1e10,#332515);}
 html.dark nav{background:var(--s1);}
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;font-size:18px;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
+button,a{transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease,border-color .2s ease,opacity .2s ease;}
+button:not(:disabled):hover{transform:translateY(-1px);}
+button:not(:disabled):active{transform:translateY(0);}
+button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px;}
+*{scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+@keyframes gma-fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.backdrop.on,#picker-overlay[style*="flex"],#modal-overlay[style*="flex"]{animation:gma-fadein .18s ease-out;}
 
 /* LIGHT BG */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
@@ -1159,6 +1176,18 @@ nav::-webkit-scrollbar{display:none;}
 
 
 
+/* Tablet layout optimization */
+@media(min-width:641px) and (max-width:1024px){
+  header{padding:8px 14px!important;}
+  nav{overflow-x:auto!important;-webkit-overflow-scrolling:touch;}
+  nav button,nav a{min-height:44px;}
+  button{min-height:36px;}
+  .modal,.picker,.backdrop .box{max-width:92vw!important;}
+}
+/* Touch target minimums — WCAG */
+@media(hover:none) and (pointer:coarse){
+  button,nav a,.tab-btn{min-height:44px;}
+}
 /* Mobile layout optimization */
 @media(max-width:640px){
   header{height:auto!important;min-height:40px;padding:5px 8px!important;gap:6px!important;flex-wrap:nowrap!important;overflow:hidden;}
@@ -6342,6 +6371,33 @@ function renderFunStats(){
     setTimeout(()=>container.remove(),5000);
   }
 }
+
+/* ===== A11y booster: auto alt/aria-label + dialog roles ===== */
+(function(){
+  function boost(root){
+    try{
+      (root||document).querySelectorAll('img:not([alt])').forEach(img=>{img.setAttribute('alt','');img.setAttribute('role','presentation');});
+      (root||document).querySelectorAll('button:not([aria-label])').forEach(b=>{
+        const t=(b.textContent||'').trim();
+        if(!t || t.length<=2){
+          const title=b.getAttribute('title');
+          if(title) b.setAttribute('aria-label',title);
+          else if(t) b.setAttribute('aria-label',t);
+        }
+      });
+      (root||document).querySelectorAll('.backdrop.on, .modal.on, .picker.on').forEach(m=>{
+        if(!m.getAttribute('role')) m.setAttribute('role','dialog');
+        if(!m.getAttribute('aria-modal')) m.setAttribute('aria-modal','true');
+      });
+    }catch(e){}
+  }
+  if(document.readyState!=='loading') boost();
+  else document.addEventListener('DOMContentLoaded',()=>boost());
+  const mo=new MutationObserver(muts=>{
+    for(const m of muts){ if(m.addedNodes.length) boost(); }
+  });
+  try{ mo.observe(document.body||document.documentElement,{childList:true,subtree:true}); }catch(e){}
+})();
 
 </script>
 
