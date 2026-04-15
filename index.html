@@ -1476,7 +1476,8 @@ undefined
     </div>
   </div>
 
-  <div id="bxh-result-label"></div>
+  <div id="bxh-main-title" style="text-align:center;font-weight:900;font-size:18px;margin:12px 0 8px;color:var(--text);letter-spacing:0.5px;"></div>
+      <div id="bxh-result-label"></div>
   <div id="bxh-all"></div>
   <div id="bxh-nam" style="display:none"></div>
   <div id="bxh-mix" style="display:none"></div>
@@ -4738,7 +4739,7 @@ function renderLedger(){
             <span style="font-size:11px;font-weight:800;color:${isPaid?'var(--green)':'#e55'};margin-right:4px;">${isPaid?'✅':'⏳ Nợ'}</span>${(isPaid && typeof isAdmin!=='undefined' && isAdmin)?`<button onclick="toggleMatchPaid(${m.id},'${p.name.replace(/'/g,"\\'")}')" title="Hoàn tác" style="padding:2px 8px;border-radius:6px;border:1px solid var(--bdr2);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;flex-shrink:0;margin-left:4px;">↩</button>`:''}
             
           </div>`;
-        };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
+        };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details ${(window._openPaid && window._openPaid.has(p.name))?'open':''} style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
       });
 
       // Số dư ban đầu
@@ -4890,7 +4891,7 @@ function toggleMatchPaid(matchId, name){
   else m['paid_'+name] = !m['paid_'+name];
   // Keep accordion open
   const domId = 'ldg-p-'+name.replace(/\W/g,'_');
-  if(window._openDays) window._openDays.add(domId);
+  if(window._openDays) window._openDays.add(domId); if(!window._openPaid) window._openPaid=new Set(); window._openPaid.add(name);
   debounceSave();
   renderLedger();
 }
@@ -5057,7 +5058,7 @@ function renderDebtSummary(){
         <span class="debt-amount">-${fmtNum(d.owed)}&#x1F343;</span>
         <button onclick="event.stopPropagation();markAllDebtPaid('${d.name.replace(/'/g,"\\'")}')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-right:8px;">✓ Đã nộp</button><span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
       </div>
-      <div class="debt-detail" id="ddet-${i}">${detailRows}</div>
+      <div class="debt-detail" id="ddet-${i}" data-dname="${(d.name||'').replace(/"/g,'&quot;')}">${detailRows}</div>
     </div>`;
   }).join('');
   wrap.innerHTML=`<div class="debt-block">
@@ -5066,6 +5067,7 @@ function renderDebtSummary(){
       <span class="debt-block-title">Ch\u01b0a n\u1ed9p qu\u1ef9</span>
       <span class="debt-block-count">${debtors.length} ng\u01b0\u1eddi</span>
     </div>${rows}</div>`;
+  if(window._reopenDebtor){ const _all=wrap.querySelectorAll(".debt-detail"); for(const _el of _all){ if(_el.getAttribute("data-dname")===window._reopenDebtor){ _el.classList.add("on"); const _arr=document.getElementById(_el.id+"-arr"); if(_arr) _arr.style.transform="rotate(90deg)"; break; } } window._reopenDebtor=null; }
 }
 function markOneDebtPaid(matchId, name){
   if(typeof isAdmin!=='undefined' && !isAdmin){ alert('Chỉ admin'); return; }
@@ -5075,7 +5077,7 @@ function markOneDebtPaid(matchId, name){
   if(m.isBetEntry){ m.paid = true; }
   else { m['paid_'+name] = true; }
   if(typeof debounceSave==='function') debounceSave();
-  if(typeof renderQuy==='function') renderQuy();
+  window._reopenDebtor=name; if(typeof renderQuy==='function') renderQuy();
   if(typeof renderLedger==='function') renderLedger();
 }
 
@@ -5812,6 +5814,8 @@ function renderBXH(){
   const emptyHtml='<div class="empty"><span class="ei">🏆</span>Chưa có kết quả.<br>Nhập tỉ số để xem bảng xếp hạng!</div>';
   const labelEl=document.getElementById('bxh-result-label');
   if(labelEl) labelEl.innerHTML=saved.length?'<span class="bxh-result-label">'+getFilterLabel()+' · '+saved.length+' trận</span>':'';
+  const titleEl=document.getElementById('bxh-main-title');
+  if(titleEl){ let _sfx=''; if(typeof bxhFilter!=='undefined' && bxhFilter && bxhFilter.mode==='month' && bxhFilter.from){ const _p=bxhFilter.from.split('-'); _sfx=' Tháng '+parseInt(_p[1])+'/'+_p[0]; } titleEl.textContent='🏆 BẢNG XẾP HẠNG CAO THỦ'+_sfx+' 🏆'; }
   if(!saved.length){
     ['all','nam','mix','nu','hon'].forEach(ct=>{ const el=document.getElementById('bxh-'+ct); if(el) el.innerHTML=emptyHtml; });
     return;
