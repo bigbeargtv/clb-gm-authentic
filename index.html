@@ -4413,6 +4413,68 @@ function saveBankInfo(btn){
   renderQuyQR();
 }
 
+function _buildDebtListHtml(){
+  try{
+    const debtors={};
+    const mArr=(typeof matches!=='undefined')?matches:[];
+    mArr.forEach(m=>{
+      if(!m.saved||!m.bet||m.bet<=0)return;
+      if(m.isBetEntry){
+        const nm=m.t2p1;
+        if(!nm||m.paid)return;
+        if(!debtors[nm])debtors[nm]={name:nm,total:0,items:[]};
+        debtors[nm].total+=(+m.bet);
+        debtors[nm].items.push(m);
+      }else{
+        const w=m.winner||((+m.s1>+m.s2)?'A':(+m.s2>+m.s1?'B':''));
+        if(!w)return;
+        const losers=w==='A'?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];
+        losers.filter(Boolean).forEach(nm=>{
+          if(m['paid_'+nm])return;
+          if(!debtors[nm])debtors[nm]={name:nm,total:0,items:[]};
+          debtors[nm].total+=(+m.bet);
+          debtors[nm].items.push(m);
+        });
+      }
+    });
+    const list=Object.values(debtors).sort((a,b)=>b.total-a.total);
+    if(!list.length)return '<div style="text-align:center;padding:18px;color:var(--muted);font-size:12px;margin-top:14px;">✅ Không còn ai nợ tiền quỹ</div>';
+    let h='<div style="text-align:center;font-size:16px;font-weight:800;margin:20px 0 10px;color:var(--text);">📋 Danh sách những người chưa nộp tiền</div>';
+    list.forEach(p=>{
+      const mb=mbOf(p.name);
+      const avHtml=(mb&&mb.photo)?'<img src="'+mb.photo+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">':'<div style="width:32px;height:32px;border-radius:50%;background:'+(mb?('var('+AVC[mb.color]+')'):'var(--muted)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">'+xe(ini(p.name))+'</div>';
+      const byDay={};
+      p.items.forEach(m=>{const d=m.date||'';if(!byDay[d])byDay[d]=[];byDay[d].push(m);});
+      const days=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+      h+='<details style="margin-bottom:8px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;">';
+      h+='<summary style="cursor:pointer;list-style:none;padding:10px 12px;display:flex;align-items:center;gap:10px;">';
+      h+=avHtml+'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+xe(p.name)+'</div><div style="font-size:10px;color:var(--muted);">'+p.items.length+' trận chưa nộp</div></div>';
+      h+='<div style="font-weight:800;font-size:14px;color:#e55;white-space:nowrap;">'+fmtNum(p.total)+'đ</div>';
+      h+='</summary>';
+      days.forEach(d=>{
+        const ms=byDay[d];
+        const dayTotal=ms.reduce((a,m)=>a+(+m.bet),0);
+        h+='<div style="padding:6px 12px;font-size:11px;color:var(--muted);background:var(--s2);border-top:1px solid var(--bdr);display:flex;justify-content:space-between;"><span>📅 '+fmtDate(d)+'</span><span style="color:#e55;font-weight:700;">'+fmtNum(dayTotal)+'đ</span></div>';
+        ms.forEach(m=>{
+          let label='',sub='';
+          if(m.isBetEntry){
+            label=(drawSessionsMeta[m.drawSessionId]||{}).name||'Bốc thăm';
+            sub=CL[m.cat]||'';
+          }else{
+            const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ');
+            const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ');
+            label=t1+' vs '+t2;
+            sub=CL[m.cat]||'';
+          }
+          h+='<div style="padding:6px 12px;border-top:1px solid var(--bdr);font-size:11px;"><div style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+xe(label)+'</div><div style="font-size:10px;color:var(--muted);">'+xe(sub)+' · '+fmtNum(m.bet)+'đ</div></div>';
+        });
+      });
+      h+='</details>';
+    });
+    return h;
+  }catch(e){return '<div style="color:#e55;padding:10px;">Lỗi: '+e.message+'</div>';}
+}
+
 function renderQuy(){
   renderDebtSummary();
   renderQuyQR();
@@ -4454,19 +4516,9 @@ function renderQuy(){
   const sorted = Object.values(debt).sort((a,b)=>b.total-a.total);
   // Summary
   const topDebtor = sorted[0];
-  let html = `<div class="quy-summary">
-    <div class="quy-total-block">
-      <div class="quy-total-label">Tổng quỹ</div>
-      <div class="quy-total-num">🍃 ${fmtNum(totalLeaf)}</div>
-      <div class="quy-total-sub">${totalMatches} trận gây quỹ · ${sorted.length} nạn nhân 😈</div>
-    </div>
-    <div class="quy-stats">
-      <div class="quy-stat"><div class="quy-stat-num">${totalMatches}</div><div class="quy-stat-lbl">Trận</div></div>
-      <div class="quy-stat"><div class="quy-stat-num">${sorted.length}</div><div class="quy-stat-lbl">Người</div></div>
-    </div>
-  </div>`;
+  const _qLedger=(typeof ledger!=='undefined'?ledger:[]);const _qIn=_qLedger.filter(t=>t.type==='in').reduce((a,t)=>a+(+t.amount),0);const _qOut=_qLedger.filter(t=>t.type==='out').reduce((a,t)=>a+(+t.amount),0);const _qBetPaid=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((a,m)=>a+(+m.bet),0);const _qGrand=_qIn+_qBetPaid-_qOut;let html=`<div style="background:linear-gradient(135deg,#00b85522,#00b85508);border:2px solid var(--green);border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px #00b85520;"><div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">💰 QUỸ CLB</div><div style="font-size:28px;font-weight:900;color:var(--green);margin-top:4px;line-height:1.1;">${fmtNum(_qGrand)}đ</div></div><div style="background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:10px;color:var(--muted);font-weight:700;">💚 Ủng hộ</div><div style="font-size:15px;font-weight:800;">${fmtNum(totalLeaf)}đ</div></div><div style="font-size:10px;color:var(--muted);text-align:right;">${totalMatches} trận · ${sorted.length} người</div></div>`;
   // ── BXH tổng ──
-  html += '<div class="sl" style="margin-top:0">BXH nộp quỹ nhiều nhất</div>';
+  html += '<div style="text-align:center;font-size:17px;font-weight:800;margin:16px 0 12px;color:var(--text);">🏆 BXH NỘP QUỸ NHIỀU NHẤT 🏆</div>';
   html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
   sorted.forEach((p,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
@@ -4526,6 +4578,7 @@ function renderQuy(){
     }
   }
 
+  html += _buildDebtListHtml();
   el.innerHTML = html;
 }
 
@@ -4675,156 +4728,7 @@ function renderLedger(){
     return b.totalUnpaid-a.totalUnpaid||a.name.localeCompare(b.name);
   });
 
-  if(peopleList.length){
-    h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👤 Chi tiết từng người</div>`;
-
-    peopleList.forEach(p=>{
-      const domId = 'ldg-p-'+p.name.replace(/\W/g,'_');
-      const isOpen = window._openDays && window._openDays.has(domId);
-      const mb = mbOf(p.name);
-      const av = mb&&mb.photo
-        ? `<img loading="lazy" src="${mb.photo}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;" decoding="async">`
-        : `<div class="${mb?AVC[mb.color]:''}" style="width:34px;height:34px;border-radius:10px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;background:${mb?'':'var(--muted)'};">${ini(p.name)}</div>`;
-
-      // ── Gom trận thua + bet entries theo ngày ──
-      const lostNormal = matches.filter(m=>{
-        if(!m.saved||!m.bet||m.bet<=0||m.isBetEntry) return false;
-        const w = m.winner||(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':'');
-        const losers = w==='A'?[m.t2p1,m.t2p2]:w==='B'?[m.t1p1,m.t1p2]:[];
-        return losers.includes(p.name);
-      });
-      const betEntries = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===p.name&&m.bet>0);
-      const allDebt = [...lostNormal, ...betEntries];
-
-      // Tính tổng nợ thực tế từ tất cả trận thua
-      const totalDebt = allDebt.reduce((s,m)=>s+(+m.bet),0);
-      const totalPaidDebt = allDebt.filter(m=>m.isBetEntry?m.paid:m['paid_'+p.name]).reduce((s,m)=>s+(+m.bet),0);
-      const totalUnpaid = totalDebt - totalPaidDebt;
-      const hasUnpaid = totalUnpaid > 0;
-      const borderCol = hasUnpaid ? '#e5555550' : totalDebt>0 ? '#00b85530' : 'var(--bdr)';
-
-      let summaryLine = '';
-      if(totalUnpaid>0) summaryLine += `<span style="color:#e55;font-weight:800;">⏳ Nợ ${fmtNum(totalUnpaid)}🍃</span>`;
-      const initBal = mbOf(p.name) ? (+mbOf(p.name).initialBalance||0) : 0;
-      const totalPaidAll = totalPaidDebt + p.netIn + initBal - p.netOut;
-      if(totalPaidAll>0) summaryLine += (summaryLine?' · ':'')+`<span style="color:var(--green);">✅ Đã nộp ${fmtNum(totalPaidAll)}🍃</span>`;
-      if(p.netIn>0||p.netOut>0){
-        const manual = p.netIn-p.netOut;
-        summaryLine += (summaryLine?' · ':'')+`<span style="color:var(--muted);">Thủ công: ${manual>=0?'+':''}${fmtNum(manual)}🍃</span>`;
-      }
-      if(!summaryLine) summaryLine = `<span style="color:var(--muted);font-size:11px;">Chưa có trận nào</span>`;
-      const byDay = {};
-      allDebt.forEach(m=>{ if(!byDay[m.date]) byDay[m.date]=[]; byDay[m.date].push(m); });
-      const dayKeys = Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
-
-      let txHtml = '';
-      dayKeys.forEach(d=>{
-        const dayMs = byDay[d];
-        const dayTotal = dayMs.reduce((s,m)=>s+(+m.bet),0);
-        const dayPaid  = dayMs.filter(m=>m.isBetEntry?m.paid:m['paid_'+p.name]).reduce((s,m)=>s+(+m.bet),0);
-        const allPaid  = dayPaid >= dayTotal;
-        txHtml += `<div style="padding:7px 12px;background:var(--s2);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:6px;">
-          <span style="font-size:12px;font-weight:800;flex:1;color:var(--text);">📅 ${fmtDate(d)}</span>
-          <span style="font-size:11px;font-weight:800;color:${allPaid?'var(--green)':'#e55'};">${allPaid?'✅ Xong':'Còn nợ '+fmtNum(dayTotal-dayPaid)+'🍃'}</span>
-        </div>`;
-        (()=>{const _fn=(m)=>{
-          const isPaid = m.isBetEntry ? !!m.paid : !!m['paid_'+p.name];
-          let label='', sub='';
-          if(m.isBetEntry){
-            label = (drawSessionsMeta[m.drawSessionId]||{}).name || 'Bốc thăm';
-            sub = CL[m.cat]||'';
-          } else {
-            const t1=[m.t1p1,m.t1p2].filter(Boolean).join(' & ');
-            const t2=[m.t2p1,m.t2p2].filter(Boolean).join(' & ');
-            const sc=(m.s1!==''&&m.s2!=='')?m.s1+':'+m.s2:'';
-            label = t1+' vs '+t2;
-            sub = (CL[m.cat]||'')+(sc?' · '+sc:'');
-          }
-          txHtml += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);background:var(--s1);">
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(label)}</div>
-              <div style="font-size:10px;color:var(--muted);">${xe(sub)} · ${fmtNum(m.bet)}🍃</div>
-            </div>
-            <span style="font-size:11px;font-weight:800;color:${isPaid?'var(--green)':'#e55'};margin-right:4px;">${isPaid?'✅':'⏳ Nợ'}</span>
-            ${isAdmin?`<button onclick="toggleMatchPaid(${m.id},'${p.name}')"
-              style="padding:5px 10px;border-radius:8px;border:1.5px solid ${isPaid?'var(--bdr2)':'var(--green)'};
-              background:${isPaid?'transparent':'#00b85510'};color:${isPaid?'var(--muted)':'var(--green)'};
-              font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
-              ${isPaid?'Hủy':'Đã nộp'}
-            </button>`:''}
-          </div>`;
-        };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
-      });
-
-      // Số dư ban đầu
-      const mbObj2 = mbOf(p.name);
-      const initBal2 = mbObj2 ? (+mbObj2.initialBalance||0) : 0;
-      if(initBal2>0){
-        txHtml += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);background:var(--s1);">
-          <div style="flex:1;">
-            <div style="font-size:12px;font-weight:700;">💰 Số dư quỹ cũ</div>
-            <div style="font-size:10px;color:var(--muted);">Ghi nhận ban đầu</div>
-          </div>
-          <span class="ldg-in">+${fmtNum(initBal2)}🍃</span>
-        </div>`;
-      }
-
-      const manualTxns = ledger.filter(t=>t.name===p.name).sort((a,b)=>b.date.localeCompare(a.date));
-      if(manualTxns.length){
-        txHtml += `<div style="padding:6px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2);">Giao dịch thủ công</div>`;
-        manualTxns.forEach(tx=>{
-          txHtml += `<div class="ldg-txn" style="background:var(--s1);">
-            <span style="font-size:16px;">${tx.type==='in'?'💚':'🔴'}</span>
-            <div style="flex:1;">
-              <div style="font-weight:700;">${xe(tx.note||'—')}</div>
-              <div style="font-size:11px;color:var(--muted);">${fmtDate(tx.date)}</div>
-            </div>
-            <span class="${tx.type==='in'?'ldg-in':'ldg-out'}">${tx.type==='in'?'+':'-'}${fmtNum(tx.amount)}🍃</span>
-            ${isAdmin?`<button onclick="delLedgerTx(${tx.id})" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);">🗑</button>`:''}
-          </div>`;
-        });
-      }
-
-      // Quick +/- buttons + số dư ban đầu (admin)
-      let quickBtns = '';
-      if(isAdmin){
-        const mbObj = mbOf(p.name);
-        const initVal = mbObj ? (+mbObj.initialBalance||0) : 0;
-        quickBtns = `<div style="border-top:1px solid var(--bdr);background:var(--s2);">
-          <div style="padding:8px 12px 4px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Số dư ban đầu (quỹ cũ)</div>
-          <div style="display:flex;gap:6px;padding:0 12px 8px;align-items:center;">
-            <input id="ldg-init-${domId}" type="number" min="0" value="${initVal||''}" placeholder="0"
-              class="ldg-inp" style="flex:1;font-size:13px;padding:6px 8px;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);">🍃</span>
-            <button onclick="saveInitBalance('${p.name}','${domId}')"
-              class="ldg-btn-in" style="padding:6px 12px;font-size:12px;">Lưu</button>
-          </div>
-          <div style="padding:0 12px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding-bottom:4px;">Ghi thu / chi thủ công</div>
-          <div style="display:flex;gap:6px;padding:0 12px 10px;">
-            <input id="ldg-quick-amt-${domId}" type="number" min="0" placeholder="Số tiền..." class="ldg-inp" style="flex:1;font-size:12px;padding:6px 8px;">
-            <input id="ldg-quick-note-${domId}" placeholder="Ghi chú..." class="ldg-inp" style="flex:2;font-size:12px;padding:6px 8px;">
-            <button onclick="quickLedger('${p.name}','${domId}','in')" class="ldg-btn-in" style="padding:6px 10px;font-size:13px;">+</button>
-            <button onclick="quickLedger('${p.name}','${domId}','out')" class="ldg-btn-out" style="padding:6px 10px;font-size:13px;">−</button>
-          </div>
-        </div>`;
-      }
-
-      h += `<div style="border:1.5px solid ${borderCol};border-radius:12px;margin-bottom:8px;overflow:hidden;">
-        <div class="ldg-person-row" onclick="toggleMatchDay('${domId}')" style="border:none;border-radius:0;margin:0;">
-          ${av}
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:800;font-size:13px;">${xe(p.name)}</div>
-            <div style="font-size:11px;margin-top:2px;">${summaryLine}</div>
-          </div>
-          <span style="font-size:11px;color:var(--muted);" id="${domId}-arrow">${isOpen?'▲':'▼'}</span>
-        </div>
-        <div id="${domId}" style="display:${isOpen?'block':'none'};">
-          ${txHtml}
-          ${quickBtns}
-        </div>
-      </div>`;
-    });
-  }
+  if(false){}
 
   el.innerHTML = h;
 
