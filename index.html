@@ -5047,7 +5047,7 @@ function renderDebtSummary(){
         <span class="debt-match-date">${m.date?m.date.slice(5):'--'}</span>
         <span class="debt-match-teams">Thua <b>${xe(winners.join(' & '))}</b></span>
         <span class="debt-match-score">-${fmtNum(+m.bet)}&#x1F343;</span>
-        <button onclick="event.stopPropagation();markOneDebtPaid(${m.id},'${d.name.replace(/'/g,"\\'")}')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:6px;">✓ Đã nộp</button>
+        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markOneDebtPaid(${m.id},'${d.name.replace(/'/g,"\\'")}')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:6px;">✓ Đã nộp</button>`:''}
       </div>`;
     }).join('');
     return `<div>
@@ -5055,7 +5055,7 @@ function renderDebtSummary(){
         ${avHtml}
         <span class="debt-name">${xe(d.name)}</span>
         <span class="debt-amount">-${fmtNum(d.owed)}&#x1F343;</span>
-        <button onclick="event.stopPropagation();markAllDebtPaid('${d.name.replace(/'/g,"\\'")}')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-right:8px;">✓ Đã nộp</button><span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
+        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markAllDebtPaid('${d.name.replace(/'/g,"\\'")}')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-right:8px;">✓ Đã nộp</button>`:''}<span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
       </div>
       <div class="debt-detail" id="ddet-${i}" data-dname="${(d.name||'').replace(/"/g,'&quot;')}">${detailRows}</div>
     </div>`;
