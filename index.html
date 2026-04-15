@@ -5016,6 +5016,7 @@ function enableIntroEdit(on){
 function renderDebtSummary(){
   const wrap=document.getElementById('quy-debt-wrap');
   if(!wrap) return;
+  if(typeof isAdmin!=='undefined' && !isAdmin){ wrap.innerHTML=''; return; }
   const debtMap={};
   matches.filter(m=>m.saved&&m.bet>0).forEach(m=>{
     const bet=+m.bet;
@@ -5046,6 +5047,7 @@ function renderDebtSummary(){
         <span class="debt-match-date">${m.date?m.date.slice(5):'--'}</span>
         <span class="debt-match-teams">Thua <b>${xe(winners.join(' & '))}</b></span>
         <span class="debt-match-score">-${fmtNum(+m.bet)}&#x1F343;</span>
+        <button onclick="event.stopPropagation();markOneDebtPaid(${m.id},'${d.name.replace(/'/g,"\\'")}')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:6px;">✓ Đã nộp</button>
       </div>`;
     }).join('');
     return `<div>
@@ -5065,6 +5067,17 @@ function renderDebtSummary(){
       <span class="debt-block-count">${debtors.length} ng\u01b0\u1eddi</span>
     </div>${rows}</div>`;
 }
+function markOneDebtPaid(matchId, name){
+  if(typeof isAdmin!=='undefined' && !isAdmin){ alert('Chỉ admin'); return; }
+  const m = matches.find(mm=>mm.id===matchId);
+  if(!m) return;
+  if(m.isBetEntry){ m.paid = true; }
+  else { m['paid_'+name] = true; }
+  if(typeof debounceSave==='function') debounceSave();
+  if(typeof renderQuy==='function') renderQuy();
+  if(typeof renderLedger==='function') renderLedger();
+}
+
 function markAllDebtPaid(name){
   if(typeof isAdmin!=='undefined' && !isAdmin){ alert('Chỉ admin'); return; }
   if(!confirm('Đánh dấu '+name+' đã nộp toàn bộ?')) return;
