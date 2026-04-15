@@ -4585,7 +4585,7 @@ function renderLedger(){
   const totalOut = ledger.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
   // Cộng thêm từ bet entries đã paid
   const betPaid = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((s,m)=>s+(+m.bet),0);
-  const grandTotal = clubInitBalance + totalIn + betPaid - totalOut;
+  const grandTotal = totalIn + betPaid - totalOut;
   const totalOwed = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
 
   let h = '';
@@ -4727,7 +4727,7 @@ function renderLedger(){
           <span style="font-size:12px;font-weight:800;flex:1;color:var(--text);">📅 ${fmtDate(d)}</span>
           <span style="font-size:11px;font-weight:800;color:${allPaid?'var(--green)':'#e55'};">${allPaid?'✅ Xong':'Còn nợ '+fmtNum(dayTotal-dayPaid)+'🍃'}</span>
         </div>`;
-        dayMs.forEach(m=>{
+        (()=>{const _fn=(m)=>{
           const isPaid = m.isBetEntry ? !!m.paid : !!m['paid_'+p.name];
           let label='', sub='';
           if(m.isBetEntry){
@@ -4753,7 +4753,7 @@ function renderLedger(){
               ${isPaid?'Hủy':'Đã nộp'}
             </button>`:''}
           </div>`;
-        });
+        };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
       });
 
       // Số dư ban đầu
