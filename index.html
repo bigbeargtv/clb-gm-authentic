@@ -1476,7 +1476,7 @@ undefined
     </div>
   </div>
 
-  <div id="bxh-main-title" style="text-align:center;font-weight:900;font-size:18px;margin:12px 0 8px;color:var(--text);letter-spacing:0.5px;"></div>
+  
       <div id="bxh-result-label"></div>
   <div id="bxh-all"></div>
   <div id="bxh-nam" style="display:none"></div>
@@ -4266,7 +4266,7 @@ function renderQuyDay(date, saved){
           <div style="font-size:11px;color:var(--muted);">${p.paid>0?`Đã nộp ${fmtNum(p.paid)}🍃 · `:''}<span style="color:#e55;font-weight:700;">Còn ${fmtNum(remaining)}🍃</span></div>
         </div>
         ${isAdmin?`<button onclick="togglePaidFull('${p.name}','${date}')"
-          style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">
+          style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;white-space:nowrap;">
           ✓ Đã nộp
         </button>`:''}
       </div>`;
@@ -4275,7 +4275,7 @@ function renderQuyDay(date, saved){
 
   // Đã nộp
   if(paidPeople.length){
-    h += `<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin:12px 0 6px;">✅ Đã nộp đủ (${paidPeople.length})</div>`;
+    h += `<div style="font-size:10px;font-weight:700;font-family:inherit;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin:12px 0 6px;">✅ Đã nộp đủ (${paidPeople.length})</div>`;
     paidPeople.forEach(p=>{
       const mb=mbOf(p.name);
       const av = mb&&mb.photo
@@ -5814,8 +5814,7 @@ function renderBXH(){
   const emptyHtml='<div class="empty"><span class="ei">🏆</span>Chưa có kết quả.<br>Nhập tỉ số để xem bảng xếp hạng!</div>';
   const labelEl=document.getElementById('bxh-result-label');
   if(labelEl) labelEl.innerHTML=saved.length?'<span class="bxh-result-label">'+getFilterLabel()+' · '+saved.length+' trận</span>':'';
-  const titleEl=document.getElementById('bxh-main-title');
-  if(titleEl){ let _sfx=''; if(typeof bxhFilter!=='undefined' && bxhFilter && bxhFilter.mode==='month' && bxhFilter.from){ const _p=bxhFilter.from.split('-'); _sfx=' Tháng '+parseInt(_p[1])+'/'+_p[0]; } titleEl.textContent='🏆 BẢNG XẾP HẠNG CAO THỦ'+_sfx+' 🏆'; }
+  
   if(!saved.length){
     ['all','nam','mix','nu','hon'].forEach(ct=>{ const el=document.getElementById('bxh-'+ct); if(el) el.innerHTML=emptyHtml; });
     return;
@@ -5831,6 +5830,8 @@ function renderBXH(){
       <div style="font-size:12px;font-weight:800;color:var(--gold);margin-bottom:4px;">⚡ Xếp hạng ELO</div>
       <div style="font-size:11px;color:#ffffffaa;line-height:1.5;">Mỗi người bắt đầu với <strong style="color:var(--gold)">1000 điểm</strong>. Thắng người mạnh → cộng nhiều · Thua người yếu → trừ nhiều. Tự cân bằng, không phụ thuộc số trận.</div>
     </div>`;
+    let _sfxT='';try{if(typeof bxhFilter!=='undefined'&&bxhFilter&&bxhFilter.mode==='month'&&bxhFilter.from){const _pp=bxhFilter.from.split('-');_sfxT=' THÁNG '+parseInt(_pp[1])+'/'+_pp[0];}}catch(e){}
+    h+=`<div style="text-align:center;font-weight:900;font-size:16px;margin:8px 0 12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;">🏆 BẢNG XẾP HẠNG CAO THỦ${_sfxT} 🏆</div>`;
 
     // Header: số thứ tự | Tên | Thắng | Thua | ELO | ±
     h+='<div class="tbl-h"><div></div><div>Tên</div><div class="nc" style="color:var(--green);">Thắng</div><div class="nc" style="color:#e55;">Thua</div><div class="nc">ELO</div><div class="nc">±</div></div>';
@@ -6247,7 +6248,7 @@ function renderFunStats(){
       heroVal:a.l,heroUnit:'LOSSES'});}
   const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
   if(betArr.length&&betArr[0].amount>0){const a=betArr[0];
-    awards.push({emoji:'💸',title:'NHÀ TÀI TRỢ',desc:'Người nộp quỹ nhiều nhất tháng',color:'green',name:a.name,badge:'💰',
+    awards.push({emoji:'💰',title:'NHÀ TÀI TRỢ',desc:'Người nộp quỹ nhiều nhất tháng',color:'green',name:a.name,badge:'💰',
       lines:[line('💵',fmtNum(a.amount)+'₫ đóng góp'),line('❤️','Cảm ơn bạn!')],
       heroVal:fmtNum(a.amount),heroUnit:'VNĐ'});}
   const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
