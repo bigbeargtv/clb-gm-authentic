@@ -4735,7 +4735,7 @@ function renderLedger(){
               <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(label)}</div>
               <div style="font-size:10px;color:var(--muted);">${xe(sub)} · ${fmtNum(m.bet)}🍃</div>
             </div>
-            <span style="font-size:11px;font-weight:800;color:${isPaid?'var(--green)':'#e55'};margin-right:4px;">${isPaid?'✅':'⏳ Nợ'}</span>
+            <span style="font-size:11px;font-weight:800;color:${isPaid?'var(--green)':'#e55'};margin-right:4px;">${isPaid?'✅':'⏳ Nợ'}</span>${(isPaid && typeof isAdmin!=='undefined' && isAdmin)?`<button onclick="toggleMatchPaid(${m.id},'${p.name.replace(/'/g,"\\'")}')" title="Hoàn tác" style="padding:2px 8px;border-radius:6px;border:1px solid var(--bdr2);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;flex-shrink:0;margin-left:4px;">↩</button>`:''}
             
           </div>`;
         };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
@@ -5016,7 +5016,7 @@ function enableIntroEdit(on){
 function renderDebtSummary(){
   const wrap=document.getElementById('quy-debt-wrap');
   if(!wrap) return;
-  if(typeof isAdmin!=='undefined' && !isAdmin){ wrap.innerHTML=''; return; }
+  if(typeof isAdmin==='undefined' || isAdmin!==true){ wrap.innerHTML=''; return; }
   const debtMap={};
   matches.filter(m=>m.saved&&m.bet>0).forEach(m=>{
     const bet=+m.bet;
@@ -5069,6 +5069,7 @@ function renderDebtSummary(){
 }
 function markOneDebtPaid(matchId, name){
   if(typeof isAdmin!=='undefined' && !isAdmin){ alert('Chỉ admin'); return; }
+  if(!confirm('Đánh dấu trận này đã nộp?')) return;
   const m = matches.find(mm=>mm.id===matchId);
   if(!m) return;
   if(m.isBetEntry){ m.paid = true; }
