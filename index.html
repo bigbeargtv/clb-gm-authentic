@@ -402,6 +402,8 @@ nav::-webkit-scrollbar{display:none;}
 .pk-list::-webkit-scrollbar{width:4px;}
 .pk-list::-webkit-scrollbar-track{background:transparent;}
 .pk-list::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.ldg-ac-item:hover{background:var(--s3);}
+#pk-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(44,111,202,.12);}
 .pk-item{
   display:flex;align-items:center;gap:10px;padding:11px 12px;
   background:var(--s1);border:1.5px solid var(--bdr);border-radius:12px;
@@ -1706,6 +1708,11 @@ undefined
     <div class="pk-head">
       <div class="pk-title">Chọn người chơi</div>
       <button class="pk-close" onclick="closePicker()">✕ Đóng</button>
+    </div>
+    <div style="padding:0 12px 8px;">
+      <input id="pk-search" type="text" placeholder="🔍 Gõ tên để lọc..." autocomplete="off"
+        style="width:100%;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--bdr2);background:var(--s2);color:var(--text);font-size:13px;font-weight:600;font-family:inherit;outline:none;"
+        oninput="filterPicker(this.value)">
     </div>
     <div class="pk-list" id="pk-list"></div>
   </div>
@@ -3278,7 +3285,7 @@ function pkItemHtml(mb, isSel, isUsed, small){
     : '<div class="pk-name">'+xe(mb.name)+'</div>';
   const checkHtml = isSel ? '<span class="'+(small?'pk-check-sm':'pk-check')+'">✓</span>' : '';
   const safeName = mb.name.replace(/'/g, '&#39;');
-  return '<div class="'+cls+(isSel?' selected':'')+(isUsed?' disabled':'')+'" onclick="pickMember(&quot;'+safeName+'&quot;)">'+avHtml+nameHtml+checkHtml+'</div>';
+  return '<div class="'+cls+(isSel?' selected':'')+(isUsed?' disabled':'')+'" data-name="'+xe(mb.name)+'" onclick="pickMember(&quot;'+safeName+'&quot;)">'+avHtml+nameHtml+checkHtml+'</div>';
 }
 
 function openPicker(matchId,field){
@@ -3338,6 +3345,15 @@ function openPicker(matchId,field){
   }
   document.getElementById('picker-overlay').classList.add('on');
   document.body.style.overflow='hidden';
+  const si=document.getElementById('pk-search');if(si){si.value='';si.focus();}
+}
+function filterPicker(q){
+  q=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const items=document.querySelectorAll('#pk-list .pk-item, #pk-list .pk-item-mix');
+  items.forEach(el=>{
+    const n=(el.getAttribute('data-name')||el.textContent||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    el.style.display=n.includes(q)?'':'none';
+  });
 }
 function pickMember(name){
   if(!pickerCtx)return;
@@ -4731,12 +4747,13 @@ function renderLedger(){
       <div style="font-weight:800;font-size:13px;margin-bottom:8px;">➕ Ghi thu/chi</div>
       <div style="margin-bottom:6px;">
         <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">Người</div>
-        <select id="ldg-sel-name" class="ldg-inp" style="width:100%;">
-          <option value="">-- Chọn thành viên --</option>
-          ${members.map(m=>`<option value="${xe(m.name)}">${xe(m.name)}</option>`).join('')}
-          <option value="__custom__">✏️ Nhập tên khác...</option>
-        </select>
-        <input id="ldg-custom-name" class="ldg-inp" placeholder="Tên người..." style="width:100%;margin-top:6px;display:none;">
+        <div style="position:relative;" id="ldg-ac-wrap">
+          <input id="ldg-sel-name" type="text" class="ldg-inp" style="width:100%;box-sizing:border-box;" placeholder="🔍 Gõ tên thành viên..." autocomplete="off"
+            onfocus="showLdgAC()" oninput="filterLdgAC(this.value)">
+          <div id="ldg-ac-list" style="display:none;position:absolute;left:0;right:0;top:100%;max-height:200px;overflow-y:auto;background:var(--s1);border:1.5px solid var(--bdr2);border-radius:0 0 10px 10px;z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.12);">
+            ${members.map(m=>`<div class="ldg-ac-item" data-val="${xe(m.name)}" onclick="pickLdgAC('${xe(m.name)}')" style="padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;border-top:1px solid var(--bdr);">${xe(m.name)}</div>`).join('')}
+          </div>
+        </div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <div style="flex:1;">
@@ -4944,16 +4961,38 @@ function renderLedger(){
   });
 }
 
+/* ── Ledger autocomplete ── */
+function showLdgAC(){
+  const list=document.getElementById('ldg-ac-list');if(list)list.style.display='block';
+  filterLdgAC(document.getElementById('ldg-sel-name').value);
+}
+function filterLdgAC(q){
+  q=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const items=document.querySelectorAll('#ldg-ac-list .ldg-ac-item');
+  items.forEach(el=>{
+    const n=(el.getAttribute('data-val')||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    el.style.display=n.includes(q)?'':'none';
+  });
+}
+function pickLdgAC(name){
+  document.getElementById('ldg-sel-name').value=name;
+  document.getElementById('ldg-ac-list').style.display='none';
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('ldg-ac-wrap');
+  const list=document.getElementById('ldg-ac-list');
+  if(wrap&&list&&!wrap.contains(e.target))list.style.display='none';
+});
+
 function addLedgerTx(type){
   if(!isAdmin) return;
-  const sel = document.getElementById('ldg-sel-name');
-  const customInp = document.getElementById('ldg-custom-name');
-  const name = sel.value==='__custom__' ? (customInp?customInp.value.trim():'') : sel.value;
+  const name = (document.getElementById('ldg-sel-name').value||'').trim();
   const amount = parseInt(document.getElementById('ldg-amount').value)||0;
   const note = document.getElementById('ldg-note').value.trim();
   if(!name){ alert('Chọn tên!'); return; }
   if(!amount){ alert('Nhập số tiền!'); return; }
   ledger.push({id:ledgerUid++, date:vnDateStr(new Date()), name, amount, note, type});
+  document.getElementById('ldg-sel-name').value='';
   document.getElementById('ldg-amount').value='';
   document.getElementById('ldg-note').value='';
   save();
