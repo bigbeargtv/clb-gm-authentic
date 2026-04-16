@@ -1199,6 +1199,22 @@ nav::-webkit-scrollbar{display:none;}
 .pc-pair-fill{height:100%;border-radius:3px;}
 .pc-btn-detail{display:block;width:100%;margin-top:16px;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:13px;font-weight:800;cursor:pointer;text-align:center;transition:all .2s;box-shadow:0 4px 16px rgba(212,134,10,.25);}
 .pc-btn-detail:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,134,10,.35);}
+/* Badge system */
+.pc-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;position:relative;z-index:1;}
+.pc-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800;backdrop-filter:blur(6px);letter-spacing:.3px;animation:pcBadgePop .35s cubic-bezier(.34,1.56,.64,1) both;}
+.pc-badge:nth-child(2){animation-delay:.06s;}.pc-badge:nth-child(3){animation-delay:.12s;}.pc-badge:nth-child(4){animation-delay:.18s;}.pc-badge:nth-child(5){animation-delay:.24s;}
+@keyframes pcBadgePop{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+.pc-badge.crown{background:linear-gradient(135deg,rgba(240,180,41,.25),rgba(240,180,41,.1));border:1.5px solid rgba(240,180,41,.5);color:#fbbf24;text-shadow:0 0 8px rgba(240,180,41,.3);}
+.pc-badge.fire{background:linear-gradient(135deg,rgba(249,115,22,.2),rgba(249,115,22,.08));border:1.5px solid rgba(249,115,22,.4);color:#fb923c;}
+.pc-badge.star{background:linear-gradient(135deg,rgba(26,158,96,.2),rgba(26,158,96,.08));border:1.5px solid rgba(26,158,96,.4);color:#4ade80;}
+.pc-badge.bolt{background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(99,102,241,.08));border:1.5px solid rgba(99,102,241,.4);color:#a5b4fc;}
+.pc-badge.ice{background:linear-gradient(135deg,rgba(56,189,248,.2),rgba(56,189,248,.08));border:1.5px solid rgba(56,189,248,.4);color:#7dd3fc;}
+.pc-badge.skull{background:linear-gradient(135deg,rgba(229,85,85,.2),rgba(229,85,85,.08));border:1.5px solid rgba(229,85,85,.4);color:#f87171;}
+.pc-badge.money{background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.08));border:1.5px solid rgba(16,185,129,.4);color:#6ee7b7;}
+.pc-badge.veteran{background:linear-gradient(135deg,rgba(168,162,158,.2),rgba(168,162,158,.08));border:1.5px solid rgba(168,162,158,.4);color:#d6d3d1;}
+/* Top 1 special glow */
+.pc-banner.top1::after{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(240,180,41,.2),transparent 70%);border-radius:50%;z-index:0;animation:pcGlow 2s ease-in-out infinite alternate;}
+@keyframes pcGlow{from{opacity:.5;transform:scale(.9);}to{opacity:1;transform:scale(1.1);}}
 /* BXH rank change */
 .dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
 .dark-toggle:hover{border-color:var(--gold);}
@@ -6586,19 +6602,60 @@ function showProfileCard(name){
   function miniAv(n,sz){const pm=mbOf(n);return pm&&pm.photo?`<img src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;">`:`<div class="${pm?AVC[pm.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;font-size:${Math.round(sz/2.5)}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pm?'':'var(--muted)'};">${ini(n)}</div>`;}
   const bigAvInner=mb&&mb.photo?`<img src="${mb.photo}" style="width:62px;height:62px;border-radius:15px;object-fit:cover;">`:`<div class="${mb?AVC[mb.color]:''}" style="width:62px;height:62px;border-radius:15px;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
   const gender=mb?mb.gender:'m';
-  const streakBadge=streakTxt?`<span class="pc-streak-badge" style="background:${curSign==='W'?'rgba(26,158,96,.15)':'rgba(229,85,85,.15)'};border:1px solid ${curSign==='W'?'rgba(26,158,96,.3)':'rgba(229,85,85,.3)'};color:${curSign==='W'?'#4ade80':'#f87171'};">${streakTxt}</span>`:'';
-  let h=`<div class="pc-banner ${gender==='m'?'male':'female'}">
+  // ── Compute badges ──
+  const badges=[];
+  const eloSorted=eloData.slice().sort((a,b)=>b.elo-a.elo);
+  const allPlayers=eloSorted.filter(p=>p.games>0);
+  // Rank badges
+  if(eloRank===1) badges.push({icon:'👑',text:'Top 1 BXH',cls:'crown'});
+  else if(eloRank===2) badges.push({icon:'🥈',text:'Top 2 BXH',cls:'crown'});
+  else if(eloRank===3) badges.push({icon:'🥉',text:'Top 3 BXH',cls:'crown'});
+  // ELO milestones
+  if(myElo.elo>=1200) badges.push({icon:'💎',text:'ELO '+myElo.elo,cls:'bolt'});
+  else if(myElo.elo>=1100) badges.push({icon:'⚡',text:'ELO '+myElo.elo,cls:'bolt'});
+  // Win rate
+  if(total>=5&&wr>=70) badges.push({icon:'🌟',text:'Siêu sao '+wr+'%',cls:'star'});
+  else if(total>=5&&wr>=60) badges.push({icon:'💪',text:'Cao thủ '+wr+'%',cls:'star'});
+  // Streak
+  if(curSign==='W'&&streak>=5) badges.push({icon:'🔥',text:streak+' trận bất bại',cls:'fire'});
+  else if(curSign==='W'&&streak>=3) badges.push({icon:'🔥',text:streak+' thắng liên tiếp',cls:'fire'});
+  else if(curSign==='L'&&streak>=4) badges.push({icon:'💀',text:streak+' thua liên tiếp',cls:'skull'});
+  // Most games
+  const maxGames=Math.max(...allPlayers.map(p=>p.games));
+  if(total===maxGames&&total>0) badges.push({icon:'🏃',text:'Chăm chỉ nhất',cls:'veteran'});
+  // Best max streak ever
+  let maxStreak=0,cs=0;results.forEach(r=>{if(r==='W'){cs++;maxStreak=Math.max(maxStreak,cs);}else cs=0;});
+  if(maxStreak>=5) badges.push({icon:'⚡',text:'Best streak '+maxStreak,cls:'bolt'});
+  // Fund contribution
+  const fundPaid=matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.paid).reduce((s,m)=>s+(+m.bet),0)
+    +(typeof ledger!=='undefined'?ledger.filter(t=>t.name===name&&t.type==='in').reduce((s,t)=>s+(+t.amount),0):0);
+  if(fundPaid>=500000) badges.push({icon:'💰',text:'Mạnh thường quân',cls:'money'});
+  else if(fundPaid>=200000) badges.push({icon:'🍃',text:'Đóng góp '+fmtNum(fundPaid)+'đ',cls:'money'});
+  // Veteran
+  if(total>=50) badges.push({icon:'🎖️',text:'Kỳ cựu '+total+' trận',cls:'veteran'});
+  else if(total>=30) badges.push({icon:'🎖️',text:'Lão làng '+total+' trận',cls:'veteran'});
+  // Best duo check
+  const topPartner=topP[0];
+  if(topPartner){const [pn,cnt]=topPartner;const pw=partnerW[pn]||0;const pwr=Math.round(pw/cnt*100);
+    if(cnt>=5&&pwr>=70) badges.push({icon:'🤝',text:'Cặp đôi vàng',cls:'ice'});}
+  // Newcomer
+  if(total>0&&total<=5) badges.push({icon:'🌱',text:'Tân binh',cls:'ice'});
+
+  const isTop1=eloRank===1;
+  const badgesHtml=badges.length?`<div class="pc-badges">${badges.map(b=>`<span class="pc-badge ${b.cls}">${b.icon} ${b.text}</span>`).join('')}</div>`:'';
+
+  let h=`<div class="pc-banner ${gender==='m'?'male':'female'}${isTop1?' top1':''}">
     <div style="position:relative;z-index:1;display:flex;align-items:center;gap:14px;">
-      <div class="pc-avatar-ring">${bigAvInner}</div>
+      <div class="pc-avatar-ring"${isTop1?' style="background:linear-gradient(135deg,#fbbf24,#f59e0b,#d97706);box-shadow:0 0 20px rgba(251,191,36,.3);"':''}>${bigAvInner}</div>
       <div style="flex:1;min-width:0;">
-        <div class="pc-name">${xe(name)}</div>
-        <div class="pc-sub">${mb?(mb.gender==='m'?'Nam':'Nữ')+' · ':''} Hạng #${eloRank}</div>
+        <div class="pc-name">${xe(name)}${isTop1?' 👑':eloRank===2?' 🥈':eloRank===3?' 🥉':''}</div>
+        <div class="pc-sub">${mb?(mb.gender==='m'?'Nam':'Nữ')+' · ':''} Hạng #${eloRank}${total>0?' · '+total+' trận':''}</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
           <span class="pc-elo-badge">⚡ ${myElo.elo} <span style="color:${myElo.eloChange>=0?'#4ade80':'#f87171'};margin-left:2px;">${myElo.eloChange>=0?'+':''}${myElo.eloChange}</span></span>
-          ${streakBadge}
         </div>
       </div>
     </div>
+    ${badgesHtml}
   </div>
   <div class="pc-body">`;
   h+=`<div class="pc-kpi-grid">
