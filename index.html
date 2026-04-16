@@ -4674,15 +4674,21 @@ function renderLedger(){
     }
 
     const activeTab = window._histTxTab || 'in';
+    const histCollapsed = window._histTxCollapsed || false;
     h += `<div class="ldg-card" style="margin-bottom:14px;">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📋 Lịch sử thu/chi</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._histTxCollapsed=!window._histTxCollapsed;renderLedger();">
+        <div style="font-weight:800;font-size:14px;">📋 Lịch sử thu/chi</div>
+        <span style="font-size:11px;color:var(--muted);font-weight:700;transition:transform .2s;">${histCollapsed?'▶ Mở rộng':'▼ Thu gọn'}</span>
+      </div>
+      ${histCollapsed?'':`<div style="margin-top:10px;">
       <div style="display:flex;gap:0;margin-bottom:10px;border-radius:10px;overflow:hidden;border:1.5px solid var(--bdr2);">
-        <button onclick="window._histTxTab='in';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='in'?'background:var(--green);color:#fff;':'background:var(--s2);color:var(--muted);'}">💚 Thu (${txIn.length})</button>
-        <button onclick="window._histTxTab='out';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='out'?'background:#e55;color:#fff;':'background:var(--s2);color:var(--muted);'}">🔴 Chi (${txOut.length})</button>
+        <button onclick="event.stopPropagation();window._histTxTab='in';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='in'?'background:var(--green);color:#fff;':'background:var(--s2);color:var(--muted);'}">💚 Thu (${txIn.length})</button>
+        <button onclick="event.stopPropagation();window._histTxTab='out';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='out'?'background:#e55;color:#fff;':'background:var(--s2);color:var(--muted);'}">🔴 Chi (${txOut.length})</button>
       </div>
       <div id="hist-tx-list" style="border-radius:10px;overflow:hidden;border:1px solid var(--bdr);background:var(--s1);">
         ${activeTab==='in' ? renderTxList(txIn, 'hist-in', 'Chưa có khoản thu nào') : renderTxList(txOut, 'hist-out', 'Chưa có khoản chi nào')}
       </div>
+      </div>`}
     </div>`;
 
     // Store full lists globally for "Xem thêm"
