@@ -4632,6 +4632,93 @@ function renderLedger(){
     </div>`:''}
   </div>`;
 
+  // ── Lịch sử thu/chi ──
+  (function(){
+    // Gom tất cả giao dịch: ledger manual + bet entries đã paid
+    const allTxns = [];
+    ledger.forEach(tx => {
+      allTxns.push({type: tx.type, name: tx.name, amount: +tx.amount, note: tx.note||'', date: tx.date, src: 'manual'});
+    });
+    matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).forEach(m => {
+      allTxns.push({type: 'in', name: m.t2p1, amount: +m.bet, note: (drawSessionsMeta[m.drawSessionId]||{}).name || 'Nộp quỹ (cược)', date: m.date, src: 'bet'});
+    });
+    allTxns.sort((a,b) => b.date.localeCompare(a.date) || b.amount - a.amount);
+
+    const txIn  = allTxns.filter(t => t.type === 'in');
+    const txOut = allTxns.filter(t => t.type === 'out');
+
+    function renderTxList(list, domId, emptyMsg) {
+      if(!list.length) return `<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">${emptyMsg}</div>`;
+      const BATCH = 10;
+      let out = '';
+      list.slice(0, BATCH).forEach((tx, idx) => {
+        const mb = mbOf(tx.name);
+        const av = mb&&mb.photo
+          ? `<img loading="lazy" src="${mb.photo}" alt="${xe(tx.name)}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;" decoding="async">`
+          : `<div class="${mb?AVC[mb.color]:''}" style="width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;background:${mb?'':'var(--muted)'};">${ini(tx.name)}</div>`;
+        out += `<div class="hist-tx-row" style="display:flex;align-items:center;gap:10px;padding:9px 12px;${idx?'border-top:1px solid var(--bdr);':''}">
+          ${av}
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(tx.name)}</div>
+            <div style="font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(tx.note||'—')} · ${fmtDate(tx.date)}</div>
+          </div>
+          <span style="font-weight:800;font-size:13px;color:${tx.type==='in'?'var(--green)':'#e55'};flex-shrink:0;">${tx.type==='in'?'+':'-'}${fmtNum(tx.amount)}đ</span>
+        </div>`;
+      });
+      if(list.length > BATCH) {
+        out += `<div id="${domId}-more-wrap" style="text-align:center;padding:10px;">
+          <button onclick="window._histTxExpand('${domId}',${JSON.stringify(list.length)})" style="padding:6px 18px;border-radius:8px;border:1.5px solid var(--bdr2);background:var(--s2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;">Xem thêm (${list.length - BATCH})</button>
+        </div>`;
+      }
+      return out;
+    }
+
+    const activeTab = window._histTxTab || 'in';
+    h += `<div class="ldg-card" style="margin-bottom:14px;">
+      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📋 Lịch sử thu/chi</div>
+      <div style="display:flex;gap:0;margin-bottom:10px;border-radius:10px;overflow:hidden;border:1.5px solid var(--bdr2);">
+        <button onclick="window._histTxTab='in';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='in'?'background:var(--green);color:#fff;':'background:var(--s2);color:var(--muted);'}">💚 Thu (${txIn.length})</button>
+        <button onclick="window._histTxTab='out';renderLedger();" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;${activeTab==='out'?'background:#e55;color:#fff;':'background:var(--s2);color:var(--muted);'}">🔴 Chi (${txOut.length})</button>
+      </div>
+      <div id="hist-tx-list" style="border-radius:10px;overflow:hidden;border:1px solid var(--bdr);background:var(--s1);">
+        ${activeTab==='in' ? renderTxList(txIn, 'hist-in', 'Chưa có khoản thu nào') : renderTxList(txOut, 'hist-out', 'Chưa có khoản chi nào')}
+      </div>
+    </div>`;
+
+    // Store full lists globally for "Xem thêm"
+    window._histTxData = {txIn, txOut};
+    window._histTxExpand = function(domId, total){
+      const wrap = document.getElementById(domId+'-more-wrap');
+      if(!wrap) return;
+      const list = domId.includes('in') ? window._histTxData.txIn : window._histTxData.txOut;
+      const BATCH = 10;
+      const existing = wrap.parentElement.querySelectorAll('.hist-tx-row').length;
+      const next = list.slice(existing, existing + BATCH);
+      let newHtml = '';
+      next.forEach(tx => {
+        const mb = mbOf(tx.name);
+        const av = mb&&mb.photo
+          ? `<img loading="lazy" src="${mb.photo}" alt="${xe(tx.name)}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;" decoding="async">`
+          : `<div class="${mb?AVC[mb.color]:''}" style="width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;background:${mb?'':'var(--muted)'};">${ini(tx.name)}</div>`;
+        newHtml += `<div class="hist-tx-row" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--bdr);">
+          ${av}
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(tx.name)}</div>
+            <div style="font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(tx.note||'—')} · ${fmtDate(tx.date)}</div>
+          </div>
+          <span style="font-weight:800;font-size:13px;color:${tx.type==='in'?'var(--green)':'#e55'};flex-shrink:0;">${tx.type==='in'?'+':'-'}${fmtNum(tx.amount)}đ</span>
+        </div>`;
+      });
+      wrap.insertAdjacentHTML('beforebegin', newHtml);
+      const remaining = total - existing - next.length;
+      if(remaining > 0){
+        wrap.querySelector('button').textContent = 'Xem thêm (' + remaining + ')';
+      } else {
+        wrap.remove();
+      }
+    };
+  })();
+
   // ── Thêm giao dịch nhanh (admin) ──
   if(isAdmin){
     h += `<div class="ldg-card" style="margin-bottom:14px;">
