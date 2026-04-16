@@ -1158,6 +1158,30 @@ nav::-webkit-scrollbar{display:none;}
 .stats-res-badge.D{background:var(--s1);color:var(--muted);}
 .name-link{cursor:pointer;transition:color .15s;}
 .name-link:hover{color:var(--gold)!important;}
+/* Profile Card Popup */
+#profile-card-overlay{display:none;position:fixed;inset:0;background:rgba(80,90,120,.45);z-index:250;backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+#profile-card-overlay.on{display:flex;animation:gma-fadein .18s ease-out;}
+#profile-card-box{background:var(--s1);border:1.5px solid var(--bdr2);border-radius:20px;width:min(360px,92vw);max-height:80vh;overflow-y:auto;padding:18px;box-shadow:0 12px 48px rgba(0,0,0,.2);}
+.pc-hero{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.pc-name{font-size:18px;font-weight:900;color:var(--text);line-height:1.1;}
+.pc-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.pc-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
+.pc-kpi{background:var(--s2);border-radius:10px;padding:8px 4px;text-align:center;border:1px solid var(--bdr);}
+.pc-kpi-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;line-height:1;}
+.pc-kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+.pc-section{margin-top:10px;}
+.pc-pair{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.pc-pair-bar{width:50px;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.pc-pair-fill{height:100%;border-radius:3px;}
+.pc-btn-detail{display:block;width:100%;margin-top:12px;padding:10px;border-radius:12px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:13px;font-weight:800;cursor:pointer;text-align:center;transition:all .15s;}
+.pc-btn-detail:hover{background:var(--gold);color:#fff;}
+/* BXH rank change */
+@keyframes rankUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+@keyframes rankDown{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.rank-chg{font-size:10px;font-weight:900;margin-left:4px;animation-duration:.4s;animation-fill-mode:both;}
+.rank-chg.up{color:var(--green);animation-name:rankUp;}
+.rank-chg.down{color:#e55;animation-name:rankDown;}
+.rank-chg.same{color:var(--muted);font-size:8px;}
 .dark-toggle{background:none;border:1.5px solid var(--bdr2);border-radius:20px;padding:5px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text2);transition:all .2s;flex-shrink:0;}
 .dark-toggle:hover{border-color:var(--gold);}
 #toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;}
@@ -1702,6 +1726,10 @@ undefined
 </div>
 
 <!-- PICKER MODAL -->
+<div id="profile-card-overlay" onclick="if(event.target===this)closeProfileCard()">
+  <div id="profile-card-box"></div>
+</div>
+
 <div id="picker-overlay" onclick="closePicker(event)">
   <div id="picker-box">
     <div class="pk-handle"></div>
@@ -4036,7 +4064,7 @@ function rSaved(m){
   const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
   const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
     ${names.map(n=>av(n)).join('')}
-    <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`).join(' & ')||'Đội'}</span>
+    <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>`<span class="name-link" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(n)}">${xe(n)}</span>`).join(' & ')||'Đội'}</span>
     ${won?'<span style="font-size:11px;">🏅</span>':''}
   </div>`;
   return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);" id="mc${m.id}">
@@ -4518,7 +4546,7 @@ function renderQuy(){
     const paidBadge = allPaid ? '<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-left:4px;">Đã Ủng Hộ ✅</span>' : '';
     html += `<div class="quy-row ${rc}">
       <div class="rk">${rk}</div>
-      <div class="quy-player">${avHtml}<div><span class="quy-nm name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(p.name)}">${xe(p.name)}</span>${paidBadge}</div></div>
+      <div class="quy-player">${avHtml}<div><span class="quy-nm name-link" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(p.name)}">${xe(p.name)}</span>${paidBadge}</div></div>
       <div class="quy-matches">${p.matches}</div>
       <div class="quy-debt">${fmtNum(p.total)}🍃</div>
     </div>`;
@@ -5499,7 +5527,7 @@ function buildStatsHTML(name){
     topP.forEach(([pn,cnt])=>{
       const pw=partnerWins[pn]||0,pwr=Math.round(pw/cnt*100),col=pwr>=50?'var(--green)':'#e55';
       h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;">
-        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
         <div style="font-size:11px;color:var(--muted);">${cnt} trận · thắng ${pw} <span style="color:${col};">(${pwr}%)</span></div>
       </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${pwr}%;background:${col};"></div></div></div>`;
     });
@@ -5512,7 +5540,7 @@ function buildStatsHTML(name){
     topR.forEach(([rn,cnt])=>{
       const rl=rivalLosses[rn]||0,rlr=Math.round(rl/cnt*100),col=rlr>=50?'#e55':'var(--green)';
       h+=`<div class="stats-pr">${prAv(rn)}<div style="flex:1;min-width:0;">
-        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(rn)}">${xe(rn)}</div>
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(rn)}">${xe(rn)}</div>
         <div style="font-size:11px;color:var(--muted);">${cnt} trận đối · thua ${rl} <span style="color:${col};">(${rlr}%)</span></div>
       </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${rlr}%;background:${col};"></div></div></div>`;
     });
@@ -5526,7 +5554,7 @@ function buildStatsHTML(name){
     h+=`<div class="stats-section"><div class="stats-section-title">💀 Đồng đội... xui xẻo</div>`;
     jinx.forEach(([pn,cnt,pl,plr])=>{
       h+=`<div class="stats-pr">${prAv(pn)}<div style="flex:1;min-width:0;">
-        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
+        <div class="name-link" style="font-weight:800;font-size:13px;color:var(--text);" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(pn)}">${xe(pn)}</div>
         <div style="font-size:11px;color:#e55;">${cnt} trận · thua ${pl} (${plr}%)</div>
       </div><div class="stats-pr-bar"><div class="stats-pr-bar-fill" style="width:${plr}%;background:#e55;"></div></div></div>`;
     });
@@ -5544,7 +5572,7 @@ function buildStatsHTML(name){
     const opp=(inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
     const myS=inT1?m.s1:m.s2, oppS=inT1?m.s2:m.s1;
     const sc=(m.s1!==''&&m.s2!=='')?`${myS}–${oppS}`:'';
-    const nl=(n)=>`<span class="name-link" onclick="goStats(this.getAttribute('data-n'))" data-n="${xe(n)}" style="color:var(--text2);">${xe(n)}</span>`;
+    const nl=(n)=>`<span class="name-link" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(n)}" style="color:var(--text2);">${xe(n)}</span>`;
     return `<div class="stats-match-row">
       <span class="stats-res-badge ${res}">${won?'Thắng':lost?'Thua':'Hòa'}</span>
       <div style="flex:1;min-width:0;overflow:hidden;">
@@ -5994,21 +6022,35 @@ function renderBXH(){
     h+=`<div style="text-align:center;font-weight:900;font-size:16px;margin:8px 0 12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;">🏆 BẢNG XẾP HẠNG CAO THỦ${_sfxT} 🏆</div>`;
 
     // Header: số thứ tự | Tên | Thắng | Thua | ELO | ±
+    // Track previous ranks for animation
+    if(!window._prevRanks) window._prevRanks={};
+    const prevR=window._prevRanks[elId]||{};
+
     h+='<div class="tbl-h"><div></div><div>Tên</div><div class="nc" style="color:var(--green);">Thắng</div><div class="nc" style="color:#e55;">Thua</div><div class="nc">ELO</div><div class="nc">±</div></div>';
 
+    const newRanks={};
     list.forEach((p,i)=>{
+      newRanks[p.name]=i+1;
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       const avcls=p.mb?AVC[p.mb.color]:'';
       const bxhAv=(p.mb&&p.mb.photo)
-        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="goStats(this.closest(\'.tbl-r\').dataset.n)">'
-        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' onclick="goStats(this.closest(\'.tbl-r\').dataset.n)" style="cursor:pointer">'+ini(p.name)+'</div>';
+        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)">'
+        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)" style="cursor:pointer">'+ini(p.name)+'</div>';
       const chg=p.eloChange;
       const chgHtml=chg===0
         ?'<span style="color:var(--muted)">–</span>'
         :'<span style="color:'+(chg>0?'var(--green)':'#e55')+';font-weight:800;">'+(chg>0?'+':'')+chg+'</span>';
-      h+=`<div class="tbl-r ${rc}" data-n="${xe(p.name)}" style="cursor:pointer" onclick="goStats(this.dataset.n)">
-        <div class="rk">${medal||i+1}</div>
+      // Rank change arrow
+      let rankChg='';
+      if(prevR[p.name]!==undefined){
+        const diff=prevR[p.name]-(i+1);
+        if(diff>0) rankChg=`<span class="rank-chg up">▲${diff}</span>`;
+        else if(diff<0) rankChg=`<span class="rank-chg down">▼${Math.abs(diff)}</span>`;
+        else rankChg=`<span class="rank-chg same">━</span>`;
+      }
+      h+=`<div class="tbl-r ${rc}" data-n="${xe(p.name)}" style="cursor:pointer" onclick="showProfileCard(this.dataset.n)">
+        <div class="rk">${medal||i+1}${rankChg}</div>
         <div class="bxh-player">${bxhAv}<div style="min-width:0;overflow:hidden;"><span class="bxh-nm">${xe(p.name)}</span><div style="font-size:9px;color:var(--muted);font-weight:700;">${p.games} trận</div></div></div>
         <div class="nc wc" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;">${p.w}</div>
         <div class="nc lc" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;">${p.l}</div>
@@ -6017,6 +6059,7 @@ function renderBXH(){
       </div>`;
     });
     el.innerHTML=h;
+    window._prevRanks[elId]=newRanks;
   }
 
   buildTable(calcElo(saved,null),  'bxh-all');
@@ -6502,6 +6545,81 @@ function renderFunStats(){
     document.body.appendChild(container);
     setTimeout(()=>container.remove(),5000);
   }
+}
+
+/* ===== Profile Card Popup ===== */
+function showProfileCard(name){
+  const ov=document.getElementById('profile-card-overlay'),box=document.getElementById('profile-card-box');
+  if(!ov||!box)return;
+  const mb=mbOf(name);
+  const allM=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
+  const sorted=allM.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  let wins=0,losses=0;const partners={},rivals={},partnerW={},rivalL={};const results=[];
+  sorted.forEach(m=>{
+    const inT1=[m.t1p1,m.t1p2].includes(name);
+    const w=m.winner||(m.s1!==''&&m.s2!==''?(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':''):'');
+    const won=inT1?w==='A':w==='B',lost=inT1?w==='B':w==='A';
+    if(won)wins++;else if(lost)losses++;
+    results.push(won?'W':lost?'L':'D');
+    const partner=inT1?(m.t1p1===name?m.t1p2:m.t1p1):(m.t2p1===name?m.t2p2:m.t2p1);
+    if(partner){partners[partner]=(partners[partner]||0)+1;if(won)partnerW[partner]=(partnerW[partner]||0)+1;}
+    const opp=inT1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2];
+    opp.filter(Boolean).forEach(r=>{rivals[r]=(rivals[r]||0)+1;if(lost)rivalL[r]=(rivalL[r]||0)+1;});
+  });
+  const total=wins+losses+(results.filter(r=>r==='D').length);
+  const wr=total?Math.round(wins/total*100):0;
+  const eloData=calcElo(matches.filter(m=>m.saved&&!m.isBetEntry&&m.date),null);
+  const myElo=eloData.find(p=>p.name===name)||{elo:1000,eloChange:0};
+  const eloRank=eloData.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
+  // Streak
+  const rev=[...results].reverse();let curSign=rev[0]||null,streak=0;
+  for(let i=0;i<rev.length;i++){if(rev[i]===curSign)streak++;else break;}
+  const streakTxt=curSign==='W'?`🔥 ${streak} thắng`:curSign==='L'?`❄️ ${streak} thua`:'';
+  // Last 8
+  const last8=results.slice(-8);
+  // Top partner & rival
+  const topP=Object.entries(partners).sort((a,b)=>b[1]-a[1]).slice(0,2);
+  const topR=Object.entries(rivals).sort((a,b)=>b[1]-a[1]).slice(0,2);
+  function miniAv(n,sz){const pm=mbOf(n);return pm&&pm.photo?`<img src="${pm.photo}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;object-fit:cover;">`:`<div class="${pm?AVC[pm.color]:''}" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/3)}px;font-size:${Math.round(sz/2.5)}px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;background:${pm?'':'var(--muted)'};">${ini(n)}</div>`;}
+  const bigAv=mb&&mb.photo?`<img src="${mb.photo}" style="width:50px;height:50px;border-radius:14px;object-fit:cover;">`:`<div class="${mb?AVC[mb.color]:''}" style="width:50px;height:50px;border-radius:14px;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${mb?'':'var(--muted)'};">${ini(name)}</div>`;
+  let h=`<div class="pc-hero">${bigAv}<div style="flex:1;min-width:0;">
+    <div class="pc-name">${xe(name)}</div>
+    <div class="pc-sub">${mb?(mb.gender==='m'?'👨 Nam':'👩 Nữ')+' · ':''} ELO #${eloRank} · <b style="color:var(--gold);">${myElo.elo}</b> <span style="color:${myElo.eloChange>=0?'var(--green)':'#e55'};font-weight:800;">${myElo.eloChange>=0?'+':''}${myElo.eloChange}</span></div>
+    ${streakTxt?`<div style="margin-top:3px;font-size:11px;font-weight:800;color:${curSign==='W'?'var(--green)':'#e55'};">${streakTxt}</div>`:''}
+  </div></div>`;
+  h+=`<div class="pc-kpi-grid">
+    <div class="pc-kpi"><div class="pc-kpi-num" style="color:var(--gold);">${total}</div><div class="pc-kpi-lbl">Trận</div></div>
+    <div class="pc-kpi"><div class="pc-kpi-num" style="color:var(--green);">${wins}</div><div class="pc-kpi-lbl">Thắng</div></div>
+    <div class="pc-kpi"><div class="pc-kpi-num" style="color:#e55;">${losses}</div><div class="pc-kpi-lbl">Thua</div></div>
+    <div class="pc-kpi"><div class="pc-kpi-num" style="color:${wr>=50?'var(--green)':'#e55'};">${wr}%</div><div class="pc-kpi-lbl">Tỷ lệ</div></div>
+  </div>`;
+  // Win rate bar
+  h+=`<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:10px;"><div style="width:${wr}%;height:100%;background:${wr>=50?'var(--green)':'#e55'};border-radius:3px;transition:width .3s;"></div></div>`;
+  // Last 8 dots
+  if(last8.length){
+    h+=`<div style="display:flex;align-items:center;gap:4px;margin-bottom:10px;"><span style="font-size:10px;font-weight:700;color:var(--muted);margin-right:4px;">Gần đây</span>${last8.map(r=>`<div style="width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;background:${r==='W'?'var(--green)':r==='L'?'#e55':'var(--muted)'};">${r==='W'?'T':r==='L'?'B':'H'}</div>`).join('')}</div>`;
+  }
+  // Partners
+  if(topP.length){
+    h+=`<div class="pc-section"><div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🤝 Đồng đội</div>`;
+    topP.forEach(([pn,cnt])=>{const pw=partnerW[pn]||0;const pwr=Math.round(pw/cnt*100);
+      h+=`<div class="pc-pair">${miniAv(pn,24)}<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;">${xe(pn)}</div><div style="font-size:10px;color:var(--muted);">${cnt} trận · ${pwr}% thắng</div></div><div class="pc-pair-bar"><div class="pc-pair-fill" style="width:${pwr}%;background:${pwr>=50?'var(--green)':'#e55'};"></div></div></div>`;
+    });h+=`</div>`;}
+  // Rivals
+  if(topR.length){
+    h+=`<div class="pc-section"><div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚔️ Đối thủ</div>`;
+    topR.forEach(([rn,cnt])=>{const rl=rivalL[rn]||0;const lr=Math.round(rl/cnt*100);
+      h+=`<div class="pc-pair">${miniAv(rn,24)}<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;">${xe(rn)}</div><div style="font-size:10px;color:var(--muted);">${cnt} lần · thua ${lr}%</div></div><div class="pc-pair-bar"><div class="pc-pair-fill" style="width:${lr}%;background:#e55;"></div></div></div>`;
+    });h+=`</div>`;}
+  h+=`<button class="pc-btn-detail" onclick="closeProfileCard();goStats('${name.replace(/'/g,"\\'")}')">📊 Xem thống kê chi tiết →</button>`;
+  box.innerHTML=h;
+  ov.classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeProfileCard(){
+  const ov=document.getElementById('profile-card-overlay');
+  if(ov)ov.classList.remove('on');
+  document.body.style.overflow='';
 }
 
 /* ===== A11y booster: auto alt/aria-label + dialog roles ===== */
