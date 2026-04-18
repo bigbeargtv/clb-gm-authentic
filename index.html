@@ -467,7 +467,7 @@ nav::-webkit-scrollbar{display:none;}
 .bxh-podium-medal{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);}
 .bxh-podium-name{font-size:12px;font-weight:800;color:#fff;text-align:center;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
 .bxh-podium-elo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--gold);margin:2px 0 4px;}
-.bxh-podium-form{display:flex;gap:3px;margin-bottom:8px;}
+.bxh-podium-stats{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:8px;letter-spacing:.3px;}
 .bxh-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .bxh-dot.W{background:#1a9e60;}
 .bxh-dot.L{background:#e55;}
@@ -6110,7 +6110,7 @@ function renderBXH(){
     if(top3.length>=3){
       const podiumOrder=[top3[1],top3[0],top3[2]]; // 2nd, 1st, 3rd
       const podiumRanks=[2,1,3];
-      const podiumH=[100,130,85]; // podium block heights
+      const podiumH=[100,130,85];
       const podiumColors=['linear-gradient(180deg,#a8a8b0,#78788a)','linear-gradient(180deg,#f0b429,#d4960a)','linear-gradient(180deg,#cd7f32,#a0622a)'];
       const medalColors=['#a8a8b0','#f0b429','#cd7f32'];
       const avSizes=[56,68,52];
@@ -6120,8 +6120,8 @@ function renderBXH(){
       podiumOrder.forEach((p,pi)=>{
         const rank=podiumRanks[pi];
         const avSz=avSizes[pi];
-        const form5=getForm(p.name,saved,5);
         const avcls=p.mb?AVC[p.mb.color]:'';
+        const wr=p.games?Math.round(p.w/p.games*100):0;
         const avImg=(p.mb&&p.mb.photo)
           ?`<img src="${p.mb.photo}" style="width:${avSz-6}px;height:${avSz-6}px;border-radius:50%;object-fit:cover;">`
           :`<div class="${avcls}" style="width:${avSz-6}px;height:${avSz-6}px;border-radius:50%;font-size:${Math.round(avSz/3)}px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(p.name)}</div>`;
@@ -6132,7 +6132,7 @@ function renderBXH(){
           </div>
           <div class="bxh-podium-name">${xe(p.name)}</div>
           <div class="bxh-podium-elo">${p.elo}</div>
-          <div class="bxh-podium-form">${formDots(form5)}</div>
+          <div class="bxh-podium-stats">${p.w}W · ${p.l}L · ${wr}%</div>
           <div class="bxh-podium-block" style="height:${podiumH[pi]}px;background:${podiumColors[pi]};">
             <span class="bxh-podium-rank">${rank}</span>
           </div>
@@ -6141,27 +6141,34 @@ function renderBXH(){
       h+=`</div></div>`;
     }
 
-    // ── TABLE (rank 4+ or all if <3 players) ──
-    const tableList=top3.length>=3?list.slice(3):list;
-    if(tableList.length){
-      h+=`<div class="bxh-tbl-head"><div class="bxh-th">#</div><div class="bxh-th" style="text-align:left;flex:1;">THÀNH VIÊN</div><div class="bxh-th" style="width:80px;text-align:center;">FORM</div><div class="bxh-th" style="width:65px;text-align:right;">ELO</div></div>`;
-      tableList.forEach((p,idx)=>{
-        const rank=top3.length>=3?idx+4:idx+1;
-        const form5=getForm(p.name,saved,5);
-        const strk=getStrk(form5);
-        const avcls=p.mb?AVC[p.mb.color]:'';
-        const av=(p.mb&&p.mb.photo)
-          ?`<img src="${p.mb.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`
-          :`<div class="${avcls}" style="width:36px;height:36px;border-radius:50%;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(p.name)}</div>`;
-        const wr=p.games?Math.round(p.w/p.games*100):0;
-        h+=`<div class="bxh-tbl-row" data-n="${xe(p.name)}" onclick="showProfileCard(this.dataset.n)">
-          <div class="bxh-td-rank">${rank}</div>
-          <div class="bxh-td-player">${av}<div><div class="bxh-td-name">${xe(p.name)}</div><div class="bxh-td-sub">${p.w}W · ${p.l}L · ${wr}%</div></div></div>
-          <div class="bxh-td-form">${formDots(form5)}</div>
-          <div class="bxh-td-elo"><span class="bxh-elo-num">${p.elo}</span>${strk>=3?`<span class="bxh-fire">🔥 ${strk}</span>`:''}</div>
-        </div>`;
-      });
-    }
+    // ── BẢNG XẾP HẠNG ĐẦY ĐỦ (giữ nguyên) ──
+    // ELO intro banner
+    h+=`<div style="background:linear-gradient(135deg,#1a2a1a,#1a1a2e);border:1.5px solid #f0b42925;border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:800;color:var(--gold);margin-bottom:4px;">⚡ Xếp hạng ELO</div>
+      <div style="font-size:11px;color:#ffffffaa;line-height:1.5;">Mỗi người bắt đầu với <strong style="color:var(--gold)">1000 điểm</strong>. Thắng người mạnh → cộng nhiều · Thua người yếu → trừ nhiều. Tự cân bằng, không phụ thuộc số trận.</div>
+    </div>`;
+    h+=`<div style="text-align:center;font-weight:900;font-size:16px;margin:8px 0 12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;">🏆 BẢNG XẾP HẠNG CAO THỦ${_sfxT} 🏆</div>`;
+    h+='<div class="tbl-h"><div></div><div>Tên</div><div class="nc" style="color:var(--green);">Thắng</div><div class="nc" style="color:#e55;">Thua</div><div class="nc">ELO</div><div class="nc">±</div></div>';
+    list.forEach((p,i)=>{
+      const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      const avcls=p.mb?AVC[p.mb.color]:'';
+      const bxhAv=(p.mb&&p.mb.photo)
+        ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)">'
+        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)" style="cursor:pointer">'+ini(p.name)+'</div>';
+      const chg=p.eloChange;
+      const chgHtml=chg===0
+        ?'<span style="color:var(--muted)">–</span>'
+        :'<span style="color:'+(chg>0?'var(--green)':'#e55')+';font-weight:800;">'+(chg>0?'+':'')+chg+'</span>';
+      h+=`<div class="tbl-r ${rc}" data-n="${xe(p.name)}" style="cursor:pointer" onclick="showProfileCard(this.dataset.n)">
+        <div class="rk">${medal||i+1}</div>
+        <div class="bxh-player">${bxhAv}<div style="min-width:0;overflow:hidden;"><span class="bxh-nm">${xe(p.name)}</span><div style="font-size:9px;color:var(--muted);font-weight:700;">${p.games} trận</div></div></div>
+        <div class="nc wc" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;">${p.w}</div>
+        <div class="nc lc" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;">${p.l}</div>
+        <div class="nc" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;color:var(--gold);">${p.elo}</div>
+        <div class="nc">${chgHtml}</div>
+      </div>`;
+    });
     el.innerHTML=h;
   }
 
