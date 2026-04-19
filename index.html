@@ -1269,10 +1269,11 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 @keyframes skelDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-4px);}}
 .tbl-r:hover{border-color:var(--gold)50;transform:translateX(2px);box-shadow:0 2px 12px rgba(0,0,0,.08);}
 
-.stats-cat-pills{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
-.stats-cat-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--bdr2);background:transparent;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;transition:all .2s;}
-.stats-cat-pill:hover{border-color:var(--gold);color:var(--gold);}
-.stats-cat-pill.on{background:var(--gold);color:#fff;border-color:var(--gold);}
+.stats-search-wrap{position:relative;margin-bottom:10px;}
+.stats-search-inp{width:100%;box-sizing:border-box;padding:9px 12px 9px 34px;border-radius:12px;border:1.5px solid var(--bdr2);background:var(--s1);color:var(--text);font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;outline:none;transition:border .2s;}
+.stats-search-inp:focus{border-color:var(--gold);}
+.stats-search-inp::placeholder{color:var(--muted);font-weight:600;}
+.stats-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
 
 /* Tablet layout optimization */
 @media(min-width:641px) and (max-width:1024px){
@@ -1329,29 +1330,37 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   .stats-kpi-num{font-size:22px!important;}
   .stats-section{padding:10px!important;}
   .stats-match-row{padding:8px!important;gap:6px!important;}
-  .stats-cat-pills{gap:4px!important;}
-  .stats-cat-pill{padding:5px 10px!important;font-size:10px!important;}
+  .stats-search-inp{font-size:12px!important;padding:8px 10px 8px 30px!important;}
 
   /* BXH Podium */
-  .bxh-podium-wrap{padding:10px 4px!important;}
-  .bxh-podium{gap:6px!important;}
-  .bxh-podium-col{min-width:0!important;}
-  .bxh-podium-av{width:52px!important;height:52px!important;}
-  .bxh-podium-col:first-child .bxh-podium-av{width:60px!important;height:60px!important;}
-  .bxh-podium-name{font-size:10px!important;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .bxh-podium-elo{font-size:13px!important;}
-  .bxh-podium-stats{font-size:8px!important;}
-  .bxh-podium-medal{font-size:28px!important;}
-  .bxh-podium-col:first-child .bxh-podium-medal{font-size:34px!important;}
-  .bxh-podium-block{height:50px!important;}
-  .bxh-podium-col:first-child .bxh-podium-block{height:65px!important;}
+  .bxh-podium-wrap{padding:12px 6px 0!important;}
+  .bxh-podium{gap:4px!important;padding:0 2px!important;}
+  .bxh-podium-col{max-width:33%!important;flex:1 1 0!important;min-width:0!important;}
+  .bxh-podium-av{width:48px!important;height:48px!important;}
+  .bxh-podium-av img,.bxh-podium-av>div{width:42px!important;height:42px!important;font-size:15px!important;}
+  .bxh-podium-col:nth-child(2) .bxh-podium-av{width:56px!important;height:56px!important;}
+  .bxh-podium-col:nth-child(2) .bxh-podium-av img,.bxh-podium-col:nth-child(2) .bxh-podium-av>div{width:50px!important;height:50px!important;font-size:18px!important;}
+  .bxh-podium-name{font-size:10px!important;max-width:80px!important;}
+  .bxh-podium-elo{font-size:15px!important;}
+  .bxh-podium-stats{font-size:9px!important;}
+  .bxh-podium-medal{width:18px!important;height:18px!important;font-size:9px!important;top:-2px!important;right:-2px!important;}
+  .bxh-podium-block{padding-top:6px!important;}
+  .bxh-podium-block[style*="height:130"]{height:80px!important;}
+  .bxh-podium-block[style*="height:100"]{height:60px!important;}
+  .bxh-podium-block[style*="height:85"]{height:50px!important;}
+  .bxh-podium-rank{font-size:22px!important;}
 
   /* BXH Table */
-  .bxh-row{padding:8px 6px!important;gap:6px!important;}
-  .bxh-row .rank{min-width:22px!important;font-size:13px!important;}
-  .bxh-row .av{width:32px!important;height:32px!important;}
-  .bxh-row .info .name{font-size:12px!important;}
-  .bxh-row .elo{font-size:14px!important;}
+  .bxh-tbl-row{padding:8px 8px!important;gap:6px!important;border-radius:10px!important;}
+  .bxh-td-rank{width:22px!important;font-size:14px!important;}
+  .bxh-td-player{gap:6px!important;}
+  .bxh-td-player img,.bxh-td-player>div[class*="avc"]{width:32px!important;height:32px!important;}
+  .bxh-td-name{font-size:12px!important;}
+  .bxh-td-sub{font-size:9px!important;}
+  .bxh-td-form{width:50px!important;gap:2px!important;}
+  .bxh-dot{width:7px!important;height:7px!important;}
+  .bxh-td-elo{width:50px!important;}
+  .bxh-elo-num{font-size:16px!important;}
 
   /* Tab buttons */
   .tab-btn,.tabs button{padding:6px 10px!important;font-size:11px!important;}
@@ -2572,7 +2581,7 @@ let clubInitBalance = 0; // Số dư quỹ CLB ban đầu
 let album = []; // [{id,date,url,caption,base64}]
 let albumUid = 1;
 let statsSelected = null; // tên member đang xem
-let statsCatFilter = null; // null = Tổng hợp (all), or 'nam','mix','nu','hon'
+let statsSearchQ = ''; // search query for stats member picker
 
 function doDrawSpin(){
   if(!isAdmin) return;
@@ -5484,16 +5493,11 @@ function goStats(name){
 function renderStats(){
   const picker=document.getElementById('stats-picker'),cont=document.getElementById('stats-content');
   if(!picker||!cont) return;
-  // Category filter pills
-  const cats=[{key:null,label:'Tổng hợp'},{key:'nam',label:'Đôi Nam'},{key:'mix',label:'Nam - Nữ'},{key:'nu',label:'Đôi Nữ'},{key:'hon',label:'Hỗn Hợp'}];
-  let filterHTML='<div class="stats-cat-pills">';
-  cats.forEach(c=>{
-    const on=statsCatFilter===c.key;
-    filterHTML+=`<button class="stats-cat-pill${on?' on':''}" onclick="setStatsCat(${c.key===null?'null':"'"+c.key+"'"})">${c.label}</button>`;
-  });
-  filterHTML+='</div>';
-  picker.innerHTML=filterHTML+'<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-top:4px;">👤 Chọn thành viên</div><div class="stats-member-grid">'
-    +members.map(m=>{
+  const q=statsSearchQ.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const filtered=q?members.filter(m=>m.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(q)):members;
+  picker.innerHTML='<div class="stats-search-wrap"><span class="stats-search-icon">🔍</span><input class="stats-search-inp" placeholder="Tìm thành viên..." value="'+xe(statsSearchQ)+'" oninput="filterStatsPicker(this.value)"></div>'
+    +'<div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-top:4px;">👤 Chọn thành viên'+(q?' · '+filtered.length+' kết quả':'')+'</div><div class="stats-member-grid">'
+    +filtered.map(m=>{
       const on=statsSelected===m.name;
       const av=m.photo
         ?`<img loading="lazy" src="${m.photo}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;" decoding="async">`
@@ -5515,9 +5519,12 @@ function selectStats(name){
   if(statsSelected) setTimeout(()=>document.getElementById('stats-content').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
-function setStatsCat(cat){
-  statsCatFilter=cat;
+function filterStatsPicker(val){
+  statsSearchQ=val;
   renderStats();
+  // Re-focus input and restore cursor
+  const inp=document.querySelector('.stats-search-inp');
+  if(inp){inp.focus();inp.setSelectionRange(val.length,val.length);}
 }
 
 function getPlayerAwards(playerName){
@@ -5603,9 +5610,8 @@ function getPlayerAwards(playerName){
 }
 
 function buildStatsHTML(name){
-  let allM=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
-  if(statsCatFilter) allM=allM.filter(m=>m.cat===statsCatFilter);
-  if(!allM.length) return '<div class="empty"><span class="ei">📊</span>'+(statsCatFilter?'Không có trận '+({nam:'Đôi Nam',mix:'Nam - Nữ',nu:'Đôi Nữ',hon:'Hỗn Hợp'}[statsCatFilter]||''):'Chưa có trận nào.')+'</div>';
+  const allM=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date&&[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(name));
+  if(!allM.length) return '<div class="empty"><span class="ei">📊</span>Chưa có trận nào.</div>';
   const sorted=allM.slice().sort((a,b)=>a.date.localeCompare(b.date));
   let wins=0,losses=0,draws=0,catCount={},catWin={};
   const partners={},rivals={},partnerWins={},rivalLosses={};
@@ -5634,7 +5640,7 @@ function buildStatsHTML(name){
   let curSign=rev[0]||null, curStreakNow=0;
   for(let i=0;i<rev.length;i++){if(rev[i]===curSign)curStreakNow++;else break;}
   const allSaved=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date);
-  const eloData=calcElo(allSaved,statsCatFilter);
+  const eloData=calcElo(allSaved,null);
   const myElo=eloData.find(p=>p.name===name)||{elo:1000,eloChange:0};
   const eloRank=eloData.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
   const eloChg=myElo.eloChange;
