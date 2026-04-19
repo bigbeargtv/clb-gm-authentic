@@ -692,6 +692,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 }
 .bxh-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
 .bxh-filter-row:last-child{margin-bottom:0;}
+.bxh-filter-single{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+.bxh-filter-single::-webkit-scrollbar{display:none;}
 .fpill{
   padding:7px 13px;border-radius:20px;font-size:12px;font-weight:800;
   cursor:pointer;border:1.5px solid var(--bdr2);background:var(--s2);
@@ -898,6 +900,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 }
 .hist-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
 .hist-filter-row:last-child{margin-bottom:0;}
+.hist-filter-row.bxh-filter-single{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+.hist-filter-row.bxh-filter-single::-webkit-scrollbar{display:none;}
 .hist-result-label{
   font-size:12px;color:var(--text2);font-weight:700;
   margin-bottom:10px;padding:6px 10px;
@@ -1372,9 +1376,9 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   /* BXH Category Tabs */
   .bxh-tabs{gap:3px!important;padding:4px!important;border-radius:12px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;}
   .bxh-tab{padding:7px 3px!important;font-size:10px!important;border-radius:8px!important;min-width:0!important;white-space:nowrap!important;letter-spacing:0!important;}
-  .bxh-filter{padding:8px 10px!important;border-radius:10px!important;margin-bottom:10px!important;}
+  .bxh-filter,.hist-filter{padding:8px 10px!important;border-radius:10px!important;margin-bottom:10px!important;}
   .bxh-filter-label{font-size:9px!important;margin-bottom:4px!important;letter-spacing:1px!important;}
-  .bxh-filter-row{gap:3px!important;margin-bottom:5px!important;}
+  .bxh-filter-row,.hist-filter-row{gap:3px!important;margin-bottom:5px!important;}
   .fpill{padding:4px 8px!important;font-size:10px!important;border-radius:14px!important;}
   .filter-date-inp{padding:6px 8px!important;font-size:12px!important;min-width:100px!important;border-radius:8px!important;}
   .filter-apply{padding:6px 12px!important;font-size:11px!important;border-radius:8px!important;}
@@ -1732,8 +1736,8 @@ undefined
 
   <div class="bxh-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
-    <div class="bxh-filter-row" id="filter-quick"></div>
-    <div class="bxh-filter-row" id="filter-months"></div>
+    <div class="bxh-filter-row bxh-filter-single" id="filter-quick"></div>
+    <div class="bxh-filter-row" id="filter-months" style="display:none"></div>
     <div class="bxh-filter-custom" id="filter-custom">
       <input type="date" class="filter-date-inp" id="filter-from">
       <span class="filter-sep">→</span>
@@ -1755,8 +1759,8 @@ undefined
 <div class="pg" id="pg-hist">
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
-    <div class="hist-filter-row" id="hfilter-quick"></div>
-    <div class="hist-filter-row" id="hfilter-months"></div>
+    <div class="hist-filter-row bxh-filter-single" id="hfilter-quick"></div>
+    <div class="hist-filter-row" id="hfilter-months" style="display:none"></div>
     <div class="bxh-filter-custom" id="hfilter-custom">
       <input type="date" class="filter-date-inp" id="hfilter-from">
       <span class="filter-sep">→</span>
@@ -1790,9 +1794,9 @@ undefined
   <div id="quy-qr-block" style="padding:0 14px 4px"></div>
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
-    <div class="hist-filter-row" id="qfilter-quick"></div>
-    <div class="hist-filter-row" id="qfilter-months"></div>
-    <div class="hist-filter-row" id="qfilter-days" style="margin-top:2px;"></div>
+    <div class="hist-filter-row bxh-filter-single" id="qfilter-quick"></div>
+    <div class="hist-filter-row" id="qfilter-months" style="display:none"></div>
+    <div class="hist-filter-row" id="qfilter-days" style="display:none"></div>
     <div class="bxh-filter-custom" id="qfilter-custom">
       <input type="date" class="filter-date-inp" id="qfilter-from">
       <span class="filter-sep">→</span>
@@ -4415,41 +4419,32 @@ let quyFilter = {mode:'all', from:'', to:''};
 
 function initQuyFilter(){
   const years=[...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  let qHtml='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
+  const activeYear=(quyFilter.mode==='year'||quyFilter.mode==='month'||quyFilter.mode==='day')?(quyFilter.mode==='year'?quyFilter.from:quyFilter.from.slice(0,4)):String(new Date().getFullYear());
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const activeMonthQ=quyFilter.mode==='month'?quyFilter.from:quyFilter.mode==='day'?quyFilter.from.slice(0,7):null;
+
+  let h='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=quyFilter.mode==='year'&&quyFilter.from===y;
-    qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    h+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  qHtml+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓 Tùy chọn</span>';
-  document.getElementById('qfilter-quick').innerHTML=qHtml;
-  const activeYear=quyFilter.mode==='year'?quyFilter.from:String(new Date().getFullYear());
-  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0'), key=activeYear+'-'+mon;
     const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on=quyFilter.mode==='month'&&quyFilter.from===key;
-    if(hasData) mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    if(hasData) h+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
   }
-  document.getElementById('qfilter-months').innerHTML=mHtml;
-  // Day pills: hiện khi đang chọn tháng hoặc ngày
-  const activeMonthQ = quyFilter.mode==='month' ? quyFilter.from
-    : quyFilter.mode==='day' ? quyFilter.from.slice(0,7) : null;
-  let dayHtml = '';
+  // Day pills inline
   if(activeMonthQ){
-    const days = [...new Set(
-      matches.filter(m=>m.saved&&m.bet>0&&m.date&&m.date.startsWith(activeMonthQ))
-             .map(m=>m.date)
-    )].sort().reverse();
+    const days=[...new Set(matches.filter(m=>m.saved&&m.bet>0&&m.date&&m.date.startsWith(activeMonthQ)).map(m=>m.date))].sort().reverse();
     days.forEach(d=>{
-      const on = quyFilter.mode==='day' && quyFilter.from===d;
-      const [,mo2,dd2] = d.split('-');
-      dayHtml += `<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')" style="font-size:11px;">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
+      const on=quyFilter.mode==='day'&&quyFilter.from===d;
+      const [,mo2,dd2]=d.split('-');
+      h+=`<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
     });
   }
-  const daysEl = document.getElementById('qfilter-days');
-  if(daysEl) daysEl.innerHTML = dayHtml;
-
+  h+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓</span>';
+  document.getElementById('qfilter-quick').innerHTML=h;
   document.getElementById('qfilter-custom').classList.toggle('on',quyFilter.mode==='custom');
 }
 function setQuyFilter(mode,val){quyFilter={mode,from:val||'',to:''};renderQuy();}
@@ -6091,32 +6086,27 @@ let bxhFilter = { mode: 'all', from: '', to: '' }; // mode: all | year | month |
 function initBxhFilter(){
   const now = new Date();
   const curYear = now.getFullYear();
-  const curMonth = now.getMonth(); // 0-based
 
-  // Quick pills: Tất cả + các năm có dữ liệu
+  // All pills in ONE row: Tất cả + năm + tháng có dữ liệu + Tùy chọn
   const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  let quickHtml = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
+  const activeYear = (bxhFilter.mode==='year'||bxhFilter.mode==='month') ? (bxhFilter.mode==='month'?bxhFilter.from.slice(0,4):bxhFilter.from) : String(curYear);
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  let h = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on = bxhFilter.mode==='year' && bxhFilter.from===y;
-    quickHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    h += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  quickHtml += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓 Tùy chọn</span>';
-  document.getElementById('filter-quick').innerHTML = quickHtml;
-
-  // Month pills: 12 tháng của năm đang chọn (hoặc năm hiện tại)
-  const activeYear = (bxhFilter.mode==='year') ? bxhFilter.from : String(curYear);
-  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  let monthHtml = '';
+  // Month pills inline (chỉ tháng có data)
   for(let i=0;i<12;i++){
     const mon = String(i+1).padStart(2,'0');
     const key = activeYear+'-'+mon;
     const hasData = matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on = bxhFilter.mode==='month' && bxhFilter.from===key;
-    if(hasData){
-      monthHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
-    }
+    if(hasData) h += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
   }
-  document.getElementById('filter-months').innerHTML = monthHtml;
+  h += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓</span>';
+  document.getElementById('filter-quick').innerHTML = h;
 
   // Custom filter
   const customEl = document.getElementById('filter-custom');
@@ -6339,25 +6329,23 @@ let histFilter = {mode:'all', from:'', to:''};
 
 function initHistFilter(){
   const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  let qHtml = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
+  const activeYear = (histFilter.mode==='year'||histFilter.mode==='month') ? (histFilter.mode==='month'?histFilter.from.slice(0,4):histFilter.from) : String(new Date().getFullYear());
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  let h = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=histFilter.mode==='year'&&histFilter.from===y;
-    qHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    h += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  qHtml += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓 Tùy chọn</span>';
-  document.getElementById('hfilter-quick').innerHTML = qHtml;
-
-  const activeYear = histFilter.mode==='year' ? histFilter.from : String(new Date().getFullYear());
-  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0');
     const key=activeYear+'-'+mon;
     const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on=histFilter.mode==='month'&&histFilter.from===key;
-    if(hasData) mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    if(hasData) h+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
   }
-  document.getElementById('hfilter-months').innerHTML = mHtml;
+  h += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓</span>';
+  document.getElementById('hfilter-quick').innerHTML = h;
   document.getElementById('hfilter-custom').classList.toggle('on', histFilter.mode==='custom');
 }
 function setHistFilter(mode,val){
