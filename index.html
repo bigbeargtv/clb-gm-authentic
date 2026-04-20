@@ -1571,7 +1571,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 .iw{padding:14px 14px 90px;}
 /* Hero Banner */
 .i-hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:14px;height:220px;display:flex;align-items:flex-end;background:linear-gradient(135deg,#0f1728,#1a2642);box-shadow:0 8px 32px rgba(0,0,0,.2),0 0 0 1px rgba(255,255,255,.05) inset;}
-.i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;}
+.i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;transition:opacity 1s ease;}
+.i-hero-bg2{position:absolute;inset:0;background:center 30%/cover no-repeat;opacity:0;transition:opacity 1s ease;}
 .i-hero:not(.hero-editing):hover .i-hero-bg{transition:transform .3s;transform:scale(1.03);}
 .hero-editing .i-hero-bg{cursor:grab;}
 .hero-editing .i-hero-ov,.hero-editing .i-hero-txt,.hero-editing .i-hero-badge{pointer-events:none;opacity:.3;transition:opacity .2s;}
@@ -1750,6 +1751,7 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <!-- HERO -->
   <div class="i-hero">
     <div class="i-hero-bg" id="iHeroBg"></div>
+    <div class="i-hero-bg2" id="iHeroBg2"></div>
     <div class="i-hero-ov"></div>
     <div class="i-hero-txt">
       <h2>CLB <em>GM Authentic</em></h2>
@@ -5755,13 +5757,49 @@ function renderIntro(){
   const allPhotos=gUrls.concat(albumPhotos);
 
   if(bg){
-    if(heroUrl) bg.style.backgroundImage=`url('${heroUrl}')`;
-    else if(allPhotos.length) bg.style.backgroundImage=`url('${allPhotos[allPhotos.length-1].url}')`;
-    else bg.style.backgroundImage='';
+    const bg2=document.getElementById('iHeroBg2');
     const hPos=clbInfo.heroPos!==undefined?clbInfo.heroPos:30;
     const hZoom=clbInfo.heroZoom||100;
-    bg.style.backgroundPosition='center '+hPos+'%';
-    bg.style.backgroundSize=hZoom<=100?'cover':hZoom+'%';
+    const bgStyle='center '+hPos+'%';
+    const bgSize=hZoom<=100?'cover':hZoom+'%';
+    bg.style.backgroundPosition=bgStyle;bg.style.backgroundSize=bgSize;
+    if(bg2){bg2.style.backgroundPosition=bgStyle;bg2.style.backgroundSize=bgSize;}
+
+    // Slideshow: cycle through album photos
+    if(window._heroSlideTimer)clearInterval(window._heroSlideTimer);
+    const slidePhotos=albumPhotos.filter(a=>a.url&&!/^data:/.test(a.url));
+    if(heroUrl){
+      bg.style.backgroundImage=`url('${heroUrl}')`;
+    } else if(slidePhotos.length>1){
+      let si=0;
+      bg.style.backgroundImage=`url('${slidePhotos[0].url}')`;
+      bg.style.opacity='1';
+      if(bg2)bg2.style.opacity='0';
+      window._heroSlideTimer=setInterval(()=>{
+        si=(si+1)%slidePhotos.length;
+        const nextUrl=slidePhotos[si].url;
+        // Preload
+        const preImg=new Image();preImg.src=nextUrl;
+        preImg.onload=()=>{
+          if(bg2){
+            // Crossfade: show bg2 with new image, hide bg
+            if(si%2===1){
+              bg2.style.backgroundImage=`url('${nextUrl}')`;
+              bg2.style.opacity='1';bg.style.opacity='0';
+            } else {
+              bg.style.backgroundImage=`url('${nextUrl}')`;
+              bg.style.opacity='1';bg2.style.opacity='0';
+            }
+          } else {
+            bg.style.backgroundImage=`url('${nextUrl}')`;
+          }
+        };
+      },5000);
+    } else if(allPhotos.length){
+      bg.style.backgroundImage=`url('${allPhotos[allPhotos.length-1].url}')`;
+    } else {
+      bg.style.backgroundImage='';
+    }
   }
   const heroInp=document.getElementById('heroUrlInp');
   if(heroInp) heroInp.value=heroUrl;
@@ -6509,29 +6547,36 @@ function renderAlbum(){
     h += '<div id="'+dayId+'" style="display:'+(isOpen?'block':'none')+';">';
 
     links.forEach(a=>{
-      h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 13px;border-top:1px solid var(--bdr);background:var(--s1);">';
+      h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 13px;border-top:1px solid var(--bdr);background:var(--s1);" '+(isAdmin?'draggable="true" data-album-id="'+a.id+'"':'')+' >';
+      if(isAdmin&&window._albumReorderMode) h += '<span style="font-size:14px;cursor:grab;flex-shrink:0;color:var(--muted);">☰</span>';
       h += '<span style="font-size:20px;flex-shrink:0;">🔗</span>';
       h += '<div style="flex:1;min-width:0;">';
       h += '<div style="font-weight:800;font-size:13px;">'+xe(a.title||'Link album')+'</div>';
       h += '<a href="'+xe(a.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--gold);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+xe(a.url)+'</a>';
       h += '</div>';
-      if(isAdmin) h += '<button onclick="delAlbumPhoto('+a.id+')" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);">🗑</button>';
+      if(isAdmin) h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);">🗑</button>';
       h += '</div>';
     });
 
     if(photos.length){
+      const _reorder=isAdmin&&window._albumReorderMode;
       h += '<div style="padding:8px;'+(links.length?'border-top:1px solid var(--bdr);':'')+'background:var(--s1);">';
+      if(isAdmin){
+        h += '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;">';
+        h += '<button onclick="toggleAlbumReorder()" style="background:'+(_reorder?'var(--gold)':'var(--s2)')+';color:'+(_reorder?'#fff':'var(--muted)')+';border:1.5px solid '+(_reorder?'var(--gold)':'var(--bdr2)')+';border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_reorder?'✓ Xong':'↕ Sắp xếp')+'</button>';
+        h += '</div>';
+      }
       h += '<div class="album-grid" data-date="'+d+'">';
       photos.forEach((a,pi)=>{
-        if(isAdmin){
+        if(_reorder){
           h += '<div style="position:relative;" draggable="true" data-album-id="'+a.id+'">';
-          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async">';
-          h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;z-index:2;">✕</button>';
-          h += '<div style="position:absolute;top:3px;left:3px;background:#000a;border-radius:5px;color:#fff;font-size:9px;padding:2px 5px;pointer-events:none;opacity:.7;">↕</div>';
+          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async" style="opacity:.8;">';
+          h += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none;background:#0003;color:#fff;">☰</div>';
           h += '</div>';
         } else {
           h += '<div style="position:relative;">';
           h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
+          if(isAdmin) h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;z-index:2;">✕</button>';
           h += '</div>';
         }
       });
@@ -6543,63 +6588,57 @@ function renderAlbum(){
 
   el.innerHTML = h;
 
-  // ── Drag & Drop + Tap-to-swap for album photos (admin only) ──
-  if(isAdmin){
-    el.querySelectorAll('.album-grid[data-date]').forEach(grid=>{
-      // Desktop: HTML5 Drag & Drop
-      let dragEl=null;
-      grid.addEventListener('dragstart',e=>{
-        const item=e.target.closest('[data-album-id]');
-        if(!item)return;
-        dragEl=item;
+  // ── Drag & Drop for album reorder (admin reorder mode only) ──
+  if(isAdmin&&window._albumReorderMode){
+    el.querySelectorAll('[data-album-id]').forEach(item=>{
+      item.addEventListener('dragstart',e=>{
+        window._albumDragEl=item;
         item.style.opacity='.4';
         e.dataTransfer.effectAllowed='move';
         e.dataTransfer.setData('text/plain',item.dataset.albumId);
       });
-      grid.addEventListener('dragend',e=>{
-        if(dragEl)dragEl.style.opacity='1';
-        grid.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
-        dragEl=null;
+      item.addEventListener('dragend',e=>{
+        item.style.opacity='1';
+        el.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        window._albumDragEl=null;
       });
-      grid.addEventListener('dragover',e=>{
+      item.addEventListener('dragover',e=>{
         e.preventDefault();
         e.dataTransfer.dropEffect='move';
-        const target=e.target.closest('[data-album-id]');
-        grid.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
-        if(target&&target!==dragEl)target.style.outline='2px solid var(--gold)';
+        el.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        item.style.outline='2px solid var(--gold)';
       });
-      grid.addEventListener('drop',e=>{
+      item.addEventListener('drop',e=>{
         e.preventDefault();
-        const target=e.target.closest('[data-album-id]');
-        if(!target||!dragEl||target===dragEl)return;
-        albumSwap(+dragEl.dataset.albumId,+target.dataset.albumId);
+        if(!window._albumDragEl||window._albumDragEl===item)return;
+        albumSwap(+window._albumDragEl.dataset.albumId,+item.dataset.albumId);
       });
-
-      // Mobile: tap first photo → highlight → tap second → swap
-      grid.querySelectorAll('[data-album-id]').forEach(item=>{
-        item.addEventListener('click',e=>{
-          if(e.target.closest('button'))return; // skip delete btn
-          const id=+item.dataset.albumId;
-          if(!window._albumSwapFrom){
-            window._albumSwapFrom=id;
-            item.style.outline='3px solid var(--gold)';
-            item.style.outlineOffset='-3px';
-            showToast('Chạm ảnh khác để đổi vị trí','info');
-            e.stopPropagation();e.preventDefault();
-          } else if(window._albumSwapFrom===id){
-            // Tap same → deselect → open lightbox
-            window._albumSwapFrom=null;
-            item.style.outline='';item.style.outlineOffset='';
-            openLightbox(id);
-          } else {
-            albumSwap(window._albumSwapFrom,id);
-            window._albumSwapFrom=null;
-            e.stopPropagation();e.preventDefault();
-          }
-        });
+      // Mobile: tap-to-swap in reorder mode
+      item.addEventListener('click',e=>{
+        if(e.target.closest('button'))return;
+        const id=+item.dataset.albumId;
+        if(!window._albumSwapFrom){
+          window._albumSwapFrom=id;
+          item.style.outline='3px solid var(--gold)';
+          item.style.outlineOffset='-3px';
+          showToast('Chạm ảnh khác để đổi vị trí','info');
+        } else if(window._albumSwapFrom===id){
+          window._albumSwapFrom=null;
+          item.style.outline='';item.style.outlineOffset='';
+        } else {
+          albumSwap(window._albumSwapFrom,id);
+          window._albumSwapFrom=null;
+        }
+        e.stopPropagation();e.preventDefault();
       });
     });
   }
+}
+
+function toggleAlbumReorder(){
+  window._albumReorderMode=!window._albumReorderMode;
+  window._albumSwapFrom=null;
+  renderAlbum();
 }
 
 function albumSwap(fromId,toId){
