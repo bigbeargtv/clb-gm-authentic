@@ -40,7 +40,8 @@
 <title>GM Authentic Pickleball Club - Bảng Xếp Hạng & Quản Lý CLB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800|Barlow+Condensed:700,800,900&subset=latin,latin-ext,vietnamese&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f0f2f7;--s1:#ffffff;--s2:#f8f9fc;--s3:#eef0f6;--card:#ffffff;
@@ -4897,7 +4898,7 @@ function renderQuyDay(date, saved){
         </div>
         ${isAdmin?`<button onclick="togglePaidFull('${p.name}','${date}')"
           style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;white-space:nowrap;">
-          ✓ Đã nộp
+          ✓ Xác nhận
         </button>`:''}
       </div>`;
     });
@@ -5090,10 +5091,7 @@ function renderQuy(){
       ? '<img class="av-img-small" src="'+mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
       : '<div class="quy-av '+(mb?AVC[mb.color]:'')+'" '+(mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
     const rk = medal || (i+1);
-    // Kiểm tra đã nộp hết chưa (dùng calcFundStats)
-    const _fp=_fs.perPerson[p.name];
-    const allPaid=_fp&&_fp.owed>0&&_fp.paid>=_fp.owed;
-    const paidBadge = allPaid ? '<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-left:4px;">Đã Ủng Hộ ✅</span>' : '';
+    const paidBadge = '';
     html += `<div class="quy-row ${rc}">
       <div class="rk">${rk}</div>
       <div class="quy-player">${avHtml}<div><span class="quy-nm name-link" onclick="showProfileCard(this.getAttribute('data-n'))" data-n="${xe(p.name)}">${xe(p.name)}</span>${paidBadge}</div></div>
@@ -6026,7 +6024,7 @@ function renderDebtSummary(){
         <span class="debt-match-date">${m.date?m.date.slice(5):'--'}</span>
         <span class="debt-match-teams">Thua <b>${xe(winners.join(' & '))}</b></span>
         <span class="debt-match-score">-${fmtNum(+m.bet)}&#x1F343;</span>
-        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markOneDebtPaid(${m.id},'${d.name.replace(/'/g,"\\'")}')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:6px;">✓ Đã nộp</button>`:''}
+        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markOneDebtPaid(${m.id},'${d.name.replace(/'/g,"\\'")}')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:6px;">✓ Xác nhận</button>`:''}
       </div>`;
     }).join('');
     return `<div>
@@ -6034,7 +6032,7 @@ function renderDebtSummary(){
         ${avHtml}
         <span class="debt-name">${xe(d.name)}</span>
         <span class="debt-amount">-${fmtNum(d.owed)}&#x1F343;</span>
-        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markAllDebtPaid('${d.name.replace(/'/g,"\\'")}')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-right:8px;">✓ Đã nộp</button>`:''}<span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
+        ${(typeof isAdmin!=='undefined'&&isAdmin===true)?`<button onclick="event.stopPropagation();markAllDebtPaid('${d.name.replace(/'/g,"\\'")}')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--green);background:#00b85515;color:var(--green);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-right:8px;">✓ Xác nhận</button>`:''}<span class="debt-arrow" id="ddet-${i}-arr">&#x276F;</span>
       </div>
       <div class="debt-detail" id="ddet-${i}" data-dname="${(d.name||'').replace(/"/g,'&quot;')}">${detailRows}</div>
     </div>`;
