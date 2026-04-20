@@ -2117,7 +2117,7 @@ function applyRemoteData(data){
   if(data.members !== undefined){
     const remote = JSON.stringify(data.members);
     const local  = JSON.stringify(members);
-    if(remote !== local){ members = data.members||[]; memberUid = data.memberUid||1; changed=true; }
+    if(remote !== local){ members = data.members||[]; memberUid = data.memberUid||1; _rebuildMbCache(); changed=true; }
   }
   if(data.matches !== undefined){
     const remote = JSON.stringify(data.matches||[]);
@@ -2145,7 +2145,7 @@ function applyRemoteData(data){
 const CACHE_KEY='clb_v3';
 function _applyData(d){
   if(!d) return;
-  members=d.members||[]; memberUid=d.memberUid||1;
+  members=d.members||[]; memberUid=d.memberUid||1; _rebuildMbCache();
   matches=d.matches||[]; matchUid=d.matchUid||1;
   tgt=d.tgt||11; cat=d.cat||'nam';
   sessionDate=d.sessionDate||''; drawSessionsMeta=d.drawSessionsMeta||{};
@@ -2196,6 +2196,7 @@ let saveTimer=null;
 function debounceSave(){
   clearTimeout(saveTimer);
   setSaveDotPending();
+  _rebuildFilterCache(); // refresh cached years/months
   // Khi đang nhập trận (unsaved card tồn tại) → delay 2s để tránh SSE echo làm reset UI
   const delay = matches.some(m=>!m.saved) ? 1500 : 800;
   saveTimer=setTimeout(()=>{ save(); }, delay);
@@ -2313,14 +2314,14 @@ function addMember(){
   if(!name)return;
   if(members.find(m=>m.name.toLowerCase()===name.toLowerCase())){alert('Tên này đã có rồi!');return;}
   members.push({id:memberUid++,name,gender:newGender,color:members.length%10});
-  inp.value='';
+  _rebuildMbCache(); inp.value='';
   renderMembers();debounceSave();
 }
 function removeMember(id){
   if(!isAdmin)return;
   if(!confirm('Xóa thành viên này?'))return;
   members=members.filter(m=>m.id!==id);
-  renderMembers();debounceSave();
+  _rebuildMbCache(); renderMembers();debounceSave();
 }
 function memberAvHtml(m){
   if(m.photo) return '<img class="av-photo" src="'+m.photo+'" alt="'+xe(m.name)+'">';
@@ -3445,7 +3446,7 @@ function importBackup(input){
 
 function applyBackupData(data){
   members   = data.members   || [];
-  memberUid = data.memberUid || 1;
+  memberUid = data.memberUid || 1; _rebuildMbCache();
   matches   = data.matches   || [];
   matchUid  = data.matchUid  || 1;
   tgt       = data.tgt       || 11;
@@ -4240,7 +4241,9 @@ function rSavedWithDel(m){
   </div>`;
 }
 
-function mbOf(name){return members.find(m=>m.name===name);}
+let _mbCache=new Map();
+function _rebuildMbCache(){_mbCache=new Map(members.map(m=>[m.name,m]));}
+function mbOf(name){return _mbCache.get(name);}
 
 function slot(matchId,field,name){
   const mb=mbOf(name);
@@ -4480,7 +4483,8 @@ function setBetCustom(matchId, val){
 let quyFilter = {mode:'all', from:'', to:''};
 
 function initQuyFilter(){
-  const years=[...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
+  if(!_filterYears.length) _rebuildFilterCache();
+  const years=_filterYears;
   const activeYear=quyFilter.mode==='year'?quyFilter.from:String(new Date().getFullYear());
   const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
@@ -4492,7 +4496,7 @@ function initQuyFilter(){
   let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0'), key=activeYear+'-'+mon;
-    const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const hasData=_filterMonths.has(key);
     const on=quyFilter.mode==='month'&&quyFilter.from===key;
     if(hasData){
       qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
@@ -4894,6 +4898,8 @@ function delBetEntry(id){
 
 
 // ─── THU CHI ───
+let _rlTimer=0;
+function _debouncedRenderLedger(){clearTimeout(_rlTimer);_rlTimer=setTimeout(renderLedger,30);}
 function renderLedger(){
   const el = document.getElementById('ledger-content');
   if(!el) return;
@@ -4998,7 +5004,7 @@ function renderLedger(){
     const activeTab = window._histTxTab || 'in';
     const histCollapsed = window._histTxCollapsed || false;
     h += `<div class="ldg-card" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._histTxCollapsed=!window._histTxCollapsed;renderLedger();">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._histTxCollapsed=!window._histTxCollapsed;_debouncedRenderLedger();">
         <div style="font-weight:800;font-size:14px;">📋 Lịch sử thu/chi</div>
         <span style="font-size:11px;color:var(--muted);font-weight:700;transition:transform .2s;">${histCollapsed?'▶ Mở rộng':'▼ Thu gọn'}</span>
       </div>
@@ -5142,7 +5148,7 @@ function renderLedger(){
     if(txAll2.length){
       const statsCollapsed=window._ldgStatsCollapsed||false;
       h+=`<div class="ldg-card" style="margin-bottom:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._ldgStatsCollapsed=!window._ldgStatsCollapsed;renderLedger();">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._ldgStatsCollapsed=!window._ldgStatsCollapsed;_debouncedRenderLedger();">
           <div style="font-weight:800;font-size:14px;">📊 Thống kê chi tiêu</div>
           <span style="font-size:11px;color:var(--muted);font-weight:700;">${statsCollapsed?'▶':'▼'}</span>
         </div>`;
@@ -5213,7 +5219,7 @@ function renderLedger(){
   if(peopleList.length){
     const memberCollapsed=window._ldgMemberCollapsed||false;
     h += `<div class="ldg-card" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._ldgMemberCollapsed=!window._ldgMemberCollapsed;renderLedger();">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._ldgMemberCollapsed=!window._ldgMemberCollapsed;_debouncedRenderLedger();">
         <div style="font-weight:800;font-size:14px;">👤 Chi tiết từng thành viên</div>
         <span style="font-size:11px;color:var(--muted);font-weight:700;">${memberCollapsed?'▶':'▼'}</span>
       </div>`;
@@ -5888,7 +5894,7 @@ function buildStatsHTML(name){
   const rev=[...allResults].reverse();
   let curSign=rev[0]||null, curStreakNow=0;
   for(let i=0;i<rev.length;i++){if(rev[i]===curSign)curStreakNow++;else break;}
-  const allSaved=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date);
+  const allSaved=matches.filter(m=>m.saved&&!m.isBetEntry&&m.date).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const eloData=calcElo(allSaved,null);
   const myElo=eloData.find(p=>p.name===name)||{elo:1000,eloChange:0};
   const eloRank=eloData.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
@@ -6307,12 +6313,20 @@ function delAlbumPhoto(id){
 let activeBxhTab = 'all';
 let bxhFilter = { mode: 'all', from: '', to: '' }; // mode: all | year | month | custom
 
+// Shared cache for filter years & months (rebuilt when matches change)
+let _filterYears=[], _filterMonths=new Set();
+function _rebuildFilterCache(){
+  const saved=matches.filter(m=>m.saved&&m.date&&!m.isBetEntry);
+  _filterYears=[...new Set(saved.map(m=>m.date.slice(0,4)))].sort().reverse();
+  _filterMonths=new Set(saved.map(m=>m.date.slice(0,7)));
+}
+
 function initBxhFilter(){
   const now = new Date();
   const curYear = now.getFullYear();
 
-  // Quick pills: Tất cả + năm + Tùy chọn
-  const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
+  if(!_filterYears.length) _rebuildFilterCache();
+  const years = _filterYears;
   let quickHtml = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on = bxhFilter.mode==='year' && bxhFilter.from===y;
@@ -6325,7 +6339,7 @@ function initBxhFilter(){
   for(let i=0;i<12;i++){
     const mon = String(i+1).padStart(2,'0');
     const key = activeYear+'-'+mon;
-    const hasData = matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const hasData = _filterMonths.has(key);
     const on = bxhFilter.mode==='month' && bxhFilter.from===key;
     if(hasData){
       quickHtml += '<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
@@ -6406,7 +6420,7 @@ function switchBxhTab(ct){
 function calcElo(matchList, catFilter){
   const K=32, elo={}, stats={};
   function ge(n){ return elo[n]!==undefined ? elo[n] : 1000; }
-  matchList.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(m=>{
+  matchList.forEach(m=>{
     if(catFilter && m.cat!==catFilter) return;
     const s1=+m.s1, s2=+m.s2;
     const w=m.winner||(m.s1!==''&&m.s2!==''?(s1>s2?'A':s2>s1?'B':''):'');
@@ -6553,11 +6567,12 @@ function renderBXH(){
     el.innerHTML=h;
   }
 
-  buildTable(calcElo(saved,null),  'bxh-all');
-  buildTable(calcElo(saved,'nam'), 'bxh-nam');
-  buildTable(calcElo(saved,'mix'), 'bxh-mix');
-  buildTable(calcElo(saved,'nu'),  'bxh-nu');
-  buildTable(calcElo(saved,'hon'), 'bxh-hon');
+  const _sorted=saved.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  buildTable(calcElo(_sorted,null),  'bxh-all');
+  buildTable(calcElo(_sorted,'nam'), 'bxh-nam');
+  buildTable(calcElo(_sorted,'mix'), 'bxh-mix');
+  buildTable(calcElo(_sorted,'nu'),  'bxh-nu');
+  buildTable(calcElo(_sorted,'hon'), 'bxh-hon');
   switchBxhTab(activeBxhTab);
 }
 // ─── HISTORY ───
@@ -6565,7 +6580,8 @@ function renderBXH(){
 let histFilter = {mode:'all', from:'', to:''};
 
 function initHistFilter(){
-  const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
+  if(!_filterYears.length) _rebuildFilterCache();
+  const years = _filterYears;
   const activeYear = histFilter.mode==='year' ? histFilter.from : String(new Date().getFullYear());
   const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
@@ -6578,7 +6594,7 @@ function initHistFilter(){
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0');
     const key=activeYear+'-'+mon;
-    const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
+    const hasData=_filterMonths.has(key);
     const on=histFilter.mode==='month'&&histFilter.from===key;
     if(hasData){
       qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
@@ -7063,7 +7079,7 @@ function showProfileCard(name){
   });
   const total=wins+losses+(results.filter(r=>r==='D').length);
   const wr=total?Math.round(wins/total*100):0;
-  const eloData=calcElo(matches.filter(m=>m.saved&&!m.isBetEntry&&m.date),null);
+  const eloData=calcElo(matches.filter(m=>m.saved&&!m.isBetEntry&&m.date).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),null);
   const myElo=eloData.find(p=>p.name===name)||{elo:1000,eloChange:0};
   const eloRank=eloData.slice().sort((a,b)=>b.elo-a.elo).findIndex(p=>p.name===name)+1;
   // Streak
