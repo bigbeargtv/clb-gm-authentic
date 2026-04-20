@@ -1646,6 +1646,10 @@ undefined
       <p><span class="i-hero-dot"></span>H&#xE0; N&#x1ED9;i&nbsp;<span class="i-hero-dot"></span>&nbsp;Since 2024</p>
     </div>
   </div>
+  <div class="admin-only" id="heroUrlWrap" style="display:flex;gap:6px;margin:-8px 0 10px;align-items:center;">
+    <input id="heroUrlInp" class="ldg-inp" style="flex:1;font-size:12px;padding:7px 10px;" placeholder="D&#xE1;n link &#x1EA3;nh hero (jpg/png/webp)...">
+    <button onclick="setHeroUrl()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">&#x110;&#x1EB7;t Hero</button>
+  </div>
 
   <!-- STATS -->
   <div class="i-stats">
@@ -1696,6 +1700,11 @@ undefined
   <div class="i-block">
     <div class="i-block-ttl">&#x1EA2;nh ho&#x1EA1;t &#x111;&#x1ED9;ng</div>
     <div class="i-gallery" id="iGallery"><span class="i-gallery-empty">Ch&#x01B0;a c&#xF3; &#x1EA3;nh &#x2014; h&#xE3;y upload v&#xE0;o tab Album</span></div>
+    <div class="admin-only" id="galleryUrlWrap" style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+      <input id="galleryUrlInp" class="ldg-inp" style="flex:1;font-size:12px;padding:7px 10px;" placeholder="D&#xE1;n link &#x1EA3;nh ho&#x1EA1;t &#x111;&#x1ED9;ng...">
+      <button onclick="addGalleryUrl()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Th&#xEA;m</button>
+    </div>
+    <div id="galleryUrlList" class="admin-only" style="margin-top:6px;"></div>
   </div>
 
 </div>
@@ -5346,19 +5355,64 @@ function renderIntro(){
     // Re-bind edit if admin
     if(isAdmin) _bindFeatEdit();
   }
+  // Hero image: clbInfo.heroUrl > last album photo
+  const heroUrl=clbInfo.heroUrl||'';
+  const bg=document.getElementById('iHeroBg');
+  const albumPhotos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)||isImageUrl(a.url)));
+
+  // Gallery: clbInfo.galleryUrls + album photos
+  const gUrls=(clbInfo.galleryUrls||[]).map(u=>({url:u}));
+  const allPhotos=gUrls.concat(albumPhotos);
+
+  if(bg){
+    if(heroUrl) bg.style.backgroundImage=`url('${heroUrl}')`;
+    else if(allPhotos.length) bg.style.backgroundImage=`url('${allPhotos[allPhotos.length-1].url}')`;
+    else bg.style.backgroundImage='';
+  }
+  const heroInp=document.getElementById('heroUrlInp');
+  if(heroInp) heroInp.value=heroUrl;
+
   const gallery=document.getElementById('iGallery');
   if(!gallery) return;
-  const photos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)||isImageUrl(a.url)));
-  if(!photos.length){
-    gallery.innerHTML='<span class="i-gallery-empty">Ch\u01b0a c\xf3 \u1ea3nh \u2014 h\xe3y upload v\xe0o tab Album</span>';
-    const bg=document.getElementById('iHeroBg');
-    if(bg) bg.style.backgroundImage='';
+  if(!allPhotos.length){
+    gallery.innerHTML='<span class="i-gallery-empty">Ch\u01b0a c\xf3 \u1ea3nh</span>';
   } else {
-    gallery.innerHTML=photos.map((a,i)=>`<div class="i-gimg" onclick="openIntroPhoto(${i})" style="cursor:pointer"><img loading="lazy" src="${a.url}" decoding="async"></div>`).join('');
-    window._introPhotos=photos;
-    const bg=document.getElementById('iHeroBg');
-    if(bg) bg.style.backgroundImage=`url('${photos[photos.length-1].url}')`;
+    gallery.innerHTML=allPhotos.map((a,i)=>`<div class="i-gimg" onclick="openIntroPhoto(${i})" style="cursor:pointer"><img loading="lazy" src="${a.url}" decoding="async"></div>`).join('');
+    window._introPhotos=allPhotos;
   }
+  // Render gallery url list for admin
+  const gList=document.getElementById('galleryUrlList');
+  if(gList&&isAdmin){
+    const urls=clbInfo.galleryUrls||[];
+    gList.innerHTML=urls.map((u,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <img src="${xe(u)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">
+      <span style="flex:1;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(u)}</span>
+      <button onclick="removeGalleryUrl(${i})" style="background:none;border:none;color:var(--red,#e74c3c);cursor:pointer;font-size:14px;padding:2px 6px;">✕</button>
+    </div>`).join('');
+  }
+}
+function setHeroUrl(){
+  if(!isAdmin) return;
+  const inp=document.getElementById('heroUrlInp');
+  const url=(inp?inp.value:'').trim();
+  clbInfo.heroUrl=url;
+  save(); renderIntro();
+}
+function addGalleryUrl(){
+  if(!isAdmin) return;
+  const inp=document.getElementById('galleryUrlInp');
+  const url=(inp?inp.value:'').trim();
+  if(!url){inp&&inp.focus();return;}
+  if(!clbInfo.galleryUrls) clbInfo.galleryUrls=[];
+  clbInfo.galleryUrls.push(url);
+  inp.value='';
+  save(); renderIntro();
+}
+function removeGalleryUrl(i){
+  if(!isAdmin) return;
+  if(!clbInfo.galleryUrls) return;
+  clbInfo.galleryUrls.splice(i,1);
+  save(); renderIntro();
 }
 function _bindFeatEdit(){
   (clbInfo.features||[]).forEach((f,i)=>{
