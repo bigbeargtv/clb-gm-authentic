@@ -1795,6 +1795,18 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
     <div class="i-edit-hint">&#x270F;&#xFE0F; Ch&#x1EA1;m v&#xE0;o &#x111;&#x1EC3; ch&#x1EC9;nh s&#x1EED;a</div>
     <!-- Feature cards -->
     <div class="i-features" id="iFeatures"></div>
+
+    <!-- Đối tác -->
+    <div style="margin-top:20px;">
+      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:12px;">Đối tác & Nhà tài trợ</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px 24px;">
+        <a href="https://www.nike.com" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike" style="height:28px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
+        <a href="https://www.joola.com" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Joola_Logo_2025.svg" alt="Joola" style="height:24px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
+        <a href="https://www.bidv.com.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BIDV_RGB.png" alt="BIDV" style="height:26px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
+        <a href="#" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://cautruyenhinh.net/wp-content/uploads/2021/05/logo-chuan.png" alt="Mithalo" style="height:28px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
+        <a href="https://sakuko.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://dnsg.1cdn.vn/2022/09/11/i.doanhnhansaigon.vn-2022-09-10-_2586-1662802613.png" alt="Sakuko" style="height:26px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
+      </div>
+    </div>
   </div>
 
   <!-- LỊCH -->
@@ -6590,7 +6602,9 @@ function renderAlbum(){
 
   // ── Drag & Drop for album reorder (admin reorder mode only) ──
   if(isAdmin&&window._albumReorderMode){
-    el.querySelectorAll('[data-album-id]').forEach(item=>{
+    const items=el.querySelectorAll('[data-album-id]');
+    items.forEach(item=>{
+      // Desktop: HTML5 Drag API
       item.addEventListener('dragstart',e=>{
         window._albumDragEl=item;
         item.style.opacity='.4';
@@ -6599,13 +6613,13 @@ function renderAlbum(){
       });
       item.addEventListener('dragend',e=>{
         item.style.opacity='1';
-        el.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        items.forEach(c=>{c.style.outline='';});
         window._albumDragEl=null;
       });
       item.addEventListener('dragover',e=>{
         e.preventDefault();
         e.dataTransfer.dropEffect='move';
-        el.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        items.forEach(c=>{c.style.outline='';});
         item.style.outline='2px solid var(--gold)';
       });
       item.addEventListener('drop',e=>{
@@ -6613,23 +6627,61 @@ function renderAlbum(){
         if(!window._albumDragEl||window._albumDragEl===item)return;
         albumSwap(+window._albumDragEl.dataset.albumId,+item.dataset.albumId);
       });
-      // Mobile: tap-to-swap in reorder mode
-      item.addEventListener('click',e=>{
+      // Mobile: touch-drag reorder
+      let _touchStartY=0,_touchClone=null,_touchMoved=false;
+      item.addEventListener('touchstart',e=>{
         if(e.target.closest('button'))return;
-        const id=+item.dataset.albumId;
-        if(!window._albumSwapFrom){
-          window._albumSwapFrom=id;
-          item.style.outline='3px solid var(--gold)';
-          item.style.outlineOffset='-3px';
-          showToast('Chạm ảnh khác để đổi vị trí','info');
-        } else if(window._albumSwapFrom===id){
-          window._albumSwapFrom=null;
-          item.style.outline='';item.style.outlineOffset='';
-        } else {
-          albumSwap(window._albumSwapFrom,id);
-          window._albumSwapFrom=null;
+        _touchMoved=false;
+        _touchStartY=e.touches[0].clientY;
+        window._albumTouchSrc=item;
+        // Long press visual
+        item.style.opacity='.6';
+        item.style.outline='2px solid var(--gold)';
+      },{passive:true});
+      item.addEventListener('touchmove',e=>{
+        if(!window._albumTouchSrc||window._albumTouchSrc!==item)return;
+        _touchMoved=true;
+        e.preventDefault();
+        const t=e.touches[0];
+        // Highlight drop target
+        items.forEach(c=>{c.style.outline=c===item?'2px solid var(--gold)':'';});
+        const target=document.elementFromPoint(t.clientX,t.clientY);
+        if(target){
+          const dropItem=target.closest('[data-album-id]');
+          if(dropItem&&dropItem!==item) dropItem.style.outline='2px dashed var(--gold)';
         }
-        e.stopPropagation();e.preventDefault();
+      },{passive:false});
+      item.addEventListener('touchend',e=>{
+        item.style.opacity='1';
+        items.forEach(c=>{c.style.outline='';c.style.outlineOffset='';});
+        if(!window._albumTouchSrc||window._albumTouchSrc!==item){window._albumTouchSrc=null;return;}
+        if(_touchMoved){
+          // Drag-drop: find target under finger
+          const t=e.changedTouches[0];
+          const target=document.elementFromPoint(t.clientX,t.clientY);
+          if(target){
+            const dropItem=target.closest('[data-album-id]');
+            if(dropItem&&dropItem!==item){
+              albumSwap(+item.dataset.albumId,+dropItem.dataset.albumId);
+            }
+          }
+          window._albumTouchSrc=null;
+        } else {
+          // Tap-to-swap fallback
+          const id=+item.dataset.albumId;
+          if(!window._albumSwapFrom){
+            window._albumSwapFrom=id;
+            item.style.outline='3px solid var(--gold)';
+            item.style.outlineOffset='-3px';
+            showToast('Chạm ảnh khác để đổi vị trí','info');
+          } else if(window._albumSwapFrom===id){
+            window._albumSwapFrom=null;
+          } else {
+            albumSwap(window._albumSwapFrom,id);
+            window._albumSwapFrom=null;
+          }
+        }
+        window._albumTouchSrc=null;
       });
     });
   }
@@ -7325,12 +7377,12 @@ function hideSkeleton(){
 setTimeout(hideSkeleton,6000);
 // ─── INIT ───
 initDark();
+checkSavedAdminSession(); // Khôi phục admin session TRƯỚC khi load data
 (async function(){
   // Show loading state
   document.getElementById('saveLabel').textContent='Đang tải...';
   await load();
   await loadLogo();
-  checkSavedAdminSession();
   window.addEventListener('beforeunload', function(e){
     if(saveTimer){ e.preventDefault(); e.returnValue='Dữ liệu chưa được lưu. Bạn có chắc muốn thoát?'; return e.returnValue; }
   });
