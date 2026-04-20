@@ -255,10 +255,11 @@ nav::-webkit-scrollbar{display:none;}
   background:var(--s2);border:2px solid var(--bdr);color:var(--muted);transition:all .2s;
 }
 .tbtn.on{border-color:var(--gold);color:var(--gold);background:#f0b42918;}
-.cats{display:flex;gap:6px;margin-bottom:12px;}
+.cats{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cats::-webkit-scrollbar{display:none;}
 .cpill{
-  padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;
-  cursor:pointer;border:2px solid var(--bdr);background:var(--s2);color:var(--muted);
+  padding:6px 12px;border-radius:18px;font-size:12px;font-weight:700;white-space:nowrap;flex:0 0 auto;
+  cursor:pointer;border:1.5px solid var(--bdr);background:var(--s2);color:var(--muted);
   transition:all .18s;
 }
 .cpill.nam.on{border-color:var(--nam-c);color:var(--nam-c);background:#4a90e214;}
@@ -1321,8 +1322,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
     background:linear-gradient(90deg,transparent,var(--s1));pointer-events:none;z-index:2;}
   nav::before{content:'';position:absolute;left:0;top:0;bottom:0;width:20px;
     background:linear-gradient(270deg,transparent,var(--s1));pointer-events:none;z-index:2;}
-  .nt{min-width:46px;padding:8px 5px 6px!important;font-size:8px!important;gap:2px;flex:0 0 auto;}
-  .nt .ni{font-size:20px!important;}
+  .nt{min-width:50px;padding:10px 7px 7px!important;font-size:9px!important;gap:3px;flex:0 0 auto;}
+  .nt .ni{font-size:22px!important;}
 
   /* === NEW RESPONSIVE RULES === */
   /* Page containers */
@@ -1488,7 +1489,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   <div class="nt admin-only" onclick="goTab('pg-draw')" id="nt6" style="display:none"><span class="ni">casino</span>Bốc thăm</div>
   <div class="nt" onclick="goTab('pg-ledger')" id="nt7"><span class="ni">receipt_long</span>Thu Chi</div>
   <div class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ni">military_tech</span>Thành Tích</div>
-  <div class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ni">photo_library</span>Album</div>
+  <!--<div class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ni">photo_library</span>Album</div>-->
   <div class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ni">emoji_events</span>Tổng Kết</div>
 </nav>
 
