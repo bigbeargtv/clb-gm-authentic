@@ -1687,15 +1687,16 @@ undefined
       <p><span class="i-hero-dot"></span>H&#xE0; N&#x1ED9;i&nbsp;<span class="i-hero-dot"></span>&nbsp;Since 2024</p>
     </div>
   </div>
-  <div class="admin-only-flex" id="heroUrlWrap" style="gap:6px;margin:-8px 0 10px;align-items:center;">
-    <input id="heroUrlInp" class="ldg-inp" style="flex:1;font-size:12px;padding:7px 10px;" placeholder="D&#xE1;n link &#x1EA3;nh hero (jpg/png/webp)...">
+  <div class="admin-only-flex" id="heroUrlWrap" style="gap:6px;margin:-8px 0 10px;align-items:center;flex-wrap:wrap;">
+    <input id="heroUrlInp" class="ldg-inp" style="flex:1;font-size:12px;padding:7px 10px;min-width:150px;" placeholder="D&#xE1;n link &#x1EA3;nh hero (jpg/png/webp)...">
     <button onclick="setHeroUrl()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">&#x110;&#x1EB7;t Hero</button>
+    <button onclick="toggleHeroDrag()" id="heroReposBtn" style="background:var(--s2);color:var(--muted);border:1.5px solid var(--bdr2);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">&#x2195; Ch&#x1EC9;nh v&#x1ECB; tr&#xED;</button>
   </div>
 
   <!-- STATS -->
   <div class="i-stats">
     <div class="i-stat">
-      <div class="i-stat-n i-editable" id="iStatMember">~30</div>
+      <div class="i-stat-n i-editable" id="iStatMember">30</div>
       <div class="i-stat-l">Th&agrave;nh vi&ecirc;n</div>
     </div>
     <div class="i-stat">
@@ -2035,7 +2036,7 @@ const MONTHS=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6',
 let members=[], memberUid=1, newGender='m';
 let clbInfo={
   desc:'CLB GM Authentic quy t\u1ee5 TOP nh\u1eefng tay v\u1ee3t t\u00e0i n\u0103ng c\u1ee7a H\u00e0 N\u1ed9i, sinh ho\u1ea1t m\u1ed7i t\u1ed1i Th\u1ee9 3 & Th\u1ee9 6 h\u00e0ng tu\u1ea7n. Ch\u00fang t\u00f4i c\u01b0\u1eddi nhi\u1ec1u h\u01a1n th\u1eafng, tranh lu\u1eadn nhi\u1ec1u h\u01a1n t\u1eadp, v\u00e0 c\u00f3 m\u1ed9t qu\u1ef9 CLB ng\u00e0y c\u00e0ng ph\u1ed3ng to nh\u1EDD nh\u1EEFng ng\u01b0\u1EDDi thua tr\u1EADn kh\u00f4ng ch\u1ECBu th\u1EEBa nh\u1EADn m\u00ecnh d\u1EDF.',
-  memberCount:'~30',
+  memberCount:'30',
   badge:'\ud83c\udff8 Pickleball Club',
   time1:'18:00\u201320:00',loc1:'S\u00e2n Ocean Pickleball',
   time2:'18:00\u201320:00',loc2:'S\u00e2n Ocean Pickleball',
@@ -5523,6 +5524,8 @@ function renderIntro(){
     if(heroUrl) bg.style.backgroundImage=`url('${heroUrl}')`;
     else if(allPhotos.length) bg.style.backgroundImage=`url('${allPhotos[allPhotos.length-1].url}')`;
     else bg.style.backgroundImage='';
+    const hPos=clbInfo.heroPos!==undefined?clbInfo.heroPos:30;
+    bg.style.backgroundPosition='center '+hPos+'%';
   }
   const heroInp=document.getElementById('heroUrlInp');
   if(heroInp) heroInp.value=heroUrl;
@@ -5552,6 +5555,83 @@ function setHeroUrl(){
   const url=(inp?inp.value:'').trim();
   clbInfo.heroUrl=url;
   save(); renderIntro();
+}
+
+// ── Hero drag-to-reposition ──
+let _heroDragging=false, _heroDragActive=false, _heroStartY=0, _heroStartPos=0;
+function toggleHeroDrag(){
+  const bg=document.getElementById('iHeroBg');
+  const btn=document.getElementById('heroReposBtn');
+  if(!bg) return;
+  _heroDragging=!_heroDragging;
+  if(_heroDragging){
+    bg.style.cursor='grab';
+    bg.parentElement.style.overflow='hidden';
+    btn.style.background='var(--gold)';btn.style.color='#fff';btn.style.borderColor='var(--gold)';
+    btn.textContent='✓ Lưu vị trí';
+    bg.addEventListener('mousedown',_heroMD);
+    bg.addEventListener('touchstart',_heroTS,{passive:false});
+  } else {
+    bg.style.cursor='';
+    btn.style.background='var(--s2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--bdr2)';
+    btn.textContent='↕ Chỉnh vị trí';
+    bg.removeEventListener('mousedown',_heroMD);
+    bg.removeEventListener('touchstart',_heroTS);
+    document.removeEventListener('mousemove',_heroMM);
+    document.removeEventListener('mouseup',_heroMU);
+    document.removeEventListener('touchmove',_heroTM);
+    document.removeEventListener('touchend',_heroTE);
+    // Save position
+    if(!clbInfo.heroPos) clbInfo.heroPos=30;
+    save();
+  }
+}
+function _getHeroPos(){return clbInfo.heroPos!==undefined?clbInfo.heroPos:30;}
+function _setHeroVisual(pct){
+  const bg=document.getElementById('iHeroBg');
+  if(bg) bg.style.backgroundPosition='center '+Math.max(0,Math.min(100,pct))+'%';
+}
+function _heroMD(e){
+  e.preventDefault(); _heroDragActive=true; _heroStartY=e.clientY; _heroStartPos=_getHeroPos();
+  document.getElementById('iHeroBg').style.cursor='grabbing';
+  document.addEventListener('mousemove',_heroMM);
+  document.addEventListener('mouseup',_heroMU);
+}
+function _heroMM(e){
+  if(!_heroDragActive) return;
+  const dy=e.clientY-_heroStartY;
+  const heroH=document.getElementById('iHeroBg').parentElement.offsetHeight||200;
+  const newPos=_heroStartPos - (dy/heroH)*100;
+  clbInfo.heroPos=Math.max(0,Math.min(100,Math.round(newPos)));
+  _setHeroVisual(clbInfo.heroPos);
+}
+function _heroMU(){
+  _heroDragActive=false;
+  const bg=document.getElementById('iHeroBg');
+  if(bg) bg.style.cursor='grab';
+  document.removeEventListener('mousemove',_heroMM);
+  document.removeEventListener('mouseup',_heroMU);
+}
+function _heroTS(e){
+  if(e.touches.length!==1) return;
+  e.preventDefault(); _heroDragActive=true;
+  _heroStartY=e.touches[0].clientY; _heroStartPos=_getHeroPos();
+  document.addEventListener('touchmove',_heroTM,{passive:false});
+  document.addEventListener('touchend',_heroTE);
+}
+function _heroTM(e){
+  if(!_heroDragActive||!e.touches.length) return;
+  e.preventDefault();
+  const dy=e.touches[0].clientY-_heroStartY;
+  const heroH=document.getElementById('iHeroBg').parentElement.offsetHeight||200;
+  const newPos=_heroStartPos - (dy/heroH)*100;
+  clbInfo.heroPos=Math.max(0,Math.min(100,Math.round(newPos)));
+  _setHeroVisual(clbInfo.heroPos);
+}
+function _heroTE(){
+  _heroDragActive=false;
+  document.removeEventListener('touchmove',_heroTM);
+  document.removeEventListener('touchend',_heroTE);
 }
 function addGalleryUrl(){
   if(!isAdmin) return;
