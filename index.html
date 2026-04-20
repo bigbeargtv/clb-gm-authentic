@@ -43,7 +43,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f0f2f7;--s1:#ffffff;--s2:#f8f9fc;--s3:#eef0f6;
+  --bg:#f0f2f7;--s1:#ffffff;--s2:#f8f9fc;--s3:#eef0f6;--card:#ffffff;
   --bdr:#dde1ee;--bdr2:#c8cedf;
   --gold:#d4860a;--gold2:#e8950e;--blue:#2c6fca;--pink:#c9357a;
   --green:#1a9e60;--red:#d03030;--purple:#6b3fcf;
@@ -51,7 +51,7 @@
   --nam-c:#2c6fca;--mix-c:#c07a00;--nu-c:#c9357a;
 }
 html.dark{
-  --bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;
+  --bg:#0f1117;--s1:#1a1d27;--s2:#21253a;--s3:#2a2f45;--card:#1e2130;
   --bdr:#2e3350;--bdr2:#3a4060;
   --gold:#f0b429;--gold2:#ffcc44;
   --muted:#6b7494;--text:#e8ecf4;--text2:#9ba3c0;
@@ -246,7 +246,7 @@ nav::-webkit-scrollbar{display:none;}
 .avc5{background:linear-gradient(135deg,#9b6dff,#6030c0);box-shadow:0 3px 8px #9b6dff40;}
 .avc6{background:linear-gradient(135deg,#26c9a8,#0a9070);box-shadow:0 3px 8px #26c9a840;}
 .avc7{background:linear-gradient(135deg,#ff7b35,#c04a00);box-shadow:0 3px 8px #ff7b3540;}
-.avc8{background:linear-gradient(135deg,#22c5e8,#0880a8);box-shadow:0 3x 8px #22c5e840;}
+.avc8{background:linear-gradient(135deg,#22c5e8,#0880a8);box-shadow:0 3px 8px #22c5e840;}
 .avc9{background:linear-gradient(135deg,#d966ee,#8a1aaa);box-shadow:0 3px 8px #d966ee40;}
 
 /* ── MATCH CARDS ── */
@@ -1626,7 +1626,6 @@ body.admin-mode .i-feat-icon,
 body.admin-mode .i-feat-title,
 body.admin-mode .i-feat-sub{border-bottom:1px dashed rgba(240,180,41,0.3);cursor:text;}
 body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:10px;}
-undefined
 
 /* === FUN STATS v4 === */
 @keyframes funFadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
@@ -2364,7 +2363,7 @@ function goTab(id){
   document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   const map={'pg-intro':'nt0','pg-members':'nt1','pg-matches':'nt2','pg-bxh':'nt3','pg-hist':'nt4','pg-quy':'nt5','pg-draw':'nt6','pg-ledger':'nt7','pg-stats':'nt8','pg-album':'nt9','pg-funstats':'nt10'};
-  document.getElementById(map[id]).classList.add('on');
+  const _ntEl=document.getElementById(map[id]);if(_ntEl)_ntEl.classList.add('on');
   if(id==='pg-intro')renderIntro();
   if(id==='pg-bxh')renderBXH();
   if(id==='pg-hist')renderHist();
@@ -3749,7 +3748,7 @@ function openPicker(matchId,field){
 }
 function filterPicker(q){
   q=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const items=document.querySelectorAll('#pk-list .pk-item, #pk-list .pk-item-mix');
+  const items=document.querySelectorAll('#pk-list .pk-item, #pk-list .pk-item-sm');
   items.forEach(el=>{
     const n=(el.getAttribute('data-name')||el.textContent||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     el.style.display=n.includes(q)?'':'none';
@@ -4682,11 +4681,16 @@ function delMatch(id){
 function delDay(date){
   if(!isAdmin) return;
   if(!confirm('Xóa tất cả trận ngày '+fmtDate(date)+'?')) return;
-  // Collect team battle IDs being deleted so we can remove their bet entries too
+  // Collect team battle IDs + draw session IDs being deleted
   const tbIds=new Set(matches.filter(m=>m.saved&&m.isTeamBattle&&m.date===date).map(m=>m.id));
+  const drawSids=new Set(matches.filter(m=>m.saved&&m.fromDraw&&m.date===date&&m.drawSessionId).map(m=>m.drawSessionId));
   matches = matches.filter(m=>{
+    // Xóa bet entries liên kết team battle
     if(m.teamBattleParentId&&tbIds.has(m.teamBattleParentId)) return false;
-    if(m.saved&&!m.fromDraw&&!m.isBetEntry&&m.date===date) return false;
+    // Xóa tất cả trận trong ngày (thường + draw + team battle + bet entries của ngày đó)
+    if(m.saved&&m.date===date&&!m.teamBattleParentId) return false;
+    // Xóa bet entries draw cùng session
+    if(m.isBetEntry&&m.drawSessionId&&drawSids.has(m.drawSessionId)) return false;
     return true;
   });
   renderMatches();
@@ -4978,8 +4982,8 @@ function renderQuyQR(){
       💳 Chuyển khoản nộp quỹ<span style="flex:1;height:1px;background:var(--bdr);display:block;"></span>
     </div>
     <div style="display:flex;gap:14px;align-items:center;">
-      ${qrUrl?`<div style="flex-shrink:0;background:#fff;border-radius:12px;padding:6px;width:180px;height:180pxx;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <img src="${qrUrl}" style="width:168px;height:168pxx;object-fit:contain;" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<span style=font-size:10px;color:#999;text-align:center>QR không tải được</span>'">
+      ${qrUrl?`<div style="flex-shrink:0;background:#fff;border-radius:12px;padding:6px;width:180px;height:180px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <img src="${qrUrl}" style="width:168px;height:168px;object-fit:contain;" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<span style=font-size:10px;color:#999;text-align:center>QR không tải được</span>'">
       </div>`:''}
       <div style="flex:1;min-width:0;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${xe(bank)}</div>
@@ -6900,7 +6904,7 @@ function renderBXH(){
       const avcls=p.mb?AVC[p.mb.color]:'';
       const bxhAv=(p.mb&&p.mb.photo)
         ?'<img class="av-img-small" src="'+p.mb.photo+'" style="width:28px;height:28px;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)">'
-        :'<div class="bxh-av '+avcls+'" '+(p.mb?'':' style="background:var(--muted)"')+' onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)" style="cursor:pointer">'+ini(p.name)+'</div>';
+        :'<div class="bxh-av '+avcls+'" onclick="event.stopPropagation();showProfileCard(this.closest(\'.tbl-r\').dataset.n)" style="cursor:pointer;'+(p.mb?'':'background:var(--muted);')+'">'+ini(p.name)+'</div>';
       const chg=p.eloChange;
       const chgHtml=chg===0
         ?'<span style="color:var(--muted)">–</span>'
@@ -7236,8 +7240,6 @@ initDark();
 
 
 
-undefined
-
 window._funMK=undefined;window._funMonths=[];
 function funPrevMonth(){var i=window._funMonths.indexOf(window._funMK);if(i<window._funMonths.length-1){window._funMK=window._funMonths[i+1];renderFunStats();}}
 function funNextMonth(){var i=window._funMonths.indexOf(window._funMK);if(i>0){window._funMK=window._funMonths[i-1];renderFunStats();}}
@@ -7512,7 +7514,7 @@ function saveMonthlyBadge(badgeKey){
     savedAt:new Date().toISOString()
   };
   debounceSave();
-  showToast('Đã lưu Top 3 tháng '+parts[1]+'/'+parts[0],'ok');
+  showToast('Đã lưu Top 3 tháng '+parts[1]+'/'+parts[0],'success');
   renderFunStats();
 }
 
