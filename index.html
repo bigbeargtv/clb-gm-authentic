@@ -5253,6 +5253,108 @@ function renderLedger(){
     });
   }
 
+  // ── Thống kê chi tiêu ──
+  (function(){
+    const txAll = [];
+    ledger.forEach(tx=>txAll.push({type:tx.type,amount:+tx.amount,date:tx.date,name:tx.name,note:tx.note||''}));
+    matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).forEach(m=>txAll.push({type:'in',amount:+m.bet,date:m.date,name:m.t2p1,note:'Ủng hộ quỹ'}));
+
+    const txIn=txAll.filter(t=>t.type==='in');
+    const txOut=txAll.filter(t=>t.type==='out');
+    const sumIn=txIn.reduce((s,t)=>s+t.amount,0);
+    const sumOut=txOut.reduce((s,t)=>s+t.amount,0);
+
+    // Theo tháng
+    const byMonth={};
+    txAll.forEach(tx=>{
+      const mo=tx.date?tx.date.substring(0,7):'unknown';
+      if(!byMonth[mo])byMonth[mo]={in:0,out:0,items:[]};
+      if(tx.type==='in')byMonth[mo].in+=tx.amount;
+      else byMonth[mo].out+=tx.amount;
+      if(tx.type==='out')byMonth[mo].items.push(tx);
+    });
+    const months=Object.keys(byMonth).sort();
+
+    // Chi theo danh mục (gom note giống nhau)
+    const byCat={};
+    txOut.forEach(tx=>{
+      const cat=(tx.note||'Khác').trim()||'Khác';
+      if(!byCat[cat])byCat[cat]=0;
+      byCat[cat]+=tx.amount;
+    });
+    const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+
+    if(txAll.length){
+      h+=`<div class="ldg-card" style="margin-bottom:14px;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📊 Thống kê chi tiêu</div>`;
+
+      // Tổng quan số liệu
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
+        <div style="background:var(--s1);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--green);">${fmtNum(sumIn)}</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">Tổng thu</div>
+        </div>
+        <div style="background:var(--s1);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:#e55;">${fmtNum(sumOut)}</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">Tổng chi</div>
+        </div>
+        <div style="background:var(--s1);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:${sumIn-sumOut>=0?'var(--green)':'#e55'};">${fmtNum(sumIn-sumOut)}</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">Còn lại</div>
+        </div>
+      </div>`;
+
+      // Thu chi theo tháng
+      if(months.length){
+        const maxVal=Math.max(...months.map(m=>Math.max(byMonth[m].in,byMonth[m].out)),1);
+        h+=`<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">Thu chi theo tháng</div>`;
+        months.forEach(mo=>{
+          const d=byMonth[mo];
+          const inW=Math.round(d.in/maxVal*100);
+          const outW=Math.round(d.out/maxVal*100);
+          const label=mo.substring(5)+'/'+mo.substring(0,4);
+          h+=`<div style="margin-bottom:6px;">
+            <div style="font-size:10px;font-weight:700;color:var(--text2);margin-bottom:2px;">${label}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:1px;">
+              <div style="width:24px;font-size:9px;color:var(--green);font-weight:700;text-align:right;">Thu</div>
+              <div style="flex:1;height:12px;background:var(--s1);border-radius:3px;overflow:hidden;">
+                <div style="width:${inW}%;height:100%;background:var(--green);border-radius:3px;"></div>
+              </div>
+              <span style="font-size:10px;font-weight:800;color:var(--green);min-width:55px;text-align:right;">${fmtNum(d.in)}đ</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;font-size:9px;color:#e55;font-weight:700;text-align:right;">Chi</div>
+              <div style="flex:1;height:12px;background:var(--s1);border-radius:3px;overflow:hidden;">
+                <div style="width:${outW}%;height:100%;background:#e55;border-radius:3px;"></div>
+              </div>
+              <span style="font-size:10px;font-weight:800;color:#e55;min-width:55px;text-align:right;">${fmtNum(d.out)}đ</span>
+            </div>
+          </div>`;
+        });
+      }
+
+      // Chi theo danh mục
+      if(cats.length){
+        h+=`<div style="font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 6px;border-top:1px solid var(--bdr);padding-top:10px;">Chi tiêu theo mục</div>`;
+        cats.forEach(([cat,amt])=>{
+          const pct=sumOut>0?Math.round(amt/sumOut*100):0;
+          h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+            <span style="flex:1;font-size:11px;font-weight:600;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(cat)}</span>
+            <span style="font-size:11px;font-weight:800;color:#e55;white-space:nowrap;">${fmtNum(amt)}đ</span>
+            <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right;">${pct}%</span>
+          </div>`;
+        });
+      }
+
+      // Số giao dịch
+      h+=`<div style="border-top:1px solid var(--bdr);padding-top:8px;margin-top:8px;font-size:10px;color:var(--muted);text-align:center;">
+        ${txIn.length} khoản thu · ${txOut.length} khoản chi · ${months.length} tháng
+      </div>`;
+
+      h+=`</div>`;
+    }
+  })();
+
   el.innerHTML = h;
 
   // Xử lý dropdown tên
