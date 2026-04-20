@@ -5147,7 +5147,18 @@ function renderLedger(){
     if(!name) return;
     if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
     balances[name].fromBet += +m.bet;
-    if(m.paid) balances[name].fromLedger += +m.bet; // đã nộp = vào quỹ
+    if(m.paid) balances[name].fromLedger += +m.bet;
+  });
+  // Từ trận thường có cược (người thua nợ quỹ)
+  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
+    const bet=+m.bet;
+    const w1=+m.s1>+m.s2;
+    const losers=(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
+    losers.forEach(name=>{
+      if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
+      balances[name].fromBet += bet;
+      if(m['paid_'+name]) balances[name].fromLedger += bet;
+    });
   });
 
   // Từ ledger thủ công
@@ -5167,8 +5178,23 @@ function renderLedger(){
   const totalOut = ledger.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
   // Cộng thêm từ bet entries đã paid
   const betPaid = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((s,m)=>s+(+m.bet),0);
-  const grandTotal = totalIn + betPaid - totalOut;
-  const totalOwed = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
+  // Cộng thêm từ trận thường đã paid
+  let normalPaid=0;
+  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
+    const w1=+m.s1>+m.s2;
+    (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(name=>{
+      if(m['paid_'+name]) normalPaid+=+m.bet;
+    });
+  });
+  const grandTotal = totalIn + betPaid + normalPaid - totalOut;
+  // Tổng còn nợ = tất cả nguồn chưa paid
+  let totalOwed=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
+  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
+    const w1=+m.s1>+m.s2;
+    (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(name=>{
+      if(!m['paid_'+name]) totalOwed+=+m.bet;
+    });
+  });
 
   let h = '';
 
@@ -5203,6 +5229,13 @@ function renderLedger(){
     });
     matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).forEach(m => {
       allTxns.push({type: 'in', name: m.t2p1, amount: +m.bet, note: (drawSessionsMeta[m.drawSessionId]||{}).name || 'Nộp quỹ (cược)', date: m.date, src: 'bet'});
+    });
+    // Trận thường đã paid
+    matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
+      const w1=+m.s1>+m.s2;
+      (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(name=>{
+        if(m['paid_'+name]) allTxns.push({type:'in',name,amount:+m.bet,note:'Nộp quỹ (trận đấu)',date:m.date,src:'bet'});
+      });
     });
     allTxns.sort((a,b) => b.date.localeCompare(a.date) || b.amount - a.amount);
 
