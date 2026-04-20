@@ -4785,33 +4785,26 @@ function initQuyFilter(){
     const on=quyFilter.mode==='year'&&quyFilter.from===y;
     qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0'), key=activeYear+'-'+mon;
     const hasData=_filterMonths.has(key);
     const on=quyFilter.mode==='month'&&quyFilter.from===key;
     if(hasData){
-      qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
-      mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
     }
   }
-  // Day pills for desktop months row
+  // Day pills inline
   const activeMonthQ=quyFilter.mode==='month'?quyFilter.from:quyFilter.mode==='day'?quyFilter.from.slice(0,7):null;
-  let dayHtml='';
   if(activeMonthQ){
     const days=[...new Set(matches.filter(m=>m.saved&&m.bet>0&&m.date&&m.date.startsWith(activeMonthQ)).map(m=>m.date))].sort().reverse();
     days.forEach(d=>{
       const on=quyFilter.mode==='day'&&quyFilter.from===d;
       const [,mo2,dd2]=d.split('-');
-      qHtml+=`<span class="fpill fpill-month ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
-      dayHtml+=`<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
+      qHtml+=`<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
     });
   }
   qHtml+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓 Tùy chọn</span>';
   document.getElementById('qfilter-quick').innerHTML=qHtml;
-  document.getElementById('qfilter-months').innerHTML=mHtml;
-  const daysEl=document.getElementById('qfilter-days');
-  if(daysEl) daysEl.innerHTML=dayHtml;
   document.getElementById('qfilter-custom').classList.toggle('on',quyFilter.mode==='custom');
 }
 function setQuyFilter(mode,val){quyFilter={mode,from:val||'',to:''};renderQuy();}
@@ -6940,23 +6933,20 @@ function initBxhFilter(){
     const on = bxhFilter.mode==='year' && bxhFilter.from===y;
     quickHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  // Month pills inline for mobile (hidden row still rendered for desktop)
+  // Month pills inline (single row)
   const activeYear = (bxhFilter.mode==='year') ? bxhFilter.from : String(curYear);
   const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  let monthHtml = '';
   for(let i=0;i<12;i++){
     const mon = String(i+1).padStart(2,'0');
     const key = activeYear+'-'+mon;
     const hasData = _filterMonths.has(key);
     const on = bxhFilter.mode==='month' && bxhFilter.from===key;
     if(hasData){
-      quickHtml += '<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
-      monthHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      quickHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
     }
   }
   quickHtml += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓 Tùy chọn</span>';
   document.getElementById('filter-quick').innerHTML = quickHtml;
-  document.getElementById('filter-months').innerHTML = monthHtml;
 
   // Custom filter
   const customEl = document.getElementById('filter-custom');
@@ -7199,20 +7189,17 @@ function initHistFilter(){
     const on=histFilter.mode==='year'&&histFilter.from===y;
     qHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0');
     const key=activeYear+'-'+mon;
     const hasData=_filterMonths.has(key);
     const on=histFilter.mode==='month'&&histFilter.from===key;
     if(hasData){
-      qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
-      mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
     }
   }
   qHtml += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓 Tùy chọn</span>';
   document.getElementById('hfilter-quick').innerHTML = qHtml;
-  document.getElementById('hfilter-months').innerHTML = mHtml;
   document.getElementById('hfilter-custom').classList.toggle('on', histFilter.mode==='custom');
 }
 function setHistFilter(mode,val){
