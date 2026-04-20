@@ -66,6 +66,7 @@ html.dark{
   --gold:#f0b429;--gold2:#ffcc44;
   --muted:#6b7494;--text:#e8ecf4;--text2:#9ba3c0;
 }
+html.dark .partner-logo-dark{filter:invert(1) brightness(2);}
 html.dark body::before{background:radial-gradient(ellipse 60% 40% at 15% 10%,#1a2a5010 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 85% 90%,#2a1a1010 0%,transparent 60%);}
 html.dark body::after{background-image:radial-gradient(circle,#ffffff04 1px,transparent 1px);}
 html.dark header{background:rgba(15,17,23,.97);}
@@ -1796,16 +1797,17 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
     <!-- Feature cards -->
     <div class="i-features" id="iFeatures"></div>
 
-    <!-- Đối tác -->
-    <div style="margin-top:20px;">
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:12px;">Đối tác & Nhà tài trợ</div>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px 24px;">
-        <a href="https://www.nike.com" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike" style="height:28px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
-        <a href="https://www.joola.com" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Joola_Logo_2025.svg" alt="Joola" style="height:24px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
-        <a href="https://www.bidv.com.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BIDV_RGB.png" alt="BIDV" style="height:26px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
-        <a href="#" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://cautruyenhinh.net/wp-content/uploads/2021/05/logo-chuan.png" alt="Mithalo" style="height:28px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
-        <a href="https://sakuko.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'"><img src="https://dnsg.1cdn.vn/2022/09/11/i.doanhnhansaigon.vn-2022-09-10-_2586-1662802613.png" alt="Sakuko" style="height:26px;width:auto;filter:grayscale(1) brightness(1.5);transition:filter .2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) brightness(1.5)'"></a>
-      </div>
+  </div>
+
+  <!-- ĐỐI TÁC & NHÀ TÀI TRỢ -->
+  <div class="i-block">
+    <div class="i-block-ttl">&#x110;&#x1ED1;i t&#xE1;c & Nh&#xE0; t&#xE0;i tr&#x1EE3;</div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px 32px;padding:18px 14px;background:var(--s1);border-radius:12px;border:1px solid var(--bdr);">
+      <a href="https://www.nike.com" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike" class="partner-logo-dark" style="height:32px;width:auto;"></a>
+      <a href="https://www.joola.com" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Joola_Logo_2025.svg" alt="Joola" class="partner-logo-dark" style="height:28px;width:auto;"></a>
+      <a href="https://www.bidv.com.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BIDV_RGB.png" alt="BIDV" style="height:30px;width:auto;"></a>
+      <a href="#" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://cautruyenhinh.net/wp-content/uploads/2021/05/logo-chuan.png" alt="Mithalo" style="height:32px;width:auto;"></a>
+      <a href="https://sakuko.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://dnsg.1cdn.vn/2022/09/11/i.doanhnhansaigon.vn-2022-09-10-_2586-1662802613.png" alt="Sakuko" style="height:30px;width:auto;"></a>
     </div>
   </div>
 
@@ -6581,9 +6583,13 @@ function renderAlbum(){
       h += '<div class="album-grid" data-date="'+d+'">';
       photos.forEach((a,pi)=>{
         if(_reorder){
-          h += '<div style="position:relative;" draggable="true" data-album-id="'+a.id+'">';
-          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async" style="opacity:.8;">';
-          h += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none;background:#0003;color:#fff;">☰</div>';
+          h += '<div style="position:relative;">';
+          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async" style="opacity:.85;">';
+          h += '<div style="position:absolute;top:2px;right:2px;display:flex;flex-direction:column;gap:2px;z-index:3;">';
+          if(pi>0) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',-1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:13px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>';
+          if(pi<photos.length-1) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:13px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">▼</button>';
+          h += '</div>';
+          h += '<div style="position:absolute;bottom:2px;left:2px;background:#000b;color:#fffc;font-size:10px;padding:1px 5px;border-radius:3px;">'+(pi+1)+'</div>';
           h += '</div>';
         } else {
           h += '<div style="position:relative;">';
@@ -6600,92 +6606,8 @@ function renderAlbum(){
 
   el.innerHTML = h;
 
-  // ── Drag & Drop for album reorder (admin reorder mode only) ──
-  if(isAdmin&&window._albumReorderMode){
-    const items=el.querySelectorAll('[data-album-id]');
-    items.forEach(item=>{
-      // Desktop: HTML5 Drag API
-      item.addEventListener('dragstart',e=>{
-        window._albumDragEl=item;
-        item.style.opacity='.4';
-        e.dataTransfer.effectAllowed='move';
-        e.dataTransfer.setData('text/plain',item.dataset.albumId);
-      });
-      item.addEventListener('dragend',e=>{
-        item.style.opacity='1';
-        items.forEach(c=>{c.style.outline='';});
-        window._albumDragEl=null;
-      });
-      item.addEventListener('dragover',e=>{
-        e.preventDefault();
-        e.dataTransfer.dropEffect='move';
-        items.forEach(c=>{c.style.outline='';});
-        item.style.outline='2px solid var(--gold)';
-      });
-      item.addEventListener('drop',e=>{
-        e.preventDefault();
-        if(!window._albumDragEl||window._albumDragEl===item)return;
-        albumSwap(+window._albumDragEl.dataset.albumId,+item.dataset.albumId);
-      });
-      // Mobile: touch-drag reorder
-      let _touchStartY=0,_touchClone=null,_touchMoved=false;
-      item.addEventListener('touchstart',e=>{
-        if(e.target.closest('button'))return;
-        _touchMoved=false;
-        _touchStartY=e.touches[0].clientY;
-        window._albumTouchSrc=item;
-        // Long press visual
-        item.style.opacity='.6';
-        item.style.outline='2px solid var(--gold)';
-      },{passive:true});
-      item.addEventListener('touchmove',e=>{
-        if(!window._albumTouchSrc||window._albumTouchSrc!==item)return;
-        _touchMoved=true;
-        e.preventDefault();
-        const t=e.touches[0];
-        // Highlight drop target
-        items.forEach(c=>{c.style.outline=c===item?'2px solid var(--gold)':'';});
-        const target=document.elementFromPoint(t.clientX,t.clientY);
-        if(target){
-          const dropItem=target.closest('[data-album-id]');
-          if(dropItem&&dropItem!==item) dropItem.style.outline='2px dashed var(--gold)';
-        }
-      },{passive:false});
-      item.addEventListener('touchend',e=>{
-        item.style.opacity='1';
-        items.forEach(c=>{c.style.outline='';c.style.outlineOffset='';});
-        if(!window._albumTouchSrc||window._albumTouchSrc!==item){window._albumTouchSrc=null;return;}
-        if(_touchMoved){
-          // Drag-drop: find target under finger
-          const t=e.changedTouches[0];
-          const target=document.elementFromPoint(t.clientX,t.clientY);
-          if(target){
-            const dropItem=target.closest('[data-album-id]');
-            if(dropItem&&dropItem!==item){
-              albumSwap(+item.dataset.albumId,+dropItem.dataset.albumId);
-            }
-          }
-          window._albumTouchSrc=null;
-        } else {
-          // Tap-to-swap fallback
-          const id=+item.dataset.albumId;
-          if(!window._albumSwapFrom){
-            window._albumSwapFrom=id;
-            item.style.outline='3px solid var(--gold)';
-            item.style.outlineOffset='-3px';
-            showToast('Chạm ảnh khác để đổi vị trí','info');
-          } else if(window._albumSwapFrom===id){
-            window._albumSwapFrom=null;
-          } else {
-            albumSwap(window._albumSwapFrom,id);
-            window._albumSwapFrom=null;
-          }
-        }
-        window._albumTouchSrc=null;
-      });
-    });
-  }
 }
+
 
 function toggleAlbumReorder(){
   window._albumReorderMode=!window._albumReorderMode;
@@ -6702,6 +6624,16 @@ function albumSwap(fromId,toId){
   debounceSave();
   renderAlbum();
   showToast('Đã đổi vị trí ảnh','success');
+}
+function albumMove(id,dir){
+  const idx=album.findIndex(a=>a.id===id);
+  if(idx<0)return;
+  const ni=idx+dir;
+  if(ni<0||ni>=album.length)return;
+  // Swap in array
+  [album[idx],album[ni]]=[album[ni],album[idx]];
+  debounceSave();
+  renderAlbum();
 }
 
 function toggleAlbumDay(dayId){
