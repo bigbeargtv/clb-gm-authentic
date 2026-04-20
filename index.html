@@ -5186,7 +5186,7 @@ function renderLedger(){
       if(m['paid_'+name]) normalPaid+=+m.bet;
     });
   });
-  const grandTotal = totalIn + betPaid + normalPaid - totalOut;
+  const grandTotal = (clubInitBalance||0) + totalIn + betPaid + normalPaid - totalOut;
   // Tổng còn nợ = tất cả nguồn chưa paid
   let totalOwed=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
   matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
