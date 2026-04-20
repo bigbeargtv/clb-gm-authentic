@@ -742,11 +742,12 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   background:var(--s1);border:1px solid var(--bdr);border-radius:14px;
   padding:12px 14px;margin-bottom:14px;
 }
-.bxh-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.bxh-filter-row{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+.bxh-filter-row::-webkit-scrollbar{display:none;}
 .bxh-filter-row:last-child{margin-bottom:0;}
-/* Desktop: months in separate row, hide inline month pills */
-.fpill-month{display:none;}
-.bxh-filter-months-row{display:flex;}
+/* Months: always inline with quick pills, hide separate row */
+.fpill-month{display:inline-flex;}
+.bxh-filter-months-row{display:none;}
 .fpill{
   padding:7px 13px;border-radius:20px;font-size:12px;font-weight:800;
   cursor:pointer;border:1.5px solid var(--bdr2);background:var(--s2);
@@ -772,7 +773,7 @@ html.dark .filter-date-inp{color-scheme:dark;}
   color:#111;font-size:13px;font-weight:800;cursor:pointer;
   font-family:'Be Vietnam Pro',sans-serif;white-space:nowrap;
 }
-.bxh-filter-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.bxh-filter-label{display:none;}
 .bxh-result-label{
   font-size:12px;color:var(--text2);font-weight:700;
   margin-bottom:10px;padding:6px 10px;
@@ -6774,6 +6775,7 @@ function albumSwap(fromId,toId){
   showToast('Đã đổi vị trí ảnh','success');
 }
 function albumMove(id,dir){
+  if(!isAdmin) return;
   const idx=album.findIndex(a=>a.id===id);
   if(idx<0)return;
   const ni=idx+dir;
