@@ -145,23 +145,23 @@ nav{
   -ms-overflow-style:none;
   touch-action:pan-x;
   -webkit-overflow-scrolling:touch;
-  padding:4px 6px 0;gap:2px;
+  padding:4px 8px 0;gap:2px;
   box-shadow:0 2px 12px rgba(0,0,0,.06);
 }
 nav::-webkit-scrollbar{display:none;}
 .nt{
-  flex:0 0 auto;min-width:58px;padding:8px 8px 7px;border:none;
+  flex:0 0 auto;min-width:64px;padding:11px 8px 9px;border:none;
   background:transparent;border-radius:10px 10px 0 0;
   font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;
   letter-spacing:.3px;text-transform:uppercase;color:var(--muted);
   cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;
-  display:flex;flex-direction:column;align-items:center;gap:2px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
   position:relative;
 }
 .nt:hover{background:var(--s2);color:var(--text2);}
-.nt .ic{font-size:20px;transition:transform .2s;line-height:1;display:block;will-change:transform;}
+.nt .ic{font-size:24px;transition:transform .2s;line-height:1;display:block;will-change:transform;}
 .nt.on{color:var(--gold);border-bottom-color:var(--gold);background:linear-gradient(180deg,rgba(240,180,41,.08),transparent);}
-.nt.on .ic{transform:scale(1.12);}
+.nt.on .ic{transform:scale(1.15);}
 
 /* PAGE */
 .pg{display:none;padding:16px 14px 60px;position:relative;z-index:1;max-width:520px;margin:0 auto;contain:layout style;}
@@ -692,8 +692,9 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 }
 .bxh-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
 .bxh-filter-row:last-child{margin-bottom:0;}
-.bxh-filter-single{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
-.bxh-filter-single::-webkit-scrollbar{display:none;}
+/* Desktop: months in separate row, hide inline month pills */
+.fpill-month{display:none;}
+.bxh-filter-months-row{display:flex;}
 .fpill{
   padding:7px 13px;border-radius:20px;font-size:12px;font-weight:800;
   cursor:pointer;border:1.5px solid var(--bdr2);background:var(--s2);
@@ -900,8 +901,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 }
 .hist-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
 .hist-filter-row:last-child{margin-bottom:0;}
-.hist-filter-row.bxh-filter-single{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
-.hist-filter-row.bxh-filter-single::-webkit-scrollbar{display:none;}
+.hist-filter-row.bxh-filter-single{flex-wrap:wrap;}
 .hist-result-label{
   font-size:12px;color:var(--text2);font-weight:700;
   margin-bottom:10px;padding:6px 10px;
@@ -1378,6 +1378,11 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   .bxh-tab{padding:7px 3px!important;font-size:10px!important;border-radius:8px!important;min-width:0!important;white-space:nowrap!important;letter-spacing:0!important;}
   .bxh-filter,.hist-filter{padding:8px 10px!important;border-radius:10px!important;margin-bottom:10px!important;}
   .bxh-filter-label{font-size:9px!important;margin-bottom:4px!important;letter-spacing:1px!important;}
+  /* Mobile: 1 hàng cuộn ngang, ẩn hàng tháng riêng */
+  .bxh-filter-single,.hist-filter-row.bxh-filter-single{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+  .bxh-filter-single::-webkit-scrollbar,.hist-filter-row.bxh-filter-single::-webkit-scrollbar{display:none;}
+  .fpill-month{display:inline-flex!important;}
+  .bxh-filter-months-row{display:none!important;}
   .bxh-filter-row,.hist-filter-row{gap:3px!important;margin-bottom:5px!important;}
   .fpill{padding:4px 8px!important;font-size:10px!important;border-radius:14px!important;}
   .filter-date-inp{padding:6px 8px!important;font-size:12px!important;min-width:100px!important;border-radius:8px!important;}
@@ -1480,7 +1485,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   <button class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="ic">📋</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="ic">💰</span>Quỹ</button>
   <button class="nt admin-only" onclick="goTab('pg-draw')" id="nt6" style="display:none"><span class="ic">🎲</span>Bốc thăm</button>
-  <button class="nt admin-only" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
+  <button class="nt" onclick="goTab('pg-ledger')" id="nt7"><span class="ic">💵</span>Thu Chi</button>
   <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="ic">🏅</span>Thành Tích</button>
   <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="ic">📸</span>Album</button>
 <button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="ic">🏆</span>Tổng Kết</button>
@@ -1490,47 +1495,54 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 <div class="pg on" id="pg-intro">
 <style>
 .iw{padding:14px 14px 90px;}
-.i-hero{position:relative;border-radius:16px;overflow:hidden;margin-bottom:14px;height:200px;display:flex;align-items:flex-end;background:#1a1a1a;}
-.i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;}
-.i-hero-ov{position:absolute;inset:0;background:linear-gradient(170deg,rgba(0,0,0,0) 20%,rgba(0,0,0,0.88) 100%);}
-.i-hero-badge{position:absolute;top:12px;left:12px;background:rgba(240,180,41,0.18);border:1px solid rgba(240,180,41,0.4);backdrop-filter:blur(6px);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
-.i-hero-txt{position:relative;z-index:2;padding:16px;flex:1;}
-.i-hero-txt h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:32px;line-height:1.05;color:#fff;margin-bottom:3px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
-.i-hero-txt h2 em{color:var(--gold);font-style:normal;}
-.i-hero-txt p{font-size:11.5px;color:rgba(255,255,255,0.5);margin:0;display:flex;align-items:center;gap:6px;}
-.i-hero-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;}
+/* Hero Banner */
+.i-hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:14px;height:220px;display:flex;align-items:flex-end;background:linear-gradient(135deg,#0f1728,#1a2642);box-shadow:0 8px 32px rgba(0,0,0,.2),0 0 0 1px rgba(255,255,255,.05) inset;}
+.i-hero-bg{position:absolute;inset:0;background:center 30%/cover no-repeat;transition:transform .3s;}
+.i-hero:hover .i-hero-bg{transform:scale(1.03);}
+.i-hero-ov{position:absolute;inset:0;background:linear-gradient(170deg,rgba(0,0,0,0) 15%,rgba(0,0,0,0.85) 100%),radial-gradient(ellipse at 20% 80%,rgba(240,180,41,.08),transparent 60%);}
+.i-hero-badge{position:absolute;top:12px;left:12px;background:rgba(240,180,41,0.15);border:1px solid rgba(240,180,41,0.35);backdrop-filter:blur(10px);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;}
+.i-hero-txt{position:relative;z-index:2;padding:20px;flex:1;}
+.i-hero-txt h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:36px;line-height:1.05;color:#fff;margin-bottom:5px;text-shadow:0 2px 12px rgba(0,0,0,0.6);letter-spacing:1px;}
+.i-hero-txt h2 em{color:var(--gold);font-style:normal;text-shadow:0 2px 16px rgba(240,180,41,.3);}
+.i-hero-txt p{font-size:12px;color:rgba(255,255,255,0.55);margin:0;display:flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.5px;}
+.i-hero-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;box-shadow:0 0 6px rgba(240,180,41,.4);}
 /* Stats */
 .i-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.i-stat{background:var(--card);border-radius:11px;padding:13px 6px 10px;text-align:center;border:1px solid var(--bdr);position:relative;overflow:hidden;}
-.i-stat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:2px;background:var(--gold);border-radius:0 0 4px 4px;}
-.i-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;color:var(--gold);line-height:1;}
-.i-stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;}
+.i-stat{background:var(--card);border-radius:14px;padding:16px 8px 12px;text-align:center;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;}
+.i-stat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08);}
+.i-stat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:0 0 4px 4px;}
+.i-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;color:var(--gold);line-height:1;}
+.i-stat-l{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;letter-spacing:.3px;}
 /* Block chung */
-.i-block{background:var(--card);border-radius:13px;padding:16px;margin-bottom:12px;border:1px solid var(--bdr);}
-.i-block-ttl{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.i-block-ttl::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.i-block{background:var(--card);border-radius:16px;padding:18px;margin-bottom:12px;border:1px solid var(--bdr);transition:box-shadow .2s;}
+.i-block:hover{box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.i-block-ttl{font-size:10px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.i-block-ttl::after{content:'';flex:1;height:1.5px;background:linear-gradient(90deg,var(--bdr),transparent);}
 /* Mô tả */
-.i-desc{font-size:13.5px;color:var(--text2);line-height:1.8;outline:none;}
+.i-desc{font-size:13.5px;color:var(--text2);line-height:1.85;outline:none;position:relative;}
 /* Feature cards */
-.i-features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
-.i-feat{background:var(--s2);border-radius:10px;padding:12px 10px;border:1px solid var(--bdr);display:flex;flex-direction:column;gap:4px;}
-.i-feat-icon{font-size:22px;line-height:1;}
+.i-features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.i-feat{background:var(--s2);border-radius:12px;padding:14px 12px;border:1px solid var(--bdr);display:flex;flex-direction:column;gap:5px;transition:transform .15s,border-color .15s;}
+.i-feat:hover{transform:translateY(-2px);border-color:rgba(240,180,41,.3);}
+.i-feat-icon{font-size:24px;line-height:1;}
 .i-feat-title{font-size:12px;font-weight:800;color:var(--text);}
-.i-feat-sub{font-size:11px;color:var(--muted);line-height:1.4;}
+.i-feat-sub{font-size:11px;color:var(--muted);line-height:1.45;}
 /* Schedule */
 .i-sched-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.i-sched{background:var(--s2);border-radius:10px;padding:12px;border:1px solid var(--bdr);}
-.i-sched-day{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;color:var(--gold);line-height:1;margin-bottom:4px;}
+.i-sched{background:var(--s2);border-radius:12px;padding:14px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:transform .15s;}
+.i-sched:hover{transform:translateY(-2px);}
+.i-sched::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:.6;}
+.i-sched-day{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;color:var(--gold);line-height:1;margin-bottom:6px;}
 .i-sched-time{font-size:13px;font-weight:700;outline:none;color:var(--text);}
-.i-sched-loc{font-size:11px;color:var(--muted);margin-top:2px;outline:none;line-height:1.4;}
-.i-map-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;background:rgba(240,180,41,0.08);border:1.5px solid rgba(240,180,41,0.22);border-radius:9px;color:var(--gold);font-size:12.5px;font-weight:700;padding:10px;text-align:center;text-decoration:none;transition:background .15s;}
-.i-map-btn:hover{background:rgba(240,180,41,0.14);}
+.i-sched-loc{font-size:11px;color:var(--muted);margin-top:3px;outline:none;line-height:1.4;}
+.i-map-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;background:linear-gradient(135deg,rgba(240,180,41,0.08),rgba(240,180,41,0.04));border:1.5px solid rgba(240,180,41,0.22);border-radius:12px;color:var(--gold);font-size:12.5px;font-weight:700;padding:11px;text-align:center;text-decoration:none;transition:all .2s;}
+.i-map-btn:hover{background:rgba(240,180,41,0.15);border-color:rgba(240,180,41,.4);transform:translateY(-1px);}
 /* Gallery */
-.i-gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;min-height:88px;scroll-snap-type:x mandatory;}
+.i-gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;min-height:96px;scroll-snap-type:x mandatory;}
 .i-gallery::-webkit-scrollbar{height:3px;}
 .i-gallery::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
-.i-gimg{flex:0 0 140px;height:92px;border-radius:10px;overflow:hidden;background:var(--bg2);cursor:pointer;scroll-snap-align:start;transition:opacity .15s;}
-.i-gimg:hover{opacity:.85;}
+.i-gimg{flex:0 0 150px;height:100px;border-radius:12px;overflow:hidden;background:var(--bg2);cursor:pointer;scroll-snap-align:start;transition:transform .2s,box-shadow .2s;}
+.i-gimg:hover{transform:scale(1.03);box-shadow:0 4px 16px rgba(0,0,0,.15);}
 .i-gimg img{width:100%;height:100%;object-fit:cover;display:block;}
 .i-gallery-empty{font-size:12px;color:var(--muted);padding:24px 0;font-style:italic;}
 /* Edit */
@@ -1737,7 +1749,7 @@ undefined
   <div class="bxh-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="bxh-filter-row bxh-filter-single" id="filter-quick"></div>
-    <div class="bxh-filter-row" id="filter-months" style="display:none"></div>
+    <div class="bxh-filter-row bxh-filter-months-row" id="filter-months"></div>
     <div class="bxh-filter-custom" id="filter-custom">
       <input type="date" class="filter-date-inp" id="filter-from">
       <span class="filter-sep">→</span>
@@ -1760,7 +1772,7 @@ undefined
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="hist-filter-row bxh-filter-single" id="hfilter-quick"></div>
-    <div class="hist-filter-row" id="hfilter-months" style="display:none"></div>
+    <div class="hist-filter-row bxh-filter-months-row" id="hfilter-months"></div>
     <div class="bxh-filter-custom" id="hfilter-custom">
       <input type="date" class="filter-date-inp" id="hfilter-from">
       <span class="filter-sep">→</span>
@@ -1795,8 +1807,8 @@ undefined
   <div class="hist-filter">
     <div class="bxh-filter-label">📅 Thời gian</div>
     <div class="hist-filter-row bxh-filter-single" id="qfilter-quick"></div>
-    <div class="hist-filter-row" id="qfilter-months" style="display:none"></div>
-    <div class="hist-filter-row" id="qfilter-days" style="display:none"></div>
+    <div class="hist-filter-row bxh-filter-months-row" id="qfilter-months"></div>
+    <div class="hist-filter-row bxh-filter-months-row" id="qfilter-days"></div>
     <div class="bxh-filter-custom" id="qfilter-custom">
       <input type="date" class="filter-date-inp" id="qfilter-from">
       <span class="filter-sep">→</span>
@@ -4419,32 +4431,41 @@ let quyFilter = {mode:'all', from:'', to:''};
 
 function initQuyFilter(){
   const years=[...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  const activeYear=(quyFilter.mode==='year'||quyFilter.mode==='month'||quyFilter.mode==='day')?(quyFilter.mode==='year'?quyFilter.from:quyFilter.from.slice(0,4)):String(new Date().getFullYear());
+  const activeYear=quyFilter.mode==='year'?quyFilter.from:String(new Date().getFullYear());
   const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  const activeMonthQ=quyFilter.mode==='month'?quyFilter.from:quyFilter.mode==='day'?quyFilter.from.slice(0,7):null;
 
-  let h='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
+  let qHtml='<span class="fpill '+(quyFilter.mode==='all'?'on':'')+'" onclick="setQuyFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=quyFilter.mode==='year'&&quyFilter.from===y;
-    h+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    qHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
+  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0'), key=activeYear+'-'+mon;
     const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on=quyFilter.mode==='month'&&quyFilter.from===key;
-    if(hasData) h+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    if(hasData){
+      qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setQuyFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    }
   }
-  // Day pills inline
+  // Day pills for desktop months row
+  const activeMonthQ=quyFilter.mode==='month'?quyFilter.from:quyFilter.mode==='day'?quyFilter.from.slice(0,7):null;
+  let dayHtml='';
   if(activeMonthQ){
     const days=[...new Set(matches.filter(m=>m.saved&&m.bet>0&&m.date&&m.date.startsWith(activeMonthQ)).map(m=>m.date))].sort().reverse();
     days.forEach(d=>{
       const on=quyFilter.mode==='day'&&quyFilter.from===d;
       const [,mo2,dd2]=d.split('-');
-      h+=`<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
+      qHtml+=`<span class="fpill fpill-month ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
+      dayHtml+=`<span class="fpill ${on?'on':''}" onclick="setQuyFilter('day','${d}')">${parseInt(dd2)}/${parseInt(mo2)}</span>`;
     });
   }
-  h+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓</span>';
-  document.getElementById('qfilter-quick').innerHTML=h;
+  qHtml+='<span class="fpill '+(quyFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleQuyCustom()">🗓 Tùy chọn</span>';
+  document.getElementById('qfilter-quick').innerHTML=qHtml;
+  document.getElementById('qfilter-months').innerHTML=mHtml;
+  const daysEl=document.getElementById('qfilter-days');
+  if(daysEl) daysEl.innerHTML=dayHtml;
   document.getElementById('qfilter-custom').classList.toggle('on',quyFilter.mode==='custom');
 }
 function setQuyFilter(mode,val){quyFilter={mode,from:val||'',to:''};renderQuy();}
@@ -6087,26 +6108,30 @@ function initBxhFilter(){
   const now = new Date();
   const curYear = now.getFullYear();
 
-  // All pills in ONE row: Tất cả + năm + tháng có dữ liệu + Tùy chọn
+  // Quick pills: Tất cả + năm + Tùy chọn
   const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  const activeYear = (bxhFilter.mode==='year'||bxhFilter.mode==='month') ? (bxhFilter.mode==='month'?bxhFilter.from.slice(0,4):bxhFilter.from) : String(curYear);
-  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-
-  let h = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
+  let quickHtml = '<span class="fpill '+(bxhFilter.mode==='all'?'on':'')+'" onclick="setBxhFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on = bxhFilter.mode==='year' && bxhFilter.from===y;
-    h += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    quickHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
-  // Month pills inline (chỉ tháng có data)
+  // Month pills inline for mobile (hidden row still rendered for desktop)
+  const activeYear = (bxhFilter.mode==='year') ? bxhFilter.from : String(curYear);
+  const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  let monthHtml = '';
   for(let i=0;i<12;i++){
     const mon = String(i+1).padStart(2,'0');
     const key = activeYear+'-'+mon;
     const hasData = matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on = bxhFilter.mode==='month' && bxhFilter.from===key;
-    if(hasData) h += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    if(hasData){
+      quickHtml += '<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      monthHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setBxhFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    }
   }
-  h += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓</span>';
-  document.getElementById('filter-quick').innerHTML = h;
+  quickHtml += '<span class="fpill '+(bxhFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleCustomFilter()">🗓 Tùy chọn</span>';
+  document.getElementById('filter-quick').innerHTML = quickHtml;
+  document.getElementById('filter-months').innerHTML = monthHtml;
 
   // Custom filter
   const customEl = document.getElementById('filter-custom');
@@ -6329,23 +6354,28 @@ let histFilter = {mode:'all', from:'', to:''};
 
 function initHistFilter(){
   const years = [...new Set(matches.filter(m=>m.saved&&m.date&&!m.isBetEntry).map(m=>m.date.slice(0,4)))].sort().reverse();
-  const activeYear = (histFilter.mode==='year'||histFilter.mode==='month') ? (histFilter.mode==='month'?histFilter.from.slice(0,4):histFilter.from) : String(new Date().getFullYear());
+  const activeYear = histFilter.mode==='year' ? histFilter.from : String(new Date().getFullYear());
   const monthNames=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
-  let h = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
+  let qHtml = '<span class="fpill '+(histFilter.mode==='all'?'on':'')+'" onclick="setHistFilter(&quot;all&quot;)">Tất cả</span>';
   years.forEach(y=>{
     const on=histFilter.mode==='year'&&histFilter.from===y;
-    h += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
+    qHtml += '<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;year&quot;,&quot;'+y+'&quot;)">'+y+'</span>';
   });
+  let mHtml='';
   for(let i=0;i<12;i++){
     const mon=String(i+1).padStart(2,'0');
     const key=activeYear+'-'+mon;
     const hasData=matches.some(m=>m.saved&&m.date&&m.date.startsWith(key));
     const on=histFilter.mode==='month'&&histFilter.from===key;
-    if(hasData) h+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    if(hasData){
+      qHtml+='<span class="fpill fpill-month '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+      mHtml+='<span class="fpill '+(on?'on':'')+'" onclick="setHistFilter(&quot;month&quot;,&quot;'+key+'&quot;)">'+monthNames[i]+'</span>';
+    }
   }
-  h += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓</span>';
-  document.getElementById('hfilter-quick').innerHTML = h;
+  qHtml += '<span class="fpill '+(histFilter.mode==='custom'?'on-blue':'')+'" onclick="toggleHistCustom()">🗓 Tùy chọn</span>';
+  document.getElementById('hfilter-quick').innerHTML = qHtml;
+  document.getElementById('hfilter-months').innerHTML = mHtml;
   document.getElementById('hfilter-custom').classList.toggle('on', histFilter.mode==='custom');
 }
 function setHistFilter(mode,val){
