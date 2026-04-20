@@ -6548,10 +6548,10 @@ function renderHist(){
       const t2=[m.t2p1,m.t2p2].filter(Boolean);
       const w1=+m.s1>+m.s2;
       const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
-      const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.45'}">
+      const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.6'}">
         ${names.map(n=>av(n)).join('')}
         <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
-        ${won?'<span style="font-size:10px;">🏆</span>':''}
+        ${won?'<span style="font-size:11px;">🏅</span>':''}
       </div>`;
       const betHtml=m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}🍃</span>`:'';
       const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" title="Xóa">🗑</button>` : '';
@@ -6564,10 +6564,10 @@ function renderHist(){
           ${teamHtml(t1,w1)}
           ${teamHtml(t2,!w1)}
         </div>
-        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;background:${w1?'#1a9e6012':'#e0555512'};border-radius:8px;padding:4px 8px;">
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--red,#e05555)'};">${m.s1}</span>
-          <span style="font-size:12px;color:var(--muted);font-weight:900;margin:0 1px;">-</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--red,#e05555)'};">${m.s2}</span>
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--text)'};">${m.s1}</span>
+          <span style="font-size:9px;color:var(--muted);line-height:1;">:</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--text)'};">${m.s2}</span>
         </div>
         ${delBtn?`<div style="display:flex;gap:4px;flex-shrink:0;">${delBtn}</div>`:''}
       </div>`;
