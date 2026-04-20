@@ -4014,8 +4014,9 @@ function saveTeamBattle(){
   const betA=parseInt(document.getElementById('tbBetA').value)||0;
   const betB=parseInt(document.getElementById('tbBetB').value)||0;
   // Save team battle match
+  const tbId=matchUid++;
   matches.push({
-    id:matchUid++,
+    id:tbId,
     cat:'team',
     date:d,
     isTeamBattle:true,
@@ -4026,13 +4027,13 @@ function saveTeamBattle(){
     betPerPersonB:betB,
     saved:true
   });
-  // Create bet entries for fund (each person on each team owes their betPerPerson)
+  // Create bet entries for fund, linked to parent team battle
   if(betA>0){
     teamA.forEach(name=>{
       matches.push({id:matchUid++,cat:'team',date:d,
         t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
         s1:'1',s2:'0',
-        bet:betA,
+        bet:betA,teamBattleParentId:tbId,
         saved:true,isTeamBattle:false,isBetEntry:true,teamBattleBet:true});
     });
   }
@@ -4041,7 +4042,7 @@ function saveTeamBattle(){
       matches.push({id:matchUid++,cat:'team',date:d,
         t1p1:'(quỹ)',t1p2:'',t2p1:name,t2p2:'',
         s1:'1',s2:'0',
-        bet:betB,
+        bet:betB,teamBattleParentId:tbId,
         saved:true,isTeamBattle:false,isBetEntry:true,teamBattleBet:true});
     });
   }
@@ -4669,7 +4670,8 @@ function editMatch(id){
 function delMatch(id){
   if(!isAdmin)return;
   if(!confirm('Xóa trận này?'))return;
-  matches=matches.filter(m=>m.id!==id);
+  // Also remove linked team battle bet entries
+  matches=matches.filter(m=>m.id!==id&&m.teamBattleParentId!==id);
   renderMatches();
   debounceSave();
 }
