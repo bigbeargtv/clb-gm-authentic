@@ -85,6 +85,11 @@ html.dark .bxh-tab.on-mix{background:linear-gradient(135deg,#2a2010,#332818);col
 html.dark .bxh-tab.on-nu{background:linear-gradient(135deg,#2a1420,#331a28);color:#ffb0d0;}
 html.dark .bxh-tab.on-all{background:linear-gradient(135deg,#142518,#1a3020);color:#90dda0;}
 html.dark .bxh-tab.on-hon{background:linear-gradient(135deg,#1e1530,#251a38);color:#c8a0f0;}
+html.dark .cpill.nam.on{background:linear-gradient(135deg,#14213a,#1a2d4a);color:#90c4ff;box-shadow:none;}
+html.dark .cpill.mix.on{background:linear-gradient(135deg,#2a2010,#332818);color:#ffd080;box-shadow:none;}
+html.dark .cpill.nu.on{background:linear-gradient(135deg,#2a1420,#331a28);color:#ffb0d0;box-shadow:none;}
+html.dark .cpill.hon.on{background:linear-gradient(135deg,#1e1530,#251a38);color:#c8a0f0;box-shadow:none;}
+html.dark .cpill.team.on{background:linear-gradient(135deg,#2a1a0a,#331f10);color:#ffb060;box-shadow:none;}
 html.dark .quy-row.r1{background:linear-gradient(135deg,#2a2510cc,#252010aa);}
 html.dark .quy-row.r2{background:linear-gradient(135deg,#1e2030cc,#222535aa);}
 html.dark .quy-row.r3{background:linear-gradient(135deg,#2a2015cc,#251c10aa);}
@@ -273,18 +278,20 @@ html.dark .date-inp{color-scheme:dark;}
   background:var(--s2);border:2px solid var(--bdr);color:var(--muted);transition:all .2s;
 }
 .tbtn.on{border-color:var(--gold);color:var(--gold);background:#f0b42918;}
-.cats{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cats{display:flex;gap:0;margin-bottom:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:5px;}
 .cats::-webkit-scrollbar{display:none;}
 .cpill{
-  padding:6px 12px;border-radius:18px;font-size:12px;font-weight:700;white-space:nowrap;flex:0 0 auto;
-  cursor:pointer;border:1.5px solid var(--bdr);background:var(--s2);color:var(--muted);
-  transition:all .18s;
+  flex:1;padding:8px 4px 6px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;
+  cursor:pointer;border:none;background:transparent;color:var(--muted);
+  transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;
 }
-.cpill.nam.on{border-color:var(--nam-c);color:var(--nam-c);background:#4a90e214;}
-.cpill.mix.on{border-color:var(--mix-c);color:var(--mix-c);background:#f0b42914;}
-.cpill.nu.on{border-color:var(--nu-c);color:var(--nu-c);background:#e879b014;}
-.cpill.hon.on{border-color:#6a1b9a;color:#6a1b9a;background:#6a1b9a14;}
-.cpill.team.on{border-color:#e65100;color:#e65100;background:#e6510014;}
+.cpill .cp-icon{font-size:22px;line-height:1;display:block;}
+.cpill .cp-label{font-size:10px;font-weight:800;letter-spacing:.2px;}
+.cpill.nam.on{color:var(--nam-c);background:linear-gradient(135deg,#dceeff,#eef5ff);box-shadow:0 2px 8px #4a90e220;}
+.cpill.mix.on{color:var(--mix-c);background:linear-gradient(135deg,#fff3d0,#fffaec);box-shadow:0 2px 8px #f0b42920;}
+.cpill.nu.on{color:var(--nu-c);background:linear-gradient(135deg,#fce4f0,#fff0f8);box-shadow:0 2px 8px #e879b020;}
+.cpill.hon.on{color:#6a1b9a;background:linear-gradient(135deg,#ede7f6,#f3e5f5);box-shadow:0 2px 8px #6a1b9a20;}
+.cpill.team.on{color:#e65100;background:linear-gradient(135deg,#fff3e0,#fbe9e7);box-shadow:0 2px 8px #e6510020;}
 .tb-form{background:var(--s1);border:1.5px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:14px;}
 .tb-section{margin-bottom:14px;}
 .tb-section-head{font-size:14px;font-weight:800;margin-bottom:8px;}
@@ -710,16 +717,19 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 
 /* ── BXH TABS ── */
 .bxh-tabs{
-  display:flex;gap:6px;margin-bottom:16px;
+  display:flex;gap:0;margin-bottom:16px;
   background:var(--s2);border:1px solid var(--bdr);
   border-radius:14px;padding:5px;
 }
 .bxh-tab{
-  flex:1;padding:9px 4px;border:none;border-radius:10px;
-  font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:800;
-  letter-spacing:.3px;cursor:pointer;background:transparent;
+  flex:1;padding:8px 4px 6px;border:none;border-radius:10px;
+  font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:800;
+  letter-spacing:.2px;cursor:pointer;background:transparent;
   color:var(--muted);transition:all .18s;text-align:center;line-height:1.3;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
 }
+.bxh-tab .bt-icon{font-size:22px;line-height:1;display:block;}
+.bxh-tab .bt-label{font-size:10px;font-weight:800;letter-spacing:.2px;}
 .bxh-tab.on-nam{background:linear-gradient(135deg,#dceeff,#eef5ff);color:var(--nam-c);box-shadow:0 2px 8px #4a90e220;}
 .bxh-tab.on-mix{background:linear-gradient(135deg,#fff3d0,#fffaec);color:var(--mix-c);box-shadow:0 2px 8px #f0b42920;}
 .bxh-tab.on-nu{background:linear-gradient(135deg,#fce4f0,#fff0f8);color:var(--nu-c);box-shadow:0 2px 8px #e879b020;}
@@ -1390,7 +1400,9 @@ html.dark .filter-date-inp{color-scheme:dark;}
 
   /* Category pills */
   .cats{gap:4px!important;margin-bottom:8px!important;}
-  .cpill{padding:5px 10px!important;font-size:11px!important;border-radius:14px!important;border-width:1.5px!important;}
+  .cpill{padding:6px 2px 4px!important;border-radius:8px!important;}
+  .cpill .cp-icon{font-size:20px!important;}
+  .cpill .cp-label{font-size:9px!important;}
 
   /* Add button */
   .add-btn{padding:9px!important;font-size:12px!important;border-radius:10px!important;margin-bottom:8px!important;border-width:1.5px!important;}
@@ -1457,7 +1469,9 @@ html.dark .filter-date-inp{color-scheme:dark;}
 
   /* BXH Category Tabs */
   .bxh-tabs{gap:3px!important;padding:4px!important;border-radius:12px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;}
-  .bxh-tab{padding:7px 3px!important;font-size:10px!important;border-radius:8px!important;min-width:0!important;white-space:nowrap!important;letter-spacing:0!important;}
+  .bxh-tab{padding:6px 2px 4px!important;border-radius:8px!important;min-width:0!important;white-space:nowrap!important;}
+  .bxh-tab .bt-icon{font-size:20px!important;}
+  .bxh-tab .bt-label{font-size:9px!important;}
   .bxh-filter,.hist-filter{padding:8px 10px!important;border-radius:10px!important;margin-bottom:10px!important;}
   .bxh-filter-label{font-size:9px!important;margin-bottom:4px!important;letter-spacing:1px!important;}
   /* Mobile: 1 hàng cuộn ngang, ẩn hàng tháng riêng */
@@ -1880,11 +1894,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 
   <div class="sl admin-only">Loại trận mới</div>
   <div class="cats admin-only-flex">
-    <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')">👨 Đôi Nam</div>
-    <div class="cpill nu" id="cp-nu" onclick="setCat('nu')">👩 Đôi Nữ</div>
-    <div class="cpill mix" id="cp-mix" onclick="setCat('mix')">👫 Nam - Nữ</div>
-    <div class="cpill hon" id="cp-hon" onclick="setCat('hon')">🎯 Hỗn Hợp</div>
-    <div class="cpill team" id="cp-team" onclick="setCat('team')">⚔️ Đấu Team</div>
+    <div class="cpill nam on" id="cp-nam" onclick="setCat('nam')"><span class="cp-icon">👨</span><span class="cp-label">Đôi Nam</span></div>
+    <div class="cpill nu" id="cp-nu" onclick="setCat('nu')"><span class="cp-icon">👩</span><span class="cp-label">Đôi Nữ</span></div>
+    <div class="cpill mix" id="cp-mix" onclick="setCat('mix')"><span class="cp-icon">👫</span><span class="cp-label">Nam Nữ</span></div>
+    <div class="cpill hon" id="cp-hon" onclick="setCat('hon')"><span class="cp-icon">🎯</span><span class="cp-label">Hỗn Hợp</span></div>
+    <div class="cpill team" id="cp-team" onclick="setCat('team')"><span class="cp-icon">⚔️</span><span class="cp-label">Đấu Team</span></div>
   </div>
   <button class="add-btn admin-only" onclick="addMatch()">＋ Thêm trận đấu</button>
   <div id="teamBattleForm" class="admin-only" style="display:none;">
@@ -1915,11 +1929,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 <!-- BXH -->
 <div class="pg" id="pg-bxh">
   <div class="bxh-tabs">
-    <button class="bxh-tab on-all" id="btab-all" onclick="switchBxhTab('all')">🏆 Tổng hợp</button>
-    <button class="bxh-tab" id="btab-nam" onclick="switchBxhTab('nam')">👨 Đôi Nam</button>
-    <button class="bxh-tab" id="btab-mix" onclick="switchBxhTab('mix')">👫 Nam Nữ</button>
-    <button class="bxh-tab" id="btab-nu" onclick="switchBxhTab('nu')">👩 Đôi Nữ</button>
-    <button class="bxh-tab" id="btab-hon" onclick="switchBxhTab('hon')">🎯 Hỗn Hợp</button>
+    <button class="bxh-tab on-all" id="btab-all" onclick="switchBxhTab('all')"><span class="bt-icon">🏆</span><span class="bt-label">Tổng hợp</span></button>
+    <button class="bxh-tab" id="btab-nam" onclick="switchBxhTab('nam')"><span class="bt-icon">👨</span><span class="bt-label">Đôi Nam</span></button>
+    <button class="bxh-tab" id="btab-mix" onclick="switchBxhTab('mix')"><span class="bt-icon">👫</span><span class="bt-label">Nam Nữ</span></button>
+    <button class="bxh-tab" id="btab-nu" onclick="switchBxhTab('nu')"><span class="bt-icon">👩</span><span class="bt-label">Đôi Nữ</span></button>
+    <button class="bxh-tab" id="btab-hon" onclick="switchBxhTab('hon')"><span class="bt-icon">🎯</span><span class="bt-label">Hỗn Hợp</span></button>
   </div>
 
   <div class="bxh-filter">
