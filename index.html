@@ -4773,6 +4773,43 @@ function applyQuyFilter(){
   if(!from||!to){alert('Chọn đủ ngày!');return;}
   quyFilter={mode:'custom',from,to};renderQuy();
 }
+// ═══ Hàm tính quỹ dùng chung ═══
+function calcFundStats(matchList){
+  // matchList: optional filtered list, default = all saved matches with bet
+  const src=matchList||matches.filter(m=>m.saved&&m.bet>0&&m.date);
+  const perPerson={}; // name → {owed, paid, entries[]}
+  // 1. isBetEntry (bốc thăm / team battle)
+  src.filter(m=>m.isBetEntry).forEach(m=>{
+    const n=m.t2p1; if(!n) return;
+    if(!perPerson[n]) perPerson[n]={owed:0,paid:0,entries:[]};
+    perPerson[n].owed+=+m.bet;
+    if(m.paid) perPerson[n].paid+=+m.bet;
+    perPerson[n].entries.push(m);
+  });
+  // 2. Trận thường (người thua nợ)
+  src.filter(m=>!m.isBetEntry&&!m.isTeamBattle&&m.bet>0).forEach(m=>{
+    const w1=+m.s1>+m.s2;
+    const losers=(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
+    losers.forEach(n=>{
+      if(!perPerson[n]) perPerson[n]={owed:0,paid:0,entries:[]};
+      perPerson[n].owed+=+m.bet;
+      if(m['paid_'+n]) perPerson[n].paid+=+m.bet;
+      perPerson[n].entries.push({...m,_loser:n});
+    });
+  });
+  // 3. Team battle parent (tính tổng bet cho hiển thị, nhưng nợ nằm ở isBetEntry con)
+  // → không cần tính thêm vì đã có ở mục 1
+  const totalOwed=Object.values(perPerson).reduce((s,p)=>s+p.owed,0);
+  const totalPaid=Object.values(perPerson).reduce((s,p)=>s+p.paid,0);
+  const totalUnpaid=totalOwed-totalPaid;
+  // Tổng trong quỹ = ledger thu + đã nộp bet/trận - ledger chi
+  const ldg=(typeof ledger!=='undefined'?ledger:[]);
+  const ledgerIn=ldg.filter(t=>t.type==='in').reduce((s,t)=>s+(+t.amount),0);
+  const ledgerOut=ldg.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
+  const grandTotal=ledgerIn+totalPaid-ledgerOut;
+  return {perPerson,totalOwed,totalPaid,totalUnpaid,grandTotal,ledgerIn,ledgerOut};
+}
+
 function getQuyFiltered(){
   const saved=matches.filter(m=>m.saved&&m.bet&&m.bet>0&&m.date);
   if(quyFilter.mode==='all') return saved;
@@ -5033,18 +5070,11 @@ function renderQuy(){
       totalLeaf += bet;
     });
   });
-  // Cộng số dư quỹ cũ (initialBalance) vào BXH
-  members.forEach(mb=>{
-    const init = +mb.initialBalance||0;
-    if(!init) return;
-    if(!debt[mb.name]) debt[mb.name]={name:mb.name, total:0, matches:0};
-    debt[mb.name].total += init;
-    totalLeaf += init;
-  });
+  // (initialBalance đã loại bỏ — kế toán nhập qua ledger thủ công)
   const sorted = Object.values(debt).sort((a,b)=>b.total-a.total);
   // Summary
   const topDebtor = sorted[0];
-  const _qLedger=(typeof ledger!=='undefined'?ledger:[]);const _qIn=_qLedger.filter(t=>t.type==='in').reduce((a,t)=>a+(+t.amount),0);const _qOut=_qLedger.filter(t=>t.type==='out').reduce((a,t)=>a+(+t.amount),0);const _qBetPaid=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((a,m)=>a+(+m.bet),0);const _qGrand=_qIn+_qBetPaid-_qOut;let html=`<div style="background:linear-gradient(135deg,#00b85522,#00b85508);border:2px solid var(--green);border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px #00b85520;"><div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">💰 QUỸ CLB</div><div style="font-size:28px;font-weight:900;color:var(--green);margin-top:4px;line-height:1.1;">${fmtNum(_qGrand)}đ</div></div><div style="background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:10px;color:var(--muted);font-weight:700;">💚 Ủng hộ</div><div style="font-size:15px;font-weight:800;">${fmtNum(totalLeaf)}đ</div></div><div style="font-size:10px;color:var(--muted);text-align:right;">${totalMatches} trận · ${sorted.length} người</div></div>`;
+  const _fs=calcFundStats();let html=`<div style="background:linear-gradient(135deg,#00b85522,#00b85508);border:2px solid var(--green);border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px #00b85520;"><div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">💰 QUỸ CLB</div><div style="font-size:28px;font-weight:900;color:var(--green);margin-top:4px;line-height:1.1;">${fmtNum(_fs.grandTotal)}đ</div></div><div style="background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:10px;color:var(--muted);font-weight:700;">💚 Ủng hộ</div><div style="font-size:15px;font-weight:800;">${fmtNum(totalLeaf)}đ</div></div><div style="font-size:10px;color:var(--muted);text-align:right;">${totalMatches} trận · ${sorted.length} người</div></div>`;
   // ── BXH tổng ──
   html += '<div style="text-align:center;font-size:17px;font-weight:800;margin:16px 0 12px;color:var(--text);">🏆 BXH NỘP QUỸ NHIỀU NHẤT 🏆</div>';
   html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
@@ -5056,9 +5086,9 @@ function renderQuy(){
       ? '<img class="av-img-small" src="'+mb.photo+'" style="width:28px;height:28px;border-radius:8px;">'
       : '<div class="quy-av '+(mb?AVC[mb.color]:'')+'" '+(mb?'':' style="background:var(--muted)"')+'>'+ini(p.name)+'</div>';
     const rk = medal || (i+1);
-    // Kiểm tra đã nộp hết chưa (tất cả bet entries của người này đều paid)
-    const personBets = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===p.name&&m.bet>0);
-    const allPaid = personBets.length>0 && personBets.every(m=>m.paid);
+    // Kiểm tra đã nộp hết chưa (dùng calcFundStats)
+    const _fp=_fs.perPerson[p.name];
+    const allPaid=_fp&&_fp.owed>0&&_fp.paid>=_fp.owed;
     const paidBadge = allPaid ? '<span style="font-size:10px;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-left:4px;">Đã Ủng Hộ ✅</span>' : '';
     html += `<div class="quy-row ${rc}">
       <div class="rk">${rk}</div>
@@ -5138,62 +5168,22 @@ function renderLedger(){
   const el = document.getElementById('ledger-content');
   if(!el) return;
 
-  // Tính số dư từng người từ ledger + từ quỹ cược
-  const balances = {}; // name → {fromBet, fromLedger, ledgerTxns}
+  // Dùng calcFundStats() tính chung
+  const _lfs=calcFundStats();
+  const grandTotal=_lfs.grandTotal;
+  const totalOwed=_lfs.totalUnpaid;
 
-  // Từ quỹ cược (bet entries đã paid/chưa paid)
-  matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0).forEach(m=>{
-    const name = m.t2p1;
-    if(!name) return;
-    if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
-    balances[name].fromBet += +m.bet;
-    if(m.paid) balances[name].fromLedger += +m.bet;
+  // Balances cho danh sách thành viên (thêm ledger txns)
+  const balances={};
+  Object.entries(_lfs.perPerson).forEach(([name,p])=>{
+    balances[name]={fromBet:p.owed,fromLedger:p.paid,txns:[]};
   });
-  // Từ trận thường có cược (người thua nợ quỹ)
-  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
-    const bet=+m.bet;
-    const w1=+m.s1>+m.s2;
-    const losers=(w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean);
-    losers.forEach(name=>{
-      if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
-      balances[name].fromBet += bet;
-      if(m['paid_'+name]) balances[name].fromLedger += bet;
-    });
-  });
-
-  // Từ ledger thủ công
   ledger.forEach(tx=>{
-    const name = tx.name;
-    if(!name) return;
+    const name=tx.name; if(!name) return;
     if(!balances[name]) balances[name]={fromBet:0,fromLedger:0,txns:[]};
-    if(tx.type==='in') balances[name].fromLedger += +tx.amount;
-    else balances[name].fromLedger -= +tx.amount;
+    if(tx.type==='in') balances[name].fromLedger+=+tx.amount;
+    else balances[name].fromLedger-=+tx.amount;
     balances[name].txns.push(tx);
-  });
-
-  // Tổng quỹ = tổng tiền đã thu được (fromLedger của tất cả)
-  const allMembers = members.map(m=>m.name);
-  // Tổng tiền thực tế trong quỹ = tổng in - tổng out từ ledger manual
-  const totalIn  = ledger.filter(t=>t.type==='in').reduce((s,t)=>s+(+t.amount),0);
-  const totalOut = ledger.filter(t=>t.type==='out').reduce((s,t)=>s+(+t.amount),0);
-  // Cộng thêm từ bet entries đã paid
-  const betPaid = matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((s,m)=>s+(+m.bet),0);
-  // Cộng thêm từ trận thường đã paid
-  let normalPaid=0;
-  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
-    const w1=+m.s1>+m.s2;
-    (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(name=>{
-      if(m['paid_'+name]) normalPaid+=+m.bet;
-    });
-  });
-  const grandTotal = (clubInitBalance||0) + totalIn + betPaid + normalPaid - totalOut;
-  // Tổng còn nợ = tất cả nguồn chưa paid
-  let totalOwed=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
-  matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
-    const w1=+m.s1>+m.s2;
-    (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(name=>{
-      if(!m['paid_'+name]) totalOwed+=+m.bet;
-    });
   });
 
   let h = '';
@@ -5201,7 +5191,7 @@ function renderLedger(){
   // ── Tổng quan ──
   h += `<div class="ldg-card" style="margin-bottom:14px;">
     <div style="font-weight:800;font-size:14px;margin-bottom:10px;">💵 Tổng quan quỹ CLB</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:${isAdmin?'10':'0'}px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="background:var(--s1);border-radius:10px;padding:10px;text-align:center;">
         <div class="ldg-balance-pos">${fmtNum(grandTotal)}🍃</div>
         <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Trong quỹ</div>
@@ -5211,13 +5201,6 @@ function renderLedger(){
         <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;">Còn nợ</div>
       </div>
     </div>
-    ${isAdmin?`<div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;align-items:center;gap:8px;">
-      <div style="font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;">💰 Quỹ ban đầu</div>
-      <input id="club-init-bal" type="number" min="0" value="${clubInitBalance||''}" placeholder="0"
-        class="ldg-inp" style="flex:1;font-size:13px;padding:6px 8px;">
-      <span style="font-size:12px;color:var(--muted);">🍃</span>
-      <button onclick="saveClubInitBalance()" class="ldg-btn-in" style="padding:6px 12px;font-size:12px;flex-shrink:0;">Lưu</button>
-    </div>`:''}
   </div>`;
 
   // ── Lịch sử thu/chi ──
@@ -5359,21 +5342,13 @@ function renderLedger(){
   ]);
   const peopleList = [...nameSet].map(name=>{
     const b = balances[name]||{fromBet:0,fromLedger:0,txns:[]};
-    const netBet = b.fromBet;
+    const fp = _lfs.perPerson[name]||{owed:0,paid:0};
+    const netBet = fp.owed;
     const netIn  = ledger.filter(t=>t.name===name&&t.type==='in').reduce((s,t)=>s+(+t.amount),0);
     const netOut = ledger.filter(t=>t.name===name&&t.type==='out').reduce((s,t)=>s+(+t.amount),0);
-    const betPaidAmt = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.paid).reduce((s,m)=>s+(+m.bet),0);
-    const betUnpaid  = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&!m.paid).reduce((s,m)=>s+(+m.bet),0);
-    // Tính tổng nợ thực tế (trận thua thường + betEntry)
-    const lostM = matches.filter(m=>{
-      if(!m.saved||!m.bet||m.bet<=0||m.isBetEntry) return false;
-      const w=m.winner||(+m.s1>+m.s2?'A':+m.s2>+m.s1?'B':'');
-      return (w==='A'?[m.t2p1,m.t2p2]:w==='B'?[m.t1p1,m.t1p2]:[]).includes(name);
-    });
-    const betM = matches.filter(m=>m.saved&&m.isBetEntry&&m.t2p1===name&&m.bet>0);
-    const totalDebt = [...lostM,...betM].reduce((s,m)=>s+(+m.bet),0);
-    const totalPaid = [...lostM,...betM].filter(m=>m.isBetEntry?m.paid:m['paid_'+name]).reduce((s,m)=>s+(+m.bet),0);
-    const totalUnpaid = totalDebt - totalPaid;
+    const betPaidAmt = fp.paid;
+    const betUnpaid  = fp.owed - fp.paid;
+    const totalUnpaid = betUnpaid;
     return {name, netBet, betPaidAmt, betUnpaid, netIn, netOut, txns: b.txns, totalUnpaid};
   });
   // Sort: người còn nợ lên đầu, theo số nợ giảm dần
@@ -5389,6 +5364,13 @@ function renderLedger(){
     const txAll2 = [];
     ledger.forEach(tx=>txAll2.push({type:tx.type,amount:+tx.amount,date:tx.date,name:tx.name,note:tx.note||''}));
     matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).forEach(m=>txAll2.push({type:'in',amount:+m.bet,date:m.date,name:m.t2p1,note:'Ủng hộ quỹ'}));
+    // Trận thường đã paid
+    matches.filter(m=>m.saved&&!m.isBetEntry&&!m.isTeamBattle&&m.bet>0&&m.date).forEach(m=>{
+      const w1=+m.s1>+m.s2;
+      (w1?[m.t2p1,m.t2p2]:[m.t1p1,m.t1p2]).filter(Boolean).forEach(n=>{
+        if(m['paid_'+n]) txAll2.push({type:'in',amount:+m.bet,date:m.date,name:n,note:'Nộp quỹ (trận đấu)'});
+      });
+    });
 
     const txIn2=txAll2.filter(t=>t.type==='in');
     const txOut2=txAll2.filter(t=>t.type==='out');
@@ -5520,8 +5502,7 @@ function renderLedger(){
 
       let summaryLine = '';
       if(totalUnpaid>0) summaryLine += `<span style="color:#e55;font-weight:800;">⏳ Nợ ${fmtNum(totalUnpaid)}🍃</span>`;
-      const initBal = mbOf(p.name) ? (+mbOf(p.name).initialBalance||0) : 0;
-      const totalPaidAll = totalPaidDebt + p.netIn + initBal - p.netOut;
+      const totalPaidAll = totalPaidDebt + p.netIn - p.netOut;
       if(totalPaidAll>0) summaryLine += (summaryLine?' · ':'')+`<span style="color:var(--green);">✅ Đã nộp ${fmtNum(totalPaidAll)}🍃</span>`;
       if(p.netIn>0||p.netOut>0){
         const manual = p.netIn-p.netOut;
@@ -5566,19 +5547,6 @@ function renderLedger(){
         };const _ip=m=>m.isBetEntry?m.paid:!!m['paid_'+p.name];const _pMs=dayMs.filter(_ip);const _uMs=dayMs.filter(m=>!_ip(m));_uMs.forEach(_fn);if(_pMs.length){const _pSum=_pMs.reduce((a,mm)=>a+(+mm.bet),0);txHtml+=`<details ${(window._openPaid && window._openPaid.has(p.name))?'open':''} style="background:var(--s1);border-top:1px solid var(--bdr);"><summary style="cursor:pointer;list-style:none;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">▸ ✅ Đã nộp ${_pMs.length} mục · ${fmtNum(_pSum)}đ</summary>`;_pMs.forEach(_fn);txHtml+=`</details>`;}})();
       });
 
-      // Số dư ban đầu
-      const mbObj2 = mbOf(p.name);
-      const initBal2 = mbObj2 ? (+mbObj2.initialBalance||0) : 0;
-      if(initBal2>0){
-        txHtml += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--bdr);background:var(--s1);">
-          <div style="flex:1;">
-            <div style="font-size:12px;font-weight:700;">💰 Số dư quỹ cũ</div>
-            <div style="font-size:10px;color:var(--muted);">Ghi nhận ban đầu</div>
-          </div>
-          <span class="ldg-in">+${fmtNum(initBal2)}🍃</span>
-        </div>`;
-      }
-
       const manualTxns = ledger.filter(t=>t.name===p.name).sort((a,b)=>b.date.localeCompare(a.date));
       if(manualTxns.length){
         txHtml += `<div style="padding:6px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2);">Giao dịch thủ công</div>`;
@@ -5595,21 +5563,11 @@ function renderLedger(){
         });
       }
 
-      // Quick +/- buttons + số dư ban đầu (admin)
+      // Quick +/- buttons (admin)
       let quickBtns = '';
       if(isAdmin){
-        const mbObj = mbOf(p.name);
-        const initVal = mbObj ? (+mbObj.initialBalance||0) : 0;
         quickBtns = `<div style="border-top:1px solid var(--bdr);background:var(--s2);">
-          <div style="padding:8px 12px 4px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Số dư ban đầu (quỹ cũ)</div>
-          <div style="display:flex;gap:6px;padding:0 12px 8px;align-items:center;">
-            <input id="ldg-init-${domId}" type="number" min="0" value="${initVal||''}" placeholder="0"
-              class="ldg-inp" style="flex:1;font-size:13px;padding:6px 8px;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);">🍃</span>
-            <button onclick="saveInitBalance('${p.name}','${domId}')"
-              class="ldg-btn-in" style="padding:6px 12px;font-size:12px;">Lưu</button>
-          </div>
-          <div style="padding:0 12px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding-bottom:4px;">Ghi thu / chi thủ công</div>
+          <div style="padding:8px 12px 4px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Ghi thu / chi thủ công</div>
           <div style="display:flex;gap:6px;padding:0 12px 10px;">
             <input id="ldg-quick-amt-${domId}" type="number" min="0" placeholder="Số tiền..." class="ldg-inp" style="flex:1;font-size:12px;padding:6px 8px;">
             <input id="ldg-quick-note-${domId}" placeholder="Ghi chú..." class="ldg-inp" style="flex:2;font-size:12px;padding:6px 8px;">
