@@ -4682,7 +4682,13 @@ function delMatch(id){
 function delDay(date){
   if(!isAdmin) return;
   if(!confirm('Xóa tất cả trận ngày '+fmtDate(date)+'?')) return;
-  matches = matches.filter(m=>!(m.saved&&!m.fromDraw&&!m.isBetEntry&&m.date===date));
+  // Collect team battle IDs being deleted so we can remove their bet entries too
+  const tbIds=new Set(matches.filter(m=>m.saved&&m.isTeamBattle&&m.date===date).map(m=>m.id));
+  matches = matches.filter(m=>{
+    if(m.teamBattleParentId&&tbIds.has(m.teamBattleParentId)) return false;
+    if(m.saved&&!m.fromDraw&&!m.isBetEntry&&m.date===date) return false;
+    return true;
+  });
   renderMatches();
   debounceSave();
 }
