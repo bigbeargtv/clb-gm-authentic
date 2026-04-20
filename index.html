@@ -149,20 +149,17 @@ nav{
 }
 nav::-webkit-scrollbar{display:none;}
 .nt{
-  flex:0 0 auto;min-width:56px;padding:10px 8px 8px;
-  border:0!important;background:none!important;border-radius:0!important;
-  outline:0!important;box-shadow:none!important;-webkit-appearance:none;appearance:none;
+  flex:0 0 auto;padding:10px 8px 8px;
   font-family:'Nunito',sans-serif;font-size:9.5px;font-weight:600;
   letter-spacing:.1px;color:var(--muted);
   cursor:pointer;transition:color .2s;
   display:flex;flex-direction:column;align-items:center;gap:4px;
-  position:relative;-webkit-tap-highlight-color:transparent;
+  -webkit-tap-highlight-color:transparent;user-select:none;
 }
-.nt:hover,.nt:focus,.nt:active{background:none!important;border:0!important;outline:0!important;box-shadow:none!important;transform:none!important;}
 .nt:hover{color:var(--text);}
 .nt .mi{font-family:'Material Symbols Outlined';font-size:24px;font-weight:300;font-style:normal;line-height:1;display:block;-webkit-font-smoothing:antialiased;transition:font-variation-settings .25s,color .2s;}
 .nt.on .mi{font-variation-settings:'FILL' 1,'wght' 400;}
-.nt.on{color:var(--gold);background:none!important;}
+.nt.on{color:var(--gold);}
 
 /* PAGE */
 .pg{display:none;padding:16px 14px 60px;position:relative;z-index:1;max-width:520px;margin:0 auto;contain:layout style;}
@@ -1291,7 +1288,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 @media(min-width:641px) and (max-width:1024px){
   header{padding:8px 14px!important;}
   nav{overflow-x:auto!important;-webkit-overflow-scrolling:touch;}
-  nav button,nav a{min-height:44px;}
+  nav .nt{min-height:auto;}
   button{min-height:36px;}
   .modal,.picker,.backdrop .box{max-width:92vw!important;}
   .pg{padding:12px!important;}
@@ -1480,17 +1477,17 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 </header>
 
 <nav>
-  <button class="nt on" onclick="goTab('pg-intro')" id="nt0"><span class="mi">home</span>CLB</button>
-  <button class="nt admin-only" onclick="goTab('pg-members')" id="nt1"><span class="mi">group</span>Thành viên</button>
-  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="mi">sports_score</span>Trận đấu</button>
-  <button class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="mi">leaderboard</span>BXH</button>
-  <button class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="mi">history</span>Lịch sử</button>
-  <button class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="mi">account_balance_wallet</span>Quỹ</button>
-  <button class="nt admin-only" onclick="goTab('pg-draw')" id="nt6" style="display:none"><span class="mi">casino</span>Bốc thăm</button>
-  <button class="nt" onclick="goTab('pg-ledger')" id="nt7"><span class="mi">receipt_long</span>Thu Chi</button>
-  <button class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="mi">military_tech</span>Thành Tích</button>
-  <button class="nt" onclick="goTab('pg-album')" id="nt9"><span class="mi">photo_library</span>Album</button>
-  <button class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="mi">emoji_events</span>Tổng Kết</button>
+  <div class="nt on" onclick="goTab('pg-intro')" id="nt0"><span class="mi">home</span>CLB</div>
+  <div class="nt admin-only" onclick="goTab('pg-members')" id="nt1"><span class="mi">group</span>Thành viên</div>
+  <div class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="mi">sports_score</span>Trận đấu</div>
+  <div class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="mi">leaderboard</span>BXH</div>
+  <div class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="mi">history</span>Lịch sử</div>
+  <div class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="mi">account_balance_wallet</span>Quỹ</div>
+  <div class="nt admin-only" onclick="goTab('pg-draw')" id="nt6" style="display:none"><span class="mi">casino</span>Bốc thăm</div>
+  <div class="nt" onclick="goTab('pg-ledger')" id="nt7"><span class="mi">receipt_long</span>Thu Chi</div>
+  <div class="nt" onclick="goTab('pg-stats')" id="nt8"><span class="mi">military_tech</span>Thành Tích</div>
+  <div class="nt" onclick="goTab('pg-album')" id="nt9"><span class="mi">photo_library</span>Album</div>
+  <div class="nt" onclick="goTab('pg-funstats')" id="nt10"><span class="mi">emoji_events</span>Tổng Kết</div>
 </nav>
 
 <!-- INTRO -->
