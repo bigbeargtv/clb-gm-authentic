@@ -6200,13 +6200,13 @@ function getPlayerAwards(playerName){
   const byLR=Object.entries(ps).map(([n,s])=>({name:n,rate:s.l/s.games,...s})).filter(a=>a.games>=5).sort((a,b)=>b.rate-a.rate||b.l-a.l);
   if(byLR.length&&byLR[0].name===playerName) awards.push({emoji:'💀',title:'Người Hiến Dâng',sub:Math.round(byLR[0].rate*100)+'% thua',color:'pink'});
   const byLoss=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.l-a.l||a.games-b.games);
-  if(byLoss.length&&byLoss[0].name===playerName) awards.push({emoji:'🛡️',title:'Chiến Binh Bất Tử',sub:byLoss[0].l+' trận thua',color:'fire'});
+  if(byLoss.length&&byLoss[0].name===playerName) awards.push({emoji:'🛡️',title:'Người Đi Gỡ',sub:'Không ngừng bỏ cuộc!',color:'fire'});
   const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
-  if(betArr.length&&betArr[0].name===playerName&&betArr[0].amount>0) awards.push({emoji:'💸',title:'Nhà Tài Trợ',sub:fmtNum(betArr[0].amount)+'₫',color:'green'});
+  if(betArr.length&&betArr[0].name===playerName&&betArr[0].amount>0) awards.push({emoji:'💸',title:'Nghèo Mà Hoang',sub:fmtNum(betArr[0].amount)+'₫',color:'green'});
   const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
   if(carryArr.length&&carryArr[0].name===playerName) awards.push({emoji:'🏋️',title:'Thần Gánh Tạ',sub:Math.round(carryArr[0].rate*100)+'% carry',color:'purple'});
   const byGames=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.games-a.games||b.w-a.w);
-  if(byGames.length&&byGames[0].name===playerName) awards.push({emoji:'🦾',title:'Iron Man',sub:byGames[0].games+' trận',color:'blue'});
+  if(byGames.length&&byGames[0].name===playerName){const _days=new Set(mm.filter(m=>[m.t1p1,m.t1p2,m.t2p1,m.t2p2].includes(playerName)).map(m=>m.date)).size;awards.push({emoji:'🐃',title:'Khỏe Như Trâu',sub:byGames[0].games+' trận · '+_days+' buổi',color:'blue'});}
   const prospect=Object.entries(ps).filter(([,s])=>s.results.length>=5).map(([n,s])=>{const l5=s.results.slice(-5);return{name:n,w5:l5.filter(r=>r==='W').length};}).sort((a,b)=>b.w5-a.w5);
   if(prospect.length&&prospect[0].name===playerName&&prospect[0].w5>=3) awards.push({emoji:'⭐',title:'Ngôi Sao Đang Lên',sub:prospect[0].w5+'/5 gần nhất',color:'orange'});
   const streakD=Object.entries(ps).map(([n,s])=>({name:n,streak:getStreak(s.results),...s})).sort((a,b)=>b.streak-a.streak||b.w-a.w);
@@ -7335,12 +7335,12 @@ function renderFunStats(){
       heroVal:a.w,heroUnit:'W'});}
   const byLoss=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.l-a.l||a.games-b.games);
   if(byLoss.length){const a=byLoss[0];
-    awards.push({emoji:'🛡️',title:'CHIẾN BINH BẤT TỬ',color:'fire',name:a.name,badge:'💪',
-      lines:[line('💔',a.l+'L · '+a.games+' trận · Không bỏ cuộc!')],
+    awards.push({emoji:'🛡️',title:'NGƯỜI ĐI GỠ',color:'fire',name:a.name,badge:'💪',
+      lines:[line('💔',a.l+'L · '+a.games+' trận · Không ngừng bỏ cuộc!')],
       heroVal:a.l,heroUnit:'L'});}
   const betArr=Object.entries(betLoss).map(([n,v])=>({name:n,amount:v})).sort((a,b)=>b.amount-a.amount);
   if(betArr.length&&betArr[0].amount>0){const a=betArr[0];
-    awards.push({emoji:'💰',title:'NHÀ TÀI TRỢ',color:'green',name:a.name,badge:'💰',
+    awards.push({emoji:'💸',title:'NGHÈO MÀ HOANG',color:'green',name:a.name,badge:'💸',
       lines:[line('💵',fmtNum(a.amount)+'₫ đóng góp')],
       heroVal:fmtNum(a.amount),heroUnit:'₫'});}
   const carryArr=Object.entries(carryStats).filter(([,s])=>s.cG>=3).map(([n,s])=>({name:n,...s,rate:s.cW/s.cG})).sort((a,b)=>b.rate-a.rate||b.cW-a.cW);
@@ -7350,9 +7350,9 @@ function renderFunStats(){
       heroVal:Math.round(a.rate*100),heroUnit:'%'});}
   const byGames=Object.entries(ps).map(([n,s])=>({name:n,...s})).sort((a,b)=>b.games-a.games||b.w-a.w);
   if(byGames.length){const a=byGames[0];
-    awards.push({emoji:'🦾',title:'IRON MAN',color:'blue',name:a.name,badge:'⚡',
-      lines:[line('🎮',a.games+'G · '+a.dates.size+' buổi · '+a.w+'W-'+a.l+'L')],
-      heroVal:a.games,heroUnit:'G'});}
+    awards.push({emoji:'🐃',title:'KHỎE NHƯ TRÂU',color:'blue',name:a.name,badge:'🐃',
+      lines:[line('🎮',a.games+' trận · '+a.dates.size+' buổi')],
+      heroVal:a.games,heroUnit:'trận'});}
   const prospect=Object.entries(ps).filter(([,s])=>s.results.length>=5).map(([n,s])=>{
     const l5=s.results.slice(-5);const w5=l5.filter(r=>r==='W').length;
     return{name:n,w5,rate5:w5/5,l5};
