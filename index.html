@@ -465,7 +465,7 @@ nav::-webkit-scrollbar{display:none;}
 .pc{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--gold);}
 
 /* ── BXH Podium ── */
-.bxh-podium-wrap{background:linear-gradient(135deg,#1a1d2e,#252842,#1a1f36);border-radius:18px;padding:18px 12px 0;margin-bottom:14px;overflow:hidden;border:1.5px solid #ffffff0a;box-shadow:0 4px 24px rgba(0,0,0,.15);}
+.bxh-podium-wrap{background:linear-gradient(135deg,#1a1d2e,#252842,#1a1f36);border-radius:18px;padding:18px 12px 58px;margin-bottom:14px;overflow:visible;border:1.5px solid #ffffff0a;box-shadow:0 4px 24px rgba(0,0,0,.15);}
 .bxh-podium-title{text-align:center;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:14px;}
 .bxh-podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;}
 .bxh-podium-col{display:flex;flex-direction:column;align-items:center;cursor:pointer;flex:1;max-width:120px;transition:transform .2s;}
@@ -1381,7 +1381,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
   .stats-search-inp{font-size:12px!important;padding:8px 10px 8px 30px!important;}
 
   /* BXH Podium */
-  .bxh-podium-wrap{padding:12px 6px 0!important;}
+  .bxh-podium-wrap{padding:12px 6px 54px!important;overflow:visible!important;}
   .bxh-podium{gap:4px!important;padding:0 2px!important;}
   .bxh-podium-col{max-width:33%!important;flex:1 1 0!important;min-width:0!important;}
   .bxh-podium-av{width:48px!important;height:48px!important;}
@@ -6482,6 +6482,11 @@ function renderBXH(){
       const podiumColors=['linear-gradient(180deg,#a8a8b0,#78788a)','linear-gradient(180deg,#f0b429,#d4960a)','linear-gradient(180deg,#cd7f32,#a0622a)'];
       const medalColors=['#a8a8b0','#f0b429','#cd7f32'];
       const avSizes=[56,68,52];
+      const prizes=[
+        {img:'https://xemay.vinamotorvietnam.com/wp-content/uploads/sites/3/2021/12/8Ao5G0x7mZ98RKNj3Gzd.png',name:'SH'},
+        {img:'https://vnvinfast.com/data/upload/media/vang-1741104874.png',name:'VF 3'},
+        {img:'https://pngimg.com/uploads/iphone17/iphone17_PNG41.png',name:'iPhone 17'}
+      ];
       h+=`<div class="bxh-podium-wrap">
         <div class="bxh-podium-title">TOP 3${_sfxT?' ·'+_sfxT:''}</div>
         <div class="bxh-podium">`;
@@ -6501,8 +6506,12 @@ function renderBXH(){
           <div class="bxh-podium-name">${xe(p.name)}</div>
           <div class="bxh-podium-elo">${p.elo}</div>
           <div class="bxh-podium-stats">${p.w}W · ${p.l}L · ${wr}%</div>
-          <div class="bxh-podium-block" style="height:${podiumH[pi]}px;background:${podiumColors[pi]};">
+          <div class="bxh-podium-block" style="height:${podiumH[pi]}px;background:${podiumColors[pi]};position:relative;overflow:visible;">
             <span class="bxh-podium-rank">${rank}</span>
+            <div style="position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);text-align:center;width:${rank===1?100:rank===2?88:76}px;">
+              <img src="${prizes[pi].img}" alt="${prizes[pi].name}" style="width:${rank===1?80:rank===2?68:58}px;height:auto;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45));object-fit:contain;" loading="lazy">
+              <div style="font-size:${rank===1?10:9}px;font-weight:800;color:#ffffffcc;margin-top:1px;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.5);">${prizes[pi].name}</div>
+            </div>
           </div>
         </div>`;
       });
