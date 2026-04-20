@@ -7391,13 +7391,13 @@ function renderFunStats(){
   const medals=['🥇','🥈','🥉'];
 
   // Month nav
-  let _navH='<div style="display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 0 4px;">';
+  let _navH='<div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 0 4px;">';
   const _dk=document.documentElement.classList.contains('dark');
-  const _navC=_dk?'#c9a0ff':'#37003c';const _navCBg=_dk?'rgba(201,160,255,.15)':'rgba(55,0,60,.08)';const _navCBdr=_dk?'rgba(201,160,255,.3)':'rgba(55,0,60,.25)';const _navTxt=_dk?'#bbb':'#666';
-  const _navBtnStyle='background:'+_navCBg+';border:1.5px solid '+_navCBdr+';color:'+_navC+';border-radius:50%;width:30px;height:30px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-weight:600;';
-  _navH+=_hasPrev?'<button onclick="funPrevMonth()" style="'+_navBtnStyle+'" onmouseover="this.style.background=\''+_navC+'\';this.style.color=\'#fff\'" onmouseout="this.style.background=\''+_navCBg+'\';this.style.color=\''+_navC+'\'">‹</button>':'<div style="width:30px"></div>';
+  const _navC=_dk?'#c9a0ff':'#37003c';const _navTxt=_dk?'#bbb':'#666';
+  const _navBtnStyle='background:none;border:none;color:'+_navC+';width:28px;height:28px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s;opacity:.6;padding:0;';
+  _navH+=_hasPrev?'<button onclick="funPrevMonth()" style="'+_navBtnStyle+'" onmouseover="this.style.opacity=\'1\'" onmouseout="this.style.opacity=\'.6\'">❮</button>':'<div style="width:28px"></div>';
   _navH+='<div style="font-weight:700;font-size:13px;color:'+_navTxt+';letter-spacing:.5px;">'+monthNames[cm]+' '+cy+'</div>';
-  _navH+=_hasNext?'<button onclick="funNextMonth()" style="'+_navBtnStyle+'" onmouseover="this.style.background=\''+_navC+'\';this.style.color=\'#fff\'" onmouseout="this.style.background=\''+_navCBg+'\';this.style.color=\''+_navC+'\'">›</button>':'<div style="width:30px"></div>';
+  _navH+=_hasNext?'<button onclick="funNextMonth()" style="'+_navBtnStyle+'" onmouseover="this.style.opacity=\'1\'" onmouseout="this.style.opacity=\'.6\'">❯</button>':'<div style="width:28px"></div>';
   _navH+='</div>';
 
   let html='<div class="fun-header"><h2>🏆 TỔNG KẾT THÁNG '+(cm+1)+'/'+cy+'</h2>';
