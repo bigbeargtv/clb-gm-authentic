@@ -4065,8 +4065,8 @@ function renderTeamBattleCard(m){
   let betHtml='';
   if(winBet>0||loseBet>0){
     const parts=[];
-    if(winBet>0) parts.push('Đội thắng nộp '+(winBet>=1000?(winBet/1000)+'k':winBet)+'🍃/người');
-    if(loseBet>0) parts.push('Đội thua nộp '+(loseBet>=1000?(loseBet/1000)+'k':loseBet)+'🍃/người');
+    if(winBet>0) parts.push('Đội thắng ủng hộ '+(winBet>=1000?(winBet/1000)+'k':winBet)+'🍃/người');
+    if(loseBet>0) parts.push('Đội thua ủng hộ '+(loseBet>=1000?(loseBet/1000)+'k':loseBet)+'🍃/người');
     betHtml='<div style="font-size:10px;color:var(--green);font-weight:700;margin-top:4px;">💰 '+parts.join(' · ')+'</div>';
   }
   const totalFund=(winBet*winTeam.length)+(loseBet*loseTeam.length);
@@ -7355,9 +7355,9 @@ function renderFunStats(){
 
   // Month nav
   let _navH='<div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 0 4px;">';
-  _navH+=_hasPrev?'<button onclick="funPrevMonth()" style="background:var(--accent);color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">◀</button>':'<div style="width:32px"></div>';
+  _navH+=_hasPrev?'<button onclick="funPrevMonth()" style="background:#37003c;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">◀</button>':'<div style="width:32px"></div>';
   _navH+='<div style="font-weight:800;font-size:15px;color:var(--accent);">'+monthNames[cm]+' '+cy+'</div>';
-  _navH+=_hasNext?'<button onclick="funNextMonth()" style="background:var(--accent);color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">▶</button>':'<div style="width:32px"></div>';
+  _navH+=_hasNext?'<button onclick="funNextMonth()" style="background:#37003c;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">▶</button>':'<div style="width:32px"></div>';
   _navH+='</div>';
 
   let html='<div class="fun-header"><h2>🏆 TỔNG KẾT THÁNG</h2>';
@@ -7382,11 +7382,9 @@ function renderFunStats(){
     html+='<div class="fun-top3-elo">'+p.elo+'</div>';
     html+='</div>';
   });
-  if(!hasBadge&&mm.length>=3&&typeof isAdmin!=='undefined'&&isAdmin){
-    html+='<div style="text-align:center;"><button class="fun-badge-btn" onclick="saveMonthlyBadge(\''+badgeKey+'\')">📌 Lưu Top 3 tháng này</button></div>';
-  }
-  if(hasBadge&&!isAdmin){
-    html+='<div style="text-align:center;margin-top:6px;"><span class="fun-top3-saved">✅ Đã lưu</span></div>';
+  // Auto-save top 3 if not saved yet and enough data
+  if(!hasBadge&&top3.length>=3&&mm.length>=3){
+    setTimeout(()=>saveMonthlyBadge(badgeKey),100);
   }
   html+='</div>';
 
