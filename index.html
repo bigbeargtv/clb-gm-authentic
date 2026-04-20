@@ -840,6 +840,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 .album-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px dashed var(--bdr2);border-radius:12px;background:transparent;color:var(--muted);font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:12px;}
 .album-upload-btn:hover{border-color:var(--gold);color:var(--gold);}
 
+[data-album-id][draggable="true"]{cursor:grab;touch-action:none;}
+[data-album-id][draggable="true"]:active{cursor:grabbing;}
 /* LEDGER */
 .ldg-card{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
 .ldg-person-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
@@ -6519,12 +6521,19 @@ function renderAlbum(){
 
     if(photos.length){
       h += '<div style="padding:8px;'+(links.length?'border-top:1px solid var(--bdr);':'')+'background:var(--s1);">';
-      h += '<div class="album-grid">';
-      photos.forEach(a=>{
-        h += '<div style="position:relative;">';
-        h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
-        if(isAdmin) h += '<button onclick="delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;">✕</button>';
-        h += '</div>';
+      h += '<div class="album-grid" data-date="'+d+'">';
+      photos.forEach((a,pi)=>{
+        if(isAdmin){
+          h += '<div style="position:relative;" draggable="true" data-album-id="'+a.id+'">';
+          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async">';
+          h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;z-index:2;">✕</button>';
+          h += '<div style="position:absolute;top:3px;left:3px;background:#000a;border-radius:5px;color:#fff;font-size:9px;padding:2px 5px;pointer-events:none;opacity:.7;">↕</div>';
+          h += '</div>';
+        } else {
+          h += '<div style="position:relative;">';
+          h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
+          h += '</div>';
+        }
       });
       h += '</div></div>';
     }
@@ -6533,6 +6542,75 @@ function renderAlbum(){
   });
 
   el.innerHTML = h;
+
+  // ── Drag & Drop + Tap-to-swap for album photos (admin only) ──
+  if(isAdmin){
+    el.querySelectorAll('.album-grid[data-date]').forEach(grid=>{
+      // Desktop: HTML5 Drag & Drop
+      let dragEl=null;
+      grid.addEventListener('dragstart',e=>{
+        const item=e.target.closest('[data-album-id]');
+        if(!item)return;
+        dragEl=item;
+        item.style.opacity='.4';
+        e.dataTransfer.effectAllowed='move';
+        e.dataTransfer.setData('text/plain',item.dataset.albumId);
+      });
+      grid.addEventListener('dragend',e=>{
+        if(dragEl)dragEl.style.opacity='1';
+        grid.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        dragEl=null;
+      });
+      grid.addEventListener('dragover',e=>{
+        e.preventDefault();
+        e.dataTransfer.dropEffect='move';
+        const target=e.target.closest('[data-album-id]');
+        grid.querySelectorAll('[data-album-id]').forEach(c=>{c.style.outline='';});
+        if(target&&target!==dragEl)target.style.outline='2px solid var(--gold)';
+      });
+      grid.addEventListener('drop',e=>{
+        e.preventDefault();
+        const target=e.target.closest('[data-album-id]');
+        if(!target||!dragEl||target===dragEl)return;
+        albumSwap(+dragEl.dataset.albumId,+target.dataset.albumId);
+      });
+
+      // Mobile: tap first photo → highlight → tap second → swap
+      grid.querySelectorAll('[data-album-id]').forEach(item=>{
+        item.addEventListener('click',e=>{
+          if(e.target.closest('button'))return; // skip delete btn
+          const id=+item.dataset.albumId;
+          if(!window._albumSwapFrom){
+            window._albumSwapFrom=id;
+            item.style.outline='3px solid var(--gold)';
+            item.style.outlineOffset='-3px';
+            showToast('Chạm ảnh khác để đổi vị trí','info');
+            e.stopPropagation();e.preventDefault();
+          } else if(window._albumSwapFrom===id){
+            // Tap same → deselect → open lightbox
+            window._albumSwapFrom=null;
+            item.style.outline='';item.style.outlineOffset='';
+            openLightbox(id);
+          } else {
+            albumSwap(window._albumSwapFrom,id);
+            window._albumSwapFrom=null;
+            e.stopPropagation();e.preventDefault();
+          }
+        });
+      });
+    });
+  }
+}
+
+function albumSwap(fromId,toId){
+  const fi=album.findIndex(a=>a.id===fromId);
+  const ti=album.findIndex(a=>a.id===toId);
+  if(fi<0||ti<0)return;
+  const [moved]=album.splice(fi,1);
+  album.splice(ti,0,moved);
+  debounceSave();
+  renderAlbum();
+  showToast('Đã đổi vị trí ảnh','success');
 }
 
 function toggleAlbumDay(dayId){
