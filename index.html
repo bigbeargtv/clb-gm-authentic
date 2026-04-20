@@ -145,25 +145,23 @@ nav{
   -ms-overflow-style:none;
   touch-action:pan-x;
   -webkit-overflow-scrolling:touch;
-  padding:4px 8px 0;gap:2px;
-  box-shadow:0 2px 12px rgba(0,0,0,.06);
+  padding:2px 6px 0;gap:0;
+  box-shadow:0 1px 6px rgba(0,0,0,.05);
 }
 nav::-webkit-scrollbar{display:none;}
 .nt{
-  flex:0 0 auto;min-width:64px;padding:11px 8px 9px;border:none;
-  background:transparent;border-radius:10px 10px 0 0;
-  font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;
-  letter-spacing:.3px;text-transform:uppercase;color:var(--muted);
-  cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
+  flex:0 0 auto;min-width:52px;padding:8px 6px 6px;border:none;
+  background:transparent;border-radius:0;
+  font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.2px;text-transform:uppercase;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
   position:relative;
 }
-.nt:hover{background:var(--s2);color:var(--text2);}
-.nt .ic{font-size:24px;transition:transform .2s;line-height:1;display:block;will-change:transform;}
-.nt .mi{font-family:'Material Symbols Outlined';font-size:24px;font-weight:300;font-style:normal;line-height:1;display:block;-webkit-font-smoothing:antialiased;transition:font-variation-settings .2s,transform .2s;}
+.nt:hover{color:var(--text2);}
+.nt .mi{font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;font-style:normal;line-height:1;display:block;-webkit-font-smoothing:antialiased;transition:font-variation-settings .2s;}
 .nt.on .mi{font-variation-settings:'FILL' 1,'wght' 500;}
-.nt.on{color:var(--gold);border-bottom-color:var(--gold);background:linear-gradient(180deg,rgba(240,180,41,.08),transparent);}
-.nt.on .ic{transform:scale(1.15);}
+.nt.on{color:var(--gold);border-bottom-color:var(--gold);}
 
 /* PAGE */
 .pg{display:none;padding:16px 14px 60px;position:relative;z-index:1;max-width:520px;margin:0 auto;contain:layout style;}
@@ -1323,9 +1321,8 @@ html.dark .bxh-tbl-row{background:var(--s2);}
     background:linear-gradient(90deg,transparent,var(--s1));pointer-events:none;z-index:2;}
   nav::before{content:'';position:absolute;left:0;top:0;bottom:0;width:24px;
     background:linear-gradient(270deg,transparent,var(--s1));pointer-events:none;z-index:2;}
-  .nt{min-width:50px;padding:6px 5px 5px!important;font-size:8px!important;gap:1px;flex:0 0 auto;border-radius:8px 8px 0 0!important;border-bottom-width:2px!important;}
-  .nt .ic{font-size:18px!important;}
-  .nt .mi{font-size:20px!important;}
+  .nt{min-width:42px;padding:6px 4px 4px!important;font-size:7.5px!important;gap:1px;flex:0 0 auto;border-radius:0!important;border-bottom-width:2px!important;}
+  .nt .mi{font-size:18px!important;}
 
   /* === NEW RESPONSIVE RULES === */
   /* Page containers */
@@ -1484,7 +1481,7 @@ html.dark .bxh-tbl-row{background:var(--s2);}
 <nav>
   <button class="nt on" onclick="goTab('pg-intro')" id="nt0"><span class="mi">home</span>CLB</button>
   <button class="nt admin-only" onclick="goTab('pg-members')" id="nt1"><span class="mi">group</span>Thành viên</button>
-  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="mi">sports_tennis</span>Trận đấu</button>
+  <button class="nt admin-only" onclick="goTab('pg-matches')" id="nt2"><span class="mi">scoreboard</span>Trận đấu</button>
   <button class="nt" onclick="goTab('pg-bxh')" id="nt3"><span class="mi">leaderboard</span>BXH</button>
   <button class="nt" onclick="goTab('pg-hist')" id="nt4"><span class="mi">history</span>Lịch sử</button>
   <button class="nt" onclick="goTab('pg-quy')" id="nt5"><span class="mi">account_balance_wallet</span>Quỹ</button>
@@ -5352,7 +5349,7 @@ function renderIntro(){
   }
   const gallery=document.getElementById('iGallery');
   if(!gallery) return;
-  const photos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)));
+  const photos=(album||[]).filter(a=>a.url&&(a.type==='photo'||/^data:image/.test(a.url)||isImageUrl(a.url)));
   if(!photos.length){
     gallery.innerHTML='<span class="i-gallery-empty">Ch\u01b0a c\xf3 \u1ea3nh \u2014 h\xe3y upload v\xe0o tab Album</span>';
     const bg=document.getElementById('iHeroBg');
@@ -5903,8 +5900,8 @@ function renderAlbum(){
 
   days.forEach(d=>{
     const items  = byDay[d];
-    const links  = items.filter(a=>a.type==='link');
-    const photos = items.filter(a=>a.type==='photo'||!a.type);
+    const links  = items.filter(a=>a.type==='link'&&!isImageUrl(a.url));
+    const photos = items.filter(a=>a.type==='photo'||!a.type||(a.type==='link'&&isImageUrl(a.url)));
     const thumb  = photos[0];
     const dayId  = 'albd-'+d.replace(/-/g,'');
     const isEditingDay = (window._albumEditDay === d);
@@ -6561,6 +6558,7 @@ function getHistFilterLabel(){
 function fmtNum(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.length>1?p[p.length-1][0]:name[0]).toUpperCase();}
 function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function isImageUrl(u){if(!u||/^data:/.test(u))return false;return/\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(u)||/\/(photo|image|img|pic)\//i.test(u);}
 
 // ─── DARK MODE ───
 function toggleDark(){
