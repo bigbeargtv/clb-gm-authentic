@@ -7360,12 +7360,12 @@ function renderFunStats(){
   const pairArr=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>b.rate-a.rate||b.w-a.w);
   if(pairArr.length){const a=pairArr[0];
     awards.push({emoji:'💕',title:'CẶP ĐÔI HOÀN HẢO',color:'purple',name:a.key,badge:'💘',isPair:true,pairNames:a.p,
-      lines:[line('🏆',a.w+'/'+a.games+' · '+Math.round(a.rate*100)+'%')],
+      lines:[line('🏆',a.w+'/'+a.games+' Thắng')],
       heroVal:Math.round(a.rate*100),heroUnit:'%'});}
   const worstP=Object.entries(pairs).map(([k,v])=>({key:k,...v,rate:v.w/v.games})).filter(p=>p.games>=3).sort((a,b)=>a.rate-b.rate||a.w-b.w);
   if(worstP.length&&worstP[0].rate<0.5){const a=worstP[0];
     awards.push({emoji:'💔',title:'CẶP ĐÔI HOÀN CẢNH',color:'pink',name:a.key,badge:'😭',isPair:true,pairNames:a.p,
-      lines:[line('💔',a.l+'/'+a.games+' thua · '+Math.round(a.rate*100)+'%')],
+      lines:[line('💔',a.l+'/'+a.games+' Thua')],
       heroVal:Math.round(a.rate*100),heroUnit:'%'});}
   const totalPlayers=Object.keys(ps).length;
   const totalDays=new Set();mm.forEach(m=>totalDays.add(m.date));
@@ -7430,7 +7430,11 @@ function renderFunStats(){
       if(a.badge)html+='<div class="fun-award-badge">'+a.badge+'</div>';
       html+='</div>';
     }
-    html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.isPair?a.name:a.name)+'</div>';
+    if(a.isPair&&a.pairNames){
+      html+='<div class="fun-award-info"><div class="fun-award-name" style="white-space:normal;line-height:1.3">'+a.pairNames.map(n=>xe(n)).join(' & ')+'</div>';
+    } else {
+      html+='<div class="fun-award-info"><div class="fun-award-name">'+xe(a.name)+'</div>';
+    }
     html+='<div class="fun-award-lines">';
     a.lines.forEach(l=>{
       html+='<div class="fun-award-line"><span class="al-icon">'+l.icon+'</span><span>'+l.text+'</span></div>';
