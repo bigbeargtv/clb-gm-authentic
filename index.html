@@ -7385,7 +7385,7 @@ function renderFunStats(){
     html+='</div>';
   });
   // Auto-save top 3 if not saved yet and enough data
-  if(!hasBadge&&top3.length>=3&&mm.length>=3){
+  if(!hasBadge&&top3Elo.length>=3&&mm.length>=3){
     setTimeout(()=>saveMonthlyBadge(badgeKey),100);
   }
   html+='</div>';
