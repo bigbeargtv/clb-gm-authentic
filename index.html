@@ -1802,12 +1802,12 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <!-- ĐỐI TÁC & NHÀ TÀI TRỢ -->
   <div class="i-block">
     <div class="i-block-ttl">&#x110;&#x1ED1;i t&#xE1;c & Nh&#xE0; t&#xE0;i tr&#x1EE3;</div>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px 32px;padding:18px 14px;background:var(--s1);border-radius:12px;border:1px solid var(--bdr);">
-      <a href="https://www.nike.com" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike" class="partner-logo-dark" style="height:32px;width:auto;"></a>
-      <a href="https://www.joola.com" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Joola_Logo_2025.svg" alt="Joola" class="partner-logo-dark" style="height:28px;width:auto;"></a>
-      <a href="https://www.bidv.com.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BIDV_RGB.png" alt="BIDV" style="height:30px;width:auto;"></a>
-      <a href="#" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://cautruyenhinh.net/wp-content/uploads/2021/05/logo-chuan.png" alt="Mithalo" style="height:32px;width:auto;"></a>
-      <a href="https://sakuko.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://dnsg.1cdn.vn/2022/09/11/i.doanhnhansaigon.vn-2022-09-10-_2586-1662802613.png" alt="Sakuko" style="height:30px;width:auto;"></a>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:18px 28px;padding:18px 14px;background:var(--s1);border-radius:12px;border:1px solid var(--bdr);">
+      <a href="https://www.nike.com" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:70px;height:36px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike" class="partner-logo-dark" style="max-height:30px;max-width:65px;width:auto;height:auto;object-fit:contain;"></a>
+      <a href="https://www.joola.com" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:70px;height:36px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Joola_Logo_2025.svg" alt="Joola" class="partner-logo-dark" style="max-height:30px;max-width:65px;width:auto;height:auto;object-fit:contain;"></a>
+      <a href="https://www.bidv.com.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:70px;height:36px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BIDV_RGB.png" alt="BIDV" style="max-height:30px;max-width:65px;width:auto;height:auto;object-fit:contain;"></a>
+      <a href="#" style="display:flex;align-items:center;justify-content:center;width:70px;height:36px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://cautruyenhinh.net/wp-content/uploads/2021/05/logo-chuan.png" alt="Mithalo" style="max-height:30px;max-width:65px;width:auto;height:auto;object-fit:contain;"></a>
+      <a href="https://sakuko.vn" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:70px;height:36px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><img src="https://dnsg.1cdn.vn/2022/09/11/i.doanhnhansaigon.vn-2022-09-10-_2586-1662802613.png" alt="Sakuko" style="max-height:30px;max-width:65px;width:auto;height:auto;object-fit:contain;"></a>
     </div>
   </div>
 
@@ -6573,30 +6573,21 @@ function renderAlbum(){
     });
 
     if(photos.length){
-      const _reorder=isAdmin&&window._albumReorderMode;
       h += '<div style="padding:8px;'+(links.length?'border-top:1px solid var(--bdr);':'')+'background:var(--s1);">';
-      if(isAdmin){
-        h += '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;">';
-        h += '<button onclick="toggleAlbumReorder()" style="background:'+(_reorder?'var(--gold)':'var(--s2)')+';color:'+(_reorder?'#fff':'var(--muted)')+';border:1.5px solid '+(_reorder?'var(--gold)':'var(--bdr2)')+';border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_reorder?'✓ Xong':'↕ Sắp xếp')+'</button>';
-        h += '</div>';
-      }
       h += '<div class="album-grid" data-date="'+d+'">';
       photos.forEach((a,pi)=>{
-        if(_reorder){
-          h += '<div style="position:relative;">';
-          h += '<img src="'+a.url+'" class="album-thumb" loading="lazy" decoding="async" style="opacity:.85;">';
+        h += '<div style="position:relative;">';
+        h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
+        if(isAdmin){
+          // Nút xóa
+          h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;left:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;z-index:2;">✕</button>';
+          // Nút lên/xuống
           h += '<div style="position:absolute;top:2px;right:2px;display:flex;flex-direction:column;gap:2px;z-index:3;">';
-          if(pi>0) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',-1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:13px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>';
-          if(pi<photos.length-1) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:13px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">▼</button>';
-          h += '</div>';
-          h += '<div style="position:absolute;bottom:2px;left:2px;background:#000b;color:#fffc;font-size:10px;padding:1px 5px;border-radius:3px;">'+(pi+1)+'</div>';
-          h += '</div>';
-        } else {
-          h += '<div style="position:relative;">';
-          h += '<img src="'+a.url+'" class="album-thumb" onclick="openLightbox('+a.id+')" loading="lazy" decoding="async">';
-          if(isAdmin) h += '<button onclick="event.stopPropagation();delAlbumPhoto('+a.id+')" style="position:absolute;top:3px;right:3px;background:#000a;border:none;border-radius:5px;color:#fff;font-size:10px;padding:2px 5px;cursor:pointer;z-index:2;">✕</button>';
+          if(pi>0) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',-1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:14px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">▲</button>';
+          if(pi<photos.length-1) h += '<button onclick="event.stopPropagation();albumMove('+a.id+',1)" style="background:#000b;border:none;border-radius:4px;color:#fff;font-size:14px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">▼</button>';
           h += '</div>';
         }
+        h += '</div>';
       });
       h += '</div></div>';
     }
@@ -6610,8 +6601,7 @@ function renderAlbum(){
 
 
 function toggleAlbumReorder(){
-  window._albumReorderMode=!window._albumReorderMode;
-  window._albumSwapFrom=null;
+  // Legacy — kept for compatibility
   renderAlbum();
 }
 
