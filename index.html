@@ -4310,7 +4310,7 @@ function rEdit(m){
       </div>
     </div>
     <div class="bet-area">
-      <div class="bet-label">💰 Tiền cược (mỗi người thua nộp)</div>
+      <div class="bet-label">🍃 Ủng hộ (mỗi người thua nộp)</div>
       <div class="bet-pills">
         ${BET_PRESETS.map(v=>`<span class="bet-pill${m.bet===v?' on':''}" onclick="setBet(${m.id},${v})">${fmtBet(v)}</span>`).join('')}
       </div>
@@ -4805,7 +4805,7 @@ function renderQuy(){
   const _qLedger=(typeof ledger!=='undefined'?ledger:[]);const _qIn=_qLedger.filter(t=>t.type==='in').reduce((a,t)=>a+(+t.amount),0);const _qOut=_qLedger.filter(t=>t.type==='out').reduce((a,t)=>a+(+t.amount),0);const _qBetPaid=matches.filter(m=>m.saved&&m.isBetEntry&&m.bet>0&&m.paid).reduce((a,m)=>a+(+m.bet),0);const _qGrand=_qIn+_qBetPaid-_qOut;let html=`<div style="background:linear-gradient(135deg,#00b85522,#00b85508);border:2px solid var(--green);border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px #00b85520;"><div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">💰 QUỸ CLB</div><div style="font-size:28px;font-weight:900;color:var(--green);margin-top:4px;line-height:1.1;">${fmtNum(_qGrand)}đ</div></div><div style="background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:10px;color:var(--muted);font-weight:700;">💚 Ủng hộ</div><div style="font-size:15px;font-weight:800;">${fmtNum(totalLeaf)}đ</div></div><div style="font-size:10px;color:var(--muted);text-align:right;">${totalMatches} trận · ${sorted.length} người</div></div>`;
   // ── BXH tổng ──
   html += '<div style="text-align:center;font-size:17px;font-weight:800;margin:16px 0 12px;color:var(--text);">🏆 BXH NỘP QUỸ NHIỀU NHẤT 🏆</div>';
-  html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Trận thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
+  html += '<div class="quy-h"><div></div><div>Tên</div><div style="text-align:center">Thua</div><div style="text-align:right">Ủng Hộ 🍃</div></div>';
   sorted.forEach((p,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
