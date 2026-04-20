@@ -6546,30 +6546,30 @@ function renderHist(){
     function matchRow(m, showDel=false){
       const t1=[m.t1p1,m.t1p2].filter(Boolean);
       const t2=[m.t2p1,m.t2p2].filter(Boolean);
-      const s1=+m.s1, s2=+m.s2, w1=s1>s2, draw=s1===s2;
+      const w1=+m.s1>+m.s2;
       const av=(n)=>{ const mb=mbOf(n); if(!mb)return''; return mb.photo?`<img loading="lazy" src="${mb.photo}" style="width:20px;height:20px;border-radius:6px;object-fit:cover;" decoding="async">`:`<div class="${AVC[mb.color]}" style="width:20px;height:20px;border-radius:6px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff;">${ini(n)}</div>`; };
-      const teamLine=(names,won,score)=>{
-        const wColor=won?'var(--green)':'var(--muted)';
-        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;${won?'':'opacity:.55'}">
-          <div style="display:flex;align-items:center;gap:3px;flex:1;min-width:0;">
-            ${names.map(n=>av(n)).join('')}
-            <span style="font-size:12px;font-weight:${won?'700':'500'};color:${won?'var(--text)':'var(--muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${names.map(n=>xe(n)).join(' · ')||'—'}</span>
-          </div>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${won?'var(--green)':draw?'var(--text)':'var(--muted)'};min-width:20px;text-align:center;">${score}</span>
-          ${won?'<span style="font-size:9px;color:var(--green);font-weight:800;min-width:14px;">W</span>':'<span style="min-width:14px;"></span>'}
-        </div>`;
-      };
-      const betHtml=m.bet>0?`<span style="font-size:8px;font-weight:700;color:var(--green);background:#1a9e6012;border-radius:4px;padding:1px 4px;margin-top:1px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}🍃</span>`:'';
+      const teamHtml=(names,won)=>`<div style="display:flex;align-items:center;gap:4px;${won?'':'opacity:.45'}">
+        ${names.map(n=>av(n)).join('')}
+        <span style="font-size:12px;font-weight:${won?'800':'600'};color:${won?'var(--text)':'var(--muted)'};">${names.map(n=>xe(n)).join(' & ')||'Đội'}</span>
+        ${won?'<span style="font-size:10px;">🏆</span>':''}
+      </div>`;
+      const betHtml=m.bet>0?`<span style="font-size:9px;font-weight:800;color:var(--green);background:#1a9e6015;border-radius:6px;padding:1px 5px;">${m.bet>=1000?(m.bet/1000)+'k':''+m.bet}🍃</span>`:'';
       const delBtn = showDel ? `<button onclick="delMatch(${m.id})" class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" title="Xóa">🗑</button>` : '';
-      return `<div style="padding:6px 10px;border-bottom:1px solid var(--bdr);background:var(--s1);">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
-          <span class="cbadge ${CB[m.cat]}" style="font-size:8px;padding:2px 7px;">${CL[m.cat]}</span>
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--s1);">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+          <span class="cbadge ${CB[m.cat]}" style="font-size:9px;">${CL[m.cat]}</span>
           ${betHtml}
-          <span style="flex:1;"></span>
-          ${delBtn}
         </div>
-        ${teamLine(t1,w1,m.s1)}
-        ${teamLine(t2,!w1,m.s2)}
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+          ${teamHtml(t1,w1)}
+          ${teamHtml(t2,!w1)}
+        </div>
+        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;background:${w1?'#1a9e6012':'#e0555512'};border-radius:8px;padding:4px 8px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;color:${w1?'var(--green)':'var(--red,#e05555)'};">${m.s1}</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:900;margin:0 1px;">-</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--red,#e05555)'};">${m.s2}</span>
+        </div>
+        ${delBtn?`<div style="display:flex;gap:4px;flex-shrink:0;">${delBtn}</div>`:''}
       </div>`;
     }
 
