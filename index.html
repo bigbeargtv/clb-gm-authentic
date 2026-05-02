@@ -4771,14 +4771,17 @@ function _fuzzyMatchMember(input){
   const q=input.trim().toLowerCase();
   if(!q) return null;
   // exact match first
-  let found=members.find(m=>m.name.toLowerCase()===q);
-  if(found) return found.name;
+  let found=members.filter(m=>m.name.toLowerCase()===q);
+  if(found.length===1) return {name:found[0].name};
+  if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
   // starts with
-  found=members.find(m=>m.name.toLowerCase().startsWith(q));
-  if(found) return found.name;
+  found=members.filter(m=>m.name.toLowerCase().startsWith(q));
+  if(found.length===1) return {name:found[0].name};
+  if(found.length>1) return {ambiguous:found.map(m=>m.name)};
   // contains
-  found=members.find(m=>m.name.toLowerCase().includes(q));
-  if(found) return found.name;
+  found=members.filter(m=>m.name.toLowerCase().includes(q));
+  if(found.length===1) return {name:found[0].name};
+  if(found.length>1) return {ambiguous:found.map(m=>m.name)};
   // last word match (Vietnamese names: last word is first name)
   const qLast=q.split(/\s+/).pop();
   if(qLast.length>=2){
@@ -4786,7 +4789,8 @@ function _fuzzyMatchMember(input){
       const mLast=m.name.toLowerCase().split(/\s+/).pop();
       return mLast===qLast;
     });
-    if(candidates.length===1) return candidates[0].name;
+    if(candidates.length===1) return {name:candidates[0].name};
+    if(candidates.length>1) return {ambiguous:candidates.map(m=>m.name)};
   }
   return null;
 }
@@ -4816,9 +4820,9 @@ function _parseQuickLine(line){
   const winMatch=rest.match(/\b([AB])\s*$/i);
   if(winMatch){ winner=winMatch[1].toUpperCase(); rest=rest.replace(winMatch[0],'').trim(); }
   const teamBNames=rest.split(/[,&]+/).map(s=>s.trim()).filter(Boolean);
-  // Fuzzy match names
-  const t1=teamANames.map(n=>({input:n,match:_fuzzyMatchMember(n)}));
-  const t2=teamBNames.map(n=>({input:n,match:_fuzzyMatchMember(n)}));
+  // Fuzzy match names — result: {input, name, ambiguous}
+  const t1=teamANames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
+  const t2=teamBNames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
   // Auto-detect winner from score
   if(!winner&&s1!==''&&s2!==''){
     if(+s1>+s2) winner='A';
@@ -4844,7 +4848,11 @@ function previewQuickInput(){
       html+=`<div style="color:#e55;padding:4px 0;">❌ Dòng ${i+1}: ${p?p.error:'Không đọc được'}</div>`;
       return;
     }
-    const fmtName=(n)=>n.match?`<span style="color:var(--green);font-weight:700;">${xe(n.match)}</span>`:`<span style="color:#e55;text-decoration:line-through;">${xe(n.input)}?</span>`;
+    const fmtName=(n)=>{
+      if(n.ambiguous) return `<span style="color:#f5a623;font-weight:700;" title="Trùng: ${n.ambiguous.join(', ')}">${xe(n.input)}⚠️(${n.ambiguous.join('/')})</span>`;
+      if(n.name) return `<span style="color:var(--green);font-weight:700;">${xe(n.name)}</span>`;
+      return `<span style="color:#e55;text-decoration:line-through;">${xe(n.input)}?</span>`;
+    };
     const tA=p.t1.map(fmtName).join(' & ');
     const tB=p.t2.map(fmtName).join(' & ');
     const winTxt=p.winner?` · 🏆${p.winner}`:'';
@@ -4865,10 +4873,13 @@ function submitQuickInput(){
   lines.forEach(line=>{
     const p=_parseQuickLine(line);
     if(!p||p.error){ errors++; return; }
-    const t1p1=p.t1[0]?p.t1[0].match:'';
-    const t1p2=p.t1[1]?p.t1[1].match:'';
-    const t2p1=p.t2[0]?p.t2[0].match:'';
-    const t2p2=p.t2[1]?p.t2[1].match:'';
+    // Block if any name is ambiguous
+    const allPlayers=[...p.t1,...p.t2];
+    if(allPlayers.some(n=>n.ambiguous)){ errors++; return; }
+    const t1p1=p.t1[0]?p.t1[0].name:'';
+    const t1p2=p.t1[1]?p.t1[1].name:'';
+    const t2p1=p.t2[0]?p.t2[0].name:'';
+    const t2p2=p.t2[1]?p.t2[1].name:'';
     if(!t1p1||!t2p1){ errors++; return; }
     const saved=!!(p.winner);
     matches.push({
