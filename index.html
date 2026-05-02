@@ -1909,12 +1909,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <button class="add-btn admin-only" onclick="toggleQuickInput()" style="background:var(--s2);color:var(--text);border:1.5px solid var(--bdr);font-size:12px;padding:8px 16px;margin-top:4px;">📋 Nhập nhanh nhiều trận</button>
   <div id="quickInputBox" class="admin-only" style="display:none;margin-top:8px;">
     <div style="background:var(--s1);border:1.5px solid var(--bdr);border-radius:14px;padding:14px;box-shadow:0 2px 8px #0001;">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;line-height:1.6;">
-        📝 Mỗi dòng 1 trận · Copy từ tin nhắn nhóm:<br>
-        <code style="background:var(--s2);padding:2px 6px;border-radius:4px;font-size:11px;">Tên1 - Tên2 thắng 11-3 Tên3 - Tên4 50k</code><br>
-        <span style="font-size:10px;color:var(--muted);">• <b>thắng/thua</b> = kết quả đội trước<br>• <b>11-3</b> = tỉ số · <b>50k</b> = ủng hộ (không bắt buộc)<br>• Hỗ trợ cả cú pháp <b>vs</b> · Có thể giữ nguyên <b>@</b><br>• 🔄 Tự phân loại Đôi Nam/Nữ/Mix theo giới tính</span>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;line-height:1.7;">
+        📋 Copy thẳng tin nhắn từ nhóm chat vào đây:<br>
+        <span style="font-size:10px;">• Dùng <b>thắng/thua</b> hoặc <b>vs</b> phân cách 2 đội<br>• Tên cách bằng <b>@</b>, <b>-</b>, <b>,</b> hoặc không cần dấu<br>• Hỗ trợ <b>biệt danh</b> đã lưu trong hồ sơ thành viên<br>• 🔄 Tự phân loại Nam/Nữ/Mix · Tự đảo tỉ số cho đúng<br>• Dòng rác (giờ, tên người gửi...) tự bỏ qua</span>
       </div>
-      <textarea id="quickInputText" rows="6" placeholder="Bigbear - Quyên Bệu thắng 11-3 Phạm Hải Ninh - Trịnh Quốc Hiếu 50k&#10;Tung - Trần Hải Dương thua Tép - Trần Đức Vượng 8-11&#10;Tuan Tran - Trần Hải Dương thắng Duong Thanh Tung - Trần Đức Vượng 11-2" style="width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
+      <textarea id="quickInputText" rows="8" placeholder="Paste tin nhắn từ nhóm chat vào đây...&#10;&#10;Ví dụ:&#10;@Bigbear @Quyên Bệu thắng 11-3 @Hải Ninh @Quốc Hiếu 50k&#10;Tung - Hải Dương thua Tép - Đức Vượng 8-11&#10;Tuan Tran vs Thanh Tung A" style="width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
       <div id="quickInputPreview" style="margin-top:8px;font-size:12px;"></div>
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button onclick="previewQuickInput()" style="flex:1;padding:10px;background:var(--s2);color:var(--text);border:1.5px solid var(--bdr);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">👁 Xem trước</button>
@@ -4837,7 +4836,6 @@ function _detectCat(players){
   return cat;
 }
 function _greedyMatchNames(str){
-  // Try to greedily match names from left to right against members + nicknames
   str=str.trim();
   if(!str) return [];
   const words=str.split(/\s+/);
@@ -4845,152 +4843,203 @@ function _greedyMatchNames(str){
   let i=0;
   while(i<words.length){
     let bestMatch=null, bestLen=0;
-    // Try longest possible name first (up to 4 words)
     for(let len=Math.min(4,words.length-i);len>=1;len--){
       const candidate=words.slice(i,i+len).join(' ');
       const r=_fuzzyMatchMember(candidate);
       if(r&&r.name){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous||null}; bestLen=len; break; }
     }
     if(bestMatch){ results.push(bestMatch); i+=bestLen; }
-    else{
-      // Single word unmatched
-      results.push({input:words[i],name:null,ambiguous:null});
-      i++;
-    }
+    else{ results.push({input:words[i],name:null,ambiguous:null}); i++; }
+  }
+  // Merge consecutive unmatched words and retry as combined name
+  if(results.some(r=>!r.name&&!r.ambiguous)){
+    const merged=[];
+    let buf=[];
+    const flush=()=>{
+      if(!buf.length) return;
+      if(buf.length>1){
+        const combined=buf.map(b=>b.input).join(' ');
+        const r=_fuzzyMatchMember(combined);
+        if(r&&r.name){ merged.push({input:combined,name:r.name,ambiguous:r.ambiguous||null}); buf=[]; return; }
+      }
+      buf.forEach(b=>merged.push(b));
+      buf=[];
+    };
+    results.forEach(r=>{
+      if(r.name){ flush(); merged.push(r); }
+      else buf.push(r);
+    });
+    flush();
+    return merged;
   }
   return results;
+}
+function _parseTeamNames(str){
+  str=str.trim();
+  if(!str) return [];
+  // 1) If @ present: use @ as separator
+  if(str.includes('@')){
+    return str.split(/@/).map(s=>s.replace(/^[\s\-,]+|[\s\-,]+$/g,'').trim()).filter(Boolean);
+  }
+  // 2) If - , & present: split by those
+  if(/[-,&]/.test(str)){
+    return str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
+  }
+  // 3) No separator → null (signal greedy match)
+  return null;
 }
 function _parseQuickLine(line){
   line=line.trim();
   if(!line) return null;
-  // Remember if @ was used as separator
-  const hasAt=line.includes('@');
-  // Extract bet (e.g. 50k, 100k, 200000) — before removing @
+  // Skip obvious junk: timestamps (18:45), dates, very short text, sender names
+  if(/^\d{1,2}:\d{2}$/.test(line)) return {skip:true};
+  if(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}$/.test(line)) return {skip:true};
+  // Standalone bet: "50k" or "100000" → apply to previous match
+  if(/^\d+k$/i.test(line)) return {betUpdate:parseInt(line)*1000};
+  if(/^\d{5,}$/.test(line)) return {betUpdate:parseInt(line)};
+  // Must contain thắng/thua/vs to be a valid match line
+  if(!/thắng|thua|\bvs\b/i.test(line)) return {skip:true};
+  // Extract bet (50k, 100k)
   let bet=0;
   const betMatch=line.match(/\b(\d+)k\b/i);
   if(betMatch){ bet=parseInt(betMatch[1])*1000; line=line.replace(betMatch[0],'').trim(); }
   else{
-    const betMatch2=line.match(/\b(\d{5,})\b/);
-    if(betMatch2){
-      const before=line.slice(0,betMatch2.index);
-      if(!before.match(/\d\s*[-:]\s*$/)){
-        bet=parseInt(betMatch2[1]); line=line.replace(betMatch2[0],'').trim();
-      }
-    }
+    const betMatch2=line.match(/(?<!\d[-:])\b(\d{5,})\b(?![-:]\d)/);
+    if(betMatch2){ bet=parseInt(betMatch2[1]); line=line.replace(betMatch2[0],'').trim(); }
   }
-  // Extract score (e.g. 11-3, 8:11, 11 - 7)
+  // Extract score (11-3, 8:11, 11 - 7) — only match realistic pickleball scores
   let s1='',s2='';
   const scoreMatch=line.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
-  if(scoreMatch){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
-  // Remove @ now (after extracting score/bet)
-  line=line.replace(/@/g,' ').replace(/\s+/g,' ').trim();
-  // Split by "thắng" or "thua" or "vs"
-  let winner='';
-  let parts;
-  const thangMatch=line.match(/^(.+?)\s+thắng\s+(.+)$/i);
-  const thuaMatch=line.match(/^(.+?)\s+thua\s+(.+)$/i);
-  const vsMatch=line.match(/^(.+?)\s+vs\.?\s+(.+)$/i);
-  if(thangMatch){
-    parts=[thangMatch[1],thangMatch[2]];
-    winner='A';
-  } else if(thuaMatch){
-    parts=[thuaMatch[1],thuaMatch[2]];
-    winner='B';
-  } else if(vsMatch){
-    parts=[vsMatch[1],vsMatch[2]];
-    const winEnd=parts[1].match(/\b([AB])\s*$/i);
-    if(winEnd){ winner=winEnd[1].toUpperCase(); parts[1]=parts[1].replace(winEnd[0],'').trim(); }
+  if(scoreMatch){
+    const a=parseInt(scoreMatch[1]),b=parseInt(scoreMatch[2]);
+    // Validate: at least one side ≥ 5 to avoid matching random number pairs
+    if(a>=5||b>=5){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
+  }
+  // Split by thắng/thua/vs — keep @ intact for name parsing
+  let winner='', sideA='', sideB='';
+  let m;
+  if(m=line.match(/^(.+?)\s+thắng\s+(.+)$/i)){
+    sideA=m[1]; sideB=m[2]; winner='A';
+  } else if(m=line.match(/^(.+?)\s+thua\s+(.+)$/i)){
+    sideA=m[1]; sideB=m[2]; winner='B';
+  } else if(m=line.match(/^(.+?)\s+vs\.?\s+(.+)$/i)){
+    sideA=m[1]; sideB=m[2];
+    const winEnd=sideB.match(/\b([AB])\s*$/i);
+    if(winEnd){ winner=winEnd[1].toUpperCase(); sideB=sideB.replace(winEnd[0],'').trim(); }
   } else {
-    return {error:'Thiếu "thắng/thua/vs" phân cách 2 đội',raw:line};
+    return {skip:true};
   }
-  // Parse team names
-  const parseNames=(str)=>{
-    str=str.trim();
-    // If has separators (- , &), split by them
-    if(/[-,&]/.test(str)){
-      return str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
-    }
-    // No separator — use greedy matching
-    return null; // signal to use greedy
-  };
-  const aNamesRaw=parseNames(parts[0]);
-  const bNamesRaw=parseNames(parts[1]);
-  // Fuzzy match or greedy match
-  const matchNames=(raw,str)=>{
-    if(raw){
-      return raw.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
-    }
-    return _greedyMatchNames(str);
-  };
-  const t1=matchNames(aNamesRaw,parts[0]);
-  const t2=matchNames(bNamesRaw,parts[1]);
-  // Auto-detect winner from score if not set
+  // Parse names — @ is handled inside _parseTeamNames
+  const aNamesRaw=_parseTeamNames(sideA);
+  const bNamesRaw=_parseTeamNames(sideB);
+  // Clean @ from individual names before fuzzy matching
+  const cleanFuzzy=(n)=>{const c=n.replace(/@/g,'').trim(); const r=_fuzzyMatchMember(c); return {input:c,name:r?r.name:null,ambiguous:r?r.ambiguous:null};};
+  const t1=aNamesRaw?aNamesRaw.map(cleanFuzzy):_greedyMatchNames(sideA.replace(/@/g,' ').replace(/\s+/g,' ').trim());
+  const t2=bNamesRaw?bNamesRaw.map(cleanFuzzy):_greedyMatchNames(sideB.replace(/@/g,' ').replace(/\s+/g,' ').trim());
+  // Filter out empty/noise results (single unmatched short words like "tép" that didn't match)
+  // Score logic
   if(!winner&&s1!==''&&s2!==''){
-    if(+s1>+s2) winner='A';
-    else if(+s2>+s1) winner='B';
+    if(+s1>+s2) winner='A'; else if(+s2>+s1) winner='B';
   }
-  // If winner is set and score contradicts, swap score
-  // e.g. "thắng 3-11" → Team A won, so A=11 B=3
   if(winner&&s1!==''&&s2!==''){
     if(winner==='A'&&+s1<+s2){ const tmp=s1; s1=s2; s2=tmp; }
     if(winner==='B'&&+s1>+s2){ const tmp=s1; s1=s2; s2=tmp; }
   }
-  // Default score from winner if no score given
   if(winner&&s1===''&&s2===''){
-    s1=winner==='A'?'1':'0';
-    s2=winner==='B'?'1':'0';
+    s1=winner==='A'?'1':'0'; s2=winner==='B'?'1':'0';
   }
-  // Auto-detect category
   const detectedCat=_detectCat([...t1,...t2]);
   return {t1,t2,winner,s1,s2,bet,cat:detectedCat,raw:line};
+}
+function _parseAllQuickLines(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  const results=[];
+  lines.forEach(line=>{
+    const p=_parseQuickLine(line.trim());
+    if(!p) return;
+    if(p.skip) return; // silently skip junk lines
+    if(p.betUpdate){
+      // Apply bet to previous match
+      if(results.length>0&&!results[results.length-1].betUpdate){
+        results[results.length-1].bet=p.betUpdate;
+      }
+      return;
+    }
+    results.push(p);
+  });
+  return results;
 }
 function previewQuickInput(){
   const ta=document.getElementById('quickInputText');
   const preview=document.getElementById('quickInputPreview');
   if(!ta||!preview) return;
-  const lines=ta.value.split('\n').filter(l=>l.trim());
-  if(!lines.length){ preview.innerHTML='<span style="color:var(--muted);">Chưa có dữ liệu</span>'; return; }
-  let html='';
-  lines.forEach((line,i)=>{
-    const p=_parseQuickLine(line);
-    if(!p||p.error){
-      html+=`<div style="color:#e55;padding:4px 0;">❌ Dòng ${i+1}: ${p?p.error:'Không đọc được'}</div>`;
-      return;
-    }
+  const parsed=_parseAllQuickLines(ta.value);
+  if(!parsed.length){ preview.innerHTML='<span style="color:var(--muted);">Không nhận dạng được trận nào. Kiểm tra lại nội dung.</span>'; return; }
+  let html=`<div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;">📋 Nhận dạng ${parsed.length} trận:</div>`;
+  let hasError=false;
+  parsed.forEach((p,i)=>{
+    if(p.error){ html+=`<div style="color:#e55;padding:4px 0;">❌ ${p.error}</div>`; hasError=true; return; }
     const fmtName=(n)=>{
-      if(n.ambiguous) return `<span style="color:#f5a623;font-weight:700;" title="Trùng: ${n.ambiguous.join(', ')}">${xe(n.input)}⚠️(${n.ambiguous.join('/')})</span>`;
-      if(n.name) return `<span style="color:var(--green);font-weight:700;">${xe(n.name)}</span>`;
-      return `<span style="color:#e55;text-decoration:line-through;">${xe(n.input)}?</span>`;
+      if(n.ambiguous){ hasError=true; return `<span style="color:#f5a623;font-weight:700;">${xe(n.input)}⚠️<span style="font-size:10px;">(${n.ambiguous.join('/')})</span></span>`; }
+      if(n.name){
+        const mb=mbOf(n.name);
+        const av=mb&&mb.photo?`<img src="${mb.photo}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:2px;">`:``;
+        return `${av}<span style="color:var(--green);font-weight:700;">${xe(n.name)}</span>`;
+      }
+      hasError=true;
+      return `<span style="color:#e55;font-weight:700;text-decoration:line-through;">${xe(n.input)}</span><span style="font-size:10px;color:#e55;">?</span>`;
     };
-    const tA=p.t1.map(fmtName).join(' & ');
-    const tB=p.t2.map(fmtName).join(' & ');
-    const catLabel=CL[p.cat]||p.cat;
-    const winTxt=p.winner==='A'?' · 🏆A thắng':p.winner==='B'?' · 🏆B thắng':'';
-    const scoreTxt=(p.s1!==''&&p.s2!=='')?` · ${p.s1}:${p.s2}`:'';
-    const betTxt=p.bet>0?` · ${p.bet>=1000?(p.bet/1000)+'k':p.bet}🍃`:'';
-    html+=`<div style="padding:4px 0;border-bottom:1px solid var(--bdr);">✅ <span class="cbadge ${CB[p.cat]}" style="font-size:9px;padding:2px 6px;">${catLabel}</span> ${tA} <span style="color:var(--muted);font-weight:800;">vs</span> ${tB}${winTxt}${scoreTxt}${betTxt}</div>`;
+    const tA=p.t1.map(fmtName).join(' <span style="color:var(--muted);">&</span> ');
+    const tB=p.t2.map(fmtName).join(' <span style="color:var(--muted);">&</span> ');
+    const catLabel=CL[p.cat]||'';
+    const winIcon=p.winner==='A'?'🏆':'';
+    const loseIcon=p.winner==='B'?'🏆':'';
+    const scoreTxt=(p.s1!==''&&p.s2!=='')?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;margin:0 4px;">${p.s1}<span style="color:var(--muted);font-size:11px;">:</span>${p.s2}</span>`:'';
+    const betTxt=p.bet>0?`<span style="font-size:10px;color:var(--green);font-weight:700;margin-left:4px;">${p.bet>=1000?(p.bet/1000)+'k':p.bet}🍃</span>`:'';
+    html+=`<div style="display:flex;align-items:center;gap:6px;padding:6px 4px;border-bottom:1px solid var(--bdr);flex-wrap:wrap;">
+      <span class="cbadge ${CB[p.cat]}" style="font-size:8px;padding:2px 5px;flex-shrink:0;">${catLabel}</span>
+      <span style="font-size:12px;${p.winner==='A'?'font-weight:800;':''}">${winIcon}${tA}</span>
+      ${scoreTxt}
+      <span style="font-size:12px;${p.winner==='B'?'font-weight:800;':''}">${loseIcon}${tB}</span>
+      ${betTxt}
+    </div>`;
   });
+  // Summary
+  const valid=parsed.filter(p=>!p.error&&[...p.t1,...p.t2].every(n=>n.name&&!n.ambiguous)).length;
+  const invalid=parsed.length-valid;
+  html+=`<div style="margin-top:8px;font-size:12px;font-weight:700;color:${invalid?'#e55':'var(--green)'};">
+    ✅ ${valid} trận hợp lệ${invalid>0?` · ❌ ${invalid} trận lỗi (sẽ bị bỏ qua)`:''}
+  </div>`;
   preview.innerHTML=html;
 }
 function submitQuickInput(){
   if(!isAdmin) return;
   const ta=document.getElementById('quickInputText');
   if(!ta) return;
-  const lines=ta.value.split('\n').filter(l=>l.trim());
-  if(!lines.length){ showToast('Chưa có dữ liệu','error'); return; }
+  const parsed=_parseAllQuickLines(ta.value);
+  const valid=parsed.filter(p=>!p.error&&!p.skip&&p.t1&&p.t2);
+  if(!valid.length){ showToast('Không nhận dạng được trận nào','error'); return; }
+  // Count valid matches
+  let readyCount=0;
+  valid.forEach(p=>{
+    const allP=[...p.t1,...p.t2];
+    if(allP.some(n=>n.ambiguous)) return;
+    const t1p1=p.t1[0]?p.t1[0].name:'';
+    const t2p1=p.t2[0]?p.t2[0].name:'';
+    if(t1p1&&t2p1) readyCount++;
+  });
+  if(!readyCount){ showToast('Tất cả trận đều có lỗi tên. Bấm Xem trước để kiểm tra.','error'); return; }
+  if(!confirm(`Tạo ${readyCount} trận đấu cho ngày ${fmtDate(sessionDate)}?`)) return;
   if(!sessionDate) sessionDate=todayStr();
-  let created=0, errors=0;
-  lines.forEach(line=>{
-    const p=_parseQuickLine(line);
-    if(!p||p.error){ errors++; return; }
-    // Block if any name is ambiguous
-    const allPlayers=[...p.t1,...p.t2];
-    if(allPlayers.some(n=>n.ambiguous)){ errors++; return; }
+  let created=0;
+  valid.forEach(p=>{
+    const allP=[...p.t1,...p.t2];
+    if(allP.some(n=>n.ambiguous)) return;
     const t1p1=p.t1[0]?p.t1[0].name:'';
     const t1p2=p.t1[1]?p.t1[1].name:'';
     const t2p1=p.t2[0]?p.t2[0].name:'';
     const t2p2=p.t2[1]?p.t2[1].name:'';
-    if(!t1p1||!t2p1){ errors++; return; }
+    if(!t1p1||!t2p1) return;
     const saved=!!(p.winner);
     matches.push({
       id:matchUid++, cat:p.cat||cat, tgt, date:sessionDate,
@@ -5001,15 +5050,12 @@ function submitQuickInput(){
     });
     created++;
   });
-  if(created>0){
-    renderMatches(); save();
-    showToast(`Đã tạo ${created} trận${errors>0?' ('+errors+' lỗi)':''}`, created>0?'success':'error');
-    ta.value='';
-    document.getElementById('quickInputPreview').innerHTML='';
-    document.getElementById('quickInputBox').style.display='none';
-  } else {
-    showToast('Không tạo được trận nào. Kiểm tra lại tên thành viên.','error');
-  }
+  renderMatches(); save();
+  showToast(`✅ Đã tạo ${created} trận thành công!`,'success',2500);
+  ta.value='';
+  document.getElementById('quickInputPreview').innerHTML='';
+  document.getElementById('quickInputBox').style.display='none';
+  setTimeout(()=>{const el=document.getElementById('mlist');if(el)el.scrollIntoView({behavior:'smooth'});},100);
 }
 
 function delDay(date){
