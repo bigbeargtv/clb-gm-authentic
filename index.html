@@ -4554,8 +4554,11 @@ function _rebuildMbCache(){
   _nicknameCache=new Map();
   members.forEach(m=>{
     if(m.nickname){
-      m.nickname.split(/[,;，]+/).map(s=>s.trim().toLowerCase()).filter(Boolean).forEach(nick=>{
-        _nicknameCache.set(nick,m);
+      m.nickname.split(/[,;，]+/).map(s=>s.trim()).filter(Boolean).forEach(nick=>{
+        _nicknameCache.set(nick.toLowerCase(),m);
+        // Also index without diacritics
+        const stripped=typeof _stripDiacritics==='function'?_stripDiacritics(nick):nick.toLowerCase();
+        if(stripped!==nick.toLowerCase()) _nicknameCache.set(stripped,m);
       });
     }
   });
@@ -4778,43 +4781,61 @@ function toggleQuickInput(){
     if(ta) ta.focus();
   }
 }
+function _stripDiacritics(str){
+  return str.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/gi,'d').toLowerCase();
+}
 function _fuzzyMatchMember(input){
   if(!input) return null;
   const q=input.trim().toLowerCase();
+  const qNorm=_stripDiacritics(input);
   if(!q) return null;
-  // 1. Exact nickname match (highest priority)
-  const byNick=_nicknameCache.get(q);
+  // 1. Exact nickname match
+  const byNick=_nicknameCache.get(q)||_nicknameCache.get(qNorm);
   if(byNick) return {name:byNick.name};
-  // 2. Exact name match
-  let found=members.filter(m=>m.name.toLowerCase()===q);
+  // Also check nickname without diacritics
+  let nickFound=null;
+  _nicknameCache.forEach((m,nick)=>{if(_stripDiacritics(nick)===qNorm) nickFound=m;});
+  if(nickFound) return {name:nickFound.name};
+  // 2. Exact name match (with + without diacritics)
+  let found=members.filter(m=>m.name.toLowerCase()===q||_stripDiacritics(m.name)===qNorm);
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
   // 3. Nickname starts with
-  const nickStarts=[];
-  _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q))nickStarts.push(m);});
-  if(nickStarts.length===1) return {name:nickStarts[0].name};
+  const nickStarts=new Set();
+  _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q)||_stripDiacritics(nick).startsWith(qNorm))nickStarts.add(m);});
+  if(nickStarts.size===1) return {name:[...nickStarts][0].name};
   // 4. Name starts with
-  found=members.filter(m=>m.name.toLowerCase().startsWith(q));
+  found=members.filter(m=>m.name.toLowerCase().startsWith(q)||_stripDiacritics(m.name).startsWith(qNorm));
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return {ambiguous:found.map(m=>m.name)};
-  // 5. Nickname contains
-  const nickContains=[];
-  _nicknameCache.forEach((m,nick)=>{if(nick.includes(q))nickContains.push(m);});
-  if(nickContains.length===1) return {name:nickContains[0].name};
-  // 6. Name contains
-  found=members.filter(m=>m.name.toLowerCase().includes(q));
-  if(found.length===1) return {name:found[0].name};
-  if(found.length>1) return {ambiguous:found.map(m=>m.name)};
-  // 7. Last word match (Vietnamese: last word = first name)
-  const qLast=q.split(/\s+/).pop();
+  // 5. Name/nickname contains
+  const contains=new Set();
+  members.forEach(m=>{if(m.name.toLowerCase().includes(q)||_stripDiacritics(m.name).includes(qNorm)) contains.add(m);});
+  _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||_stripDiacritics(nick).includes(qNorm)) contains.add(m);});
+  if(contains.size===1) return {name:[...contains][0].name};
+  if(contains.size>1) return {ambiguous:[...contains].map(m=>m.name)};
+  // 6. Last word match (Vietnamese: last word = first name)
+  const qLast=qNorm.split(/\s+/).pop();
   if(qLast.length>=2){
     const candidates=members.filter(m=>{
-      const mLast=m.name.toLowerCase().split(/\s+/).pop();
+      const mLast=_stripDiacritics(m.name).split(/\s+/).pop();
       return mLast===qLast;
     });
     if(candidates.length===1) return {name:candidates[0].name};
     if(candidates.length>1) return {ambiguous:candidates.map(m=>m.name)};
   }
+  // 7. Input ends with member name (handles "Phạm Hải Ninh" → match "Hải Ninh")
+  found=members.filter(m=>{
+    const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
+    return (q.endsWith(mn)||qNorm.endsWith(mnN))&&mn.length>=3;
+  });
+  if(found.length===1) return {name:found[0].name};
+  // 8. Input starts with member name (handles "Hoài Thu Trần" → match "Hoài Thu")
+  found=members.filter(m=>{
+    const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
+    return (q.startsWith(mn)||qNorm.startsWith(mnN))&&mn.length>=3;
+  });
+  if(found.length===1) return {name:found[0].name};
   return null;
 }
 function _detectCat(players){
@@ -4836,7 +4857,6 @@ function _detectCat(players){
   return cat;
 }
 function _cleanTeamStr(str){
-  // Strip @, -, comma, & → all become spaces, then collapse
   return str.replace(/[@,&]/g,' ').replace(/\s*-\s*/g,' ').replace(/\s+/g,' ').trim();
 }
 function _greedyMatchNames(str){
@@ -4847,30 +4867,29 @@ function _greedyMatchNames(str){
   let i=0;
   while(i<words.length){
     let bestMatch=null, bestLen=0;
-    // Try longest first (up to 5 words for full Vietnamese names)
+    // Try longest first (up to 5 words)
     for(let len=Math.min(5,words.length-i);len>=1;len--){
       const candidate=words.slice(i,i+len).join(' ');
       const r=_fuzzyMatchMember(candidate);
-      if(r&&r.name){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous||null}; bestLen=len; break; }
+      if(r&&r.name&&!r.ambiguous){ bestMatch={input:candidate,name:r.name,ambiguous:null}; bestLen=len; break; }
+      if(r&&r.name&&!bestMatch){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous}; bestLen=len; }
     }
     if(bestMatch){ results.push(bestMatch); i+=bestLen; }
-    else{
-      // Collect unmatched word, will try merging below
-      results.push({input:words[i],name:null,ambiguous:null});
-      i++;
-    }
+    else{ results.push({input:words[i],name:null,ambiguous:null}); i++; }
   }
   // Second pass: merge consecutive unmatched words and retry
-  if(results.some(r=>!r.name&&!r.ambiguous)){
+  const hasUnmatched=results.some(r=>!r.name&&!r.ambiguous);
+  if(hasUnmatched){
     const merged=[];
     let buf=[];
     const flush=()=>{
       if(!buf.length) return;
-      if(buf.length>1){
-        const combined=buf.map(b=>b.input).join(' ');
-        const r=_fuzzyMatchMember(combined);
-        if(r&&r.name){ merged.push({input:combined,name:r.name,ambiguous:r.ambiguous||null}); buf=[]; return; }
-      }
+      // Try combined
+      const combined=buf.map(b=>b.input).join(' ');
+      const r=_fuzzyMatchMember(combined);
+      if(r&&r.name){ merged.push({input:combined,name:r.name,ambiguous:r.ambiguous||null}); buf=[]; return; }
+      // Try attaching to adjacent matched name
+      // e.g. "Phạm" unmatched + "Hải Ninh" matched → try "Phạm Hải Ninh"
       buf.forEach(b=>merged.push(b));
       buf=[];
     };
@@ -4879,7 +4898,29 @@ function _greedyMatchNames(str){
       else buf.push(r);
     });
     flush();
-    return merged;
+    // Third pass: absorb stray unmatched words next to matched names
+    // e.g. ["Phạm"(❌), "Hải Ninh"(✅)] → try "Phạm Hải Ninh" → if matches same person, absorb
+    const final=[];
+    for(let j=0;j<merged.length;j++){
+      if(!merged[j].name && j+1<merged.length && merged[j+1].name){
+        // Unmatched before matched: try combining
+        const combo=merged[j].input+' '+merged[j+1].input;
+        const r=_fuzzyMatchMember(combo);
+        if(r&&r.name===merged[j+1].name){ merged[j+1].input=combo; continue; } // absorbed
+      }
+      if(!merged[j].name && j>0 && final.length>0 && final[final.length-1].name){
+        // Unmatched after matched: try combining
+        const prev=final[final.length-1];
+        const combo=prev.input+' '+merged[j].input;
+        const r=_fuzzyMatchMember(combo);
+        if(r&&r.name===prev.name){ prev.input=combo; continue; } // absorbed
+      }
+      final.push(merged[j]);
+    }
+    // Remove remaining unmatched if we already found enough players
+    const matched=final.filter(r=>r.name);
+    if(matched.length>=1) return matched; // drop noise words
+    return final;
   }
   return results;
 }
