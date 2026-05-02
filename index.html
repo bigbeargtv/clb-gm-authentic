@@ -4804,16 +4804,17 @@ function _fuzzyMatchMember(input){
   const nickStarts=new Set();
   _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q)||_stripDiacritics(nick).startsWith(qNorm))nickStarts.add(m);});
   if(nickStarts.size===1) return {name:[...nickStarts][0].name};
+  if(nickStarts.size>1){const a=[...nickStarts]; return {name:a[0].name,ambiguous:a.map(m=>m.name)};}
   // 4. Name starts with
   found=members.filter(m=>m.name.toLowerCase().startsWith(q)||_stripDiacritics(m.name).startsWith(qNorm));
   if(found.length===1) return {name:found[0].name};
-  if(found.length>1) return {ambiguous:found.map(m=>m.name)};
+  if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
   // 5. Name/nickname contains
   const contains=new Set();
   members.forEach(m=>{if(m.name.toLowerCase().includes(q)||_stripDiacritics(m.name).includes(qNorm)) contains.add(m);});
   _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||_stripDiacritics(nick).includes(qNorm)) contains.add(m);});
   if(contains.size===1) return {name:[...contains][0].name};
-  if(contains.size>1) return {ambiguous:[...contains].map(m=>m.name)};
+  if(contains.size>1){const a=[...contains]; return {name:a[0].name,ambiguous:a.map(m=>m.name)};}
   // 6. Last word match — only for SINGLE word input (e.g. "Tùng" → "Nguyễn Văn Tùng")
   const qWords=qNorm.split(/\s+/);
   const qLast=qWords[qWords.length-1];
@@ -4823,7 +4824,7 @@ function _fuzzyMatchMember(input){
       return mLast===qLast;
     });
     if(candidates.length===1) return {name:candidates[0].name};
-    if(candidates.length>1) return {ambiguous:candidates.map(m=>m.name)};
+    if(candidates.length>1) return {name:candidates[0].name,ambiguous:candidates.map(m=>m.name)};
   }
   return null;
 }
@@ -4906,10 +4907,10 @@ function _greedyMatchNames(str){
       }
       final.push(merged[j]);
     }
-    // Remove remaining unmatched if we already found enough players
+    // Only drop unmatched noise if team already has ≥2 matched players (doubles full)
     const matched=final.filter(r=>r.name);
-    if(matched.length>=1) return matched; // drop noise words
-    return final;
+    if(matched.length>=2) return matched;
+    return final; // keep unmatched visible so user can see what's missing
   }
   return results;
 }
