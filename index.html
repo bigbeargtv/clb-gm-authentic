@@ -1886,12 +1886,16 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 
 <!-- MATCHES -->
 <div class="pg" id="pg-matches">
-  <div class="admin-only" style="margin-bottom:8px;position:relative;">
-    <div class="session-date-banner" id="sessionDateBanner" onclick="openSessionDatePicker()">
-      <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Buổi thi đấu</div>
-      <div id="sessionDateDisplay" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:.5px;line-height:1.1;">—</div>
+  <div class="admin-only" style="margin-bottom:8px;">
+    <div class="session-date-banner" onclick="openSessionDatePicker()">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;">
+          <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Buổi thi đấu</div>
+          <div id="sessionDateDisplay" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:.5px;line-height:1.1;">—</div>
+        </div>
+        <input type="date" id="sessionDate" style="font-family:'Be Vietnam Pro',sans-serif;font-size:14px;font-weight:700;color:var(--text);background:var(--s2);border:1.5px solid var(--bdr2);border-radius:8px;padding:6px 10px;cursor:pointer;outline:none;" onchange="sessionDate=this.value;_updateDateDisplay();debounceSave();">
+      </div>
     </div>
-    <input type="date" class="date-inp" id="sessionDate" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="sessionDate=this.value;_updateDateDisplay();debounceSave();">
   </div>
 
   <div class="cats admin-only-flex" style="margin-top:4px;">
