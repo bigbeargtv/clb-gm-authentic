@@ -4835,23 +4835,32 @@ function _detectCat(players){
   }
   return cat;
 }
+function _cleanTeamStr(str){
+  // Strip @, -, comma, & → all become spaces, then collapse
+  return str.replace(/[@,&]/g,' ').replace(/\s*-\s*/g,' ').replace(/\s+/g,' ').trim();
+}
 function _greedyMatchNames(str){
-  str=str.trim();
+  str=_cleanTeamStr(str);
   if(!str) return [];
   const words=str.split(/\s+/);
   const results=[];
   let i=0;
   while(i<words.length){
     let bestMatch=null, bestLen=0;
-    for(let len=Math.min(4,words.length-i);len>=1;len--){
+    // Try longest first (up to 5 words for full Vietnamese names)
+    for(let len=Math.min(5,words.length-i);len>=1;len--){
       const candidate=words.slice(i,i+len).join(' ');
       const r=_fuzzyMatchMember(candidate);
       if(r&&r.name){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous||null}; bestLen=len; break; }
     }
     if(bestMatch){ results.push(bestMatch); i+=bestLen; }
-    else{ results.push({input:words[i],name:null,ambiguous:null}); i++; }
+    else{
+      // Collect unmatched word, will try merging below
+      results.push({input:words[i],name:null,ambiguous:null});
+      i++;
+    }
   }
-  // Merge consecutive unmatched words and retry as combined name
+  // Second pass: merge consecutive unmatched words and retry
   if(results.some(r=>!r.name&&!r.ambiguous)){
     const merged=[];
     let buf=[];
@@ -4873,20 +4882,6 @@ function _greedyMatchNames(str){
     return merged;
   }
   return results;
-}
-function _parseTeamNames(str){
-  str=str.trim();
-  if(!str) return [];
-  // 1) If @ present: use @ as separator
-  if(str.includes('@')){
-    return str.split(/@/).map(s=>s.replace(/^[\s\-,]+|[\s\-,]+$/g,'').trim()).filter(Boolean);
-  }
-  // 2) If - , & present: split by those
-  if(/[-,&]/.test(str)){
-    return str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
-  }
-  // 3) No separator → null (signal greedy match)
-  return null;
 }
 function _parseQuickLine(line){
   line=line.trim();
@@ -4915,7 +4910,7 @@ function _parseQuickLine(line){
     // Validate: at least one side ≥ 5 to avoid matching random number pairs
     if(a>=5||b>=5){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
   }
-  // Split by thắng/thua/vs — keep @ intact for name parsing
+  // Split by thắng/thua/vs
   let winner='', sideA='', sideB='';
   let m;
   if(m=line.match(/^(.+?)\s+thắng\s+(.+)$/i)){
@@ -4929,13 +4924,9 @@ function _parseQuickLine(line){
   } else {
     return {skip:true};
   }
-  // Parse names — @ is handled inside _parseTeamNames
-  const aNamesRaw=_parseTeamNames(sideA);
-  const bNamesRaw=_parseTeamNames(sideB);
-  // Clean @ from individual names before fuzzy matching
-  const cleanFuzzy=(n)=>{const c=n.replace(/@/g,'').trim(); const r=_fuzzyMatchMember(c); return {input:c,name:r?r.name:null,ambiguous:r?r.ambiguous:null};};
-  const t1=aNamesRaw?aNamesRaw.map(cleanFuzzy):_greedyMatchNames(sideA.replace(/@/g,' ').replace(/\s+/g,' ').trim());
-  const t2=bNamesRaw?bNamesRaw.map(cleanFuzzy):_greedyMatchNames(sideB.replace(/@/g,' ').replace(/\s+/g,' ').trim());
+  // Always use greedy matching — handles @, -, comma, no separator uniformly
+  const t1=_greedyMatchNames(sideA);
+  const t2=_greedyMatchNames(sideB);
   // Filter out empty/noise results (single unmatched short words like "tép" that didn't match)
   // Score logic
   if(!winner&&s1!==''&&s2!==''){
