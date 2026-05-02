@@ -442,7 +442,7 @@ html.dark .date-inp{color-scheme:dark;}
   width:100%;max-width:520px;margin:0 auto;
   background:var(--s2);border-top:1px solid var(--bdr2);
   border-radius:22px 22px 0 0;padding:16px 14px 36px;
-  max-height:70vh;display:flex;flex-direction:column;
+  max-height:70vh;max-height:70dvh;display:flex;flex-direction:column;
   box-shadow:0 -4px 30px rgba(0,0,0,.12);
   animation:slideUp .25s ease;
 }
@@ -1517,8 +1517,9 @@ html.dark .filter-date-inp{color-scheme:dark;}
   .pc-btn-detail{font-size:12px!important;padding:10px!important;border-radius:10px!important;}
 
   /* Picker/Modal */
-  #picker-overlay .box,#pk-box{width:95vw!important;max-width:360px!important;max-height:80vh!important;}
-  #pk-list{max-height:55vh!important;}
+  #picker-overlay.on{align-items:flex-start!important;padding-top:10vh!important;}
+  #picker-overlay .box,#pk-box{width:95vw!important;max-width:360px!important;max-height:75vh!important;max-height:75dvh!important;border-radius:16px!important;padding-bottom:16px!important;}
+  #pk-list{max-height:50vh!important;max-height:50dvh!important;}
 
   /* Ledger */
   .ldg-inp{font-size:13px!important;}
@@ -4003,9 +4004,7 @@ function setCat(c){cat=c;['nam','mix','nu','hon','team'].forEach(v=>{document.ge
 
 function addMatch(){
   if(!isAdmin)return;
-  const d=document.getElementById('sessionDate').value;
-  sessionDate=d||todayStr();
-  if(!document.getElementById('sessionDate').value)document.getElementById('sessionDate').value=sessionDate;
+  if(!sessionDate) sessionDate=todayStr();
   matches.push({id:matchUid++,cat,tgt,date:sessionDate,t1p1:'',t1p2:'',t2p1:'',t2p2:'',s1:'',s2:'',bet:0,saved:false});
   renderMatches();debounceSave();
   setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);
@@ -4561,9 +4560,8 @@ function rEdit(m){
   return `<div class="mc mc-editing" id="mc${m.id}">
     <div class="mc-head">
       <span class="cbadge ${CB[m.cat]}" style="font-size:12px;padding:5px 14px;">${CL[m.cat]}</span>
-      <div style="flex:1;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
-        <span style="font-size:12px;">📅</span>
-        <input type="date" class="mc-date-inp" value="${matchDate}" onchange="setMatchDate(${m.id},this.value)" onclick="event.stopPropagation()">
+      <div style="flex:1;display:flex;align-items:center;gap:4px;justify-content:flex-end;">
+        <span style="font-size:11px;color:var(--muted);font-weight:600;">📅 ${fmtDate(matchDate)}</span>
       </div>
       <button class="del-btn" onclick="delMatch(${m.id})" title="Xóa" style="margin-left:6px;font-size:18px;">✕</button>
     </div>
