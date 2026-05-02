@@ -1910,11 +1910,11 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
   <div id="quickInputBox" class="admin-only" style="display:none;margin-top:8px;">
     <div style="background:var(--s1);border:1.5px solid var(--bdr);border-radius:14px;padding:14px;box-shadow:0 2px 8px #0001;">
       <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;line-height:1.6;">
-        📝 Mỗi dòng 1 trận · Cú pháp:<br>
-        <code style="background:var(--s2);padding:2px 6px;border-radius:4px;font-size:11px;">Tên1, Tên2 vs Tên3, Tên4 A 100k</code><br>
-        <span style="font-size:10px;color:var(--muted);">• <b>A</b> hoặc <b>B</b> = đội thắng (bỏ qua = chưa có kết quả)<br>• <b>100k</b> = tiền ủng hộ (không bắt buộc)<br>• <b>3-1</b> = tỉ số (không bắt buộc)</span>
+        📝 Mỗi dòng 1 trận · Copy từ tin nhắn nhóm:<br>
+        <code style="background:var(--s2);padding:2px 6px;border-radius:4px;font-size:11px;">Tên1 - Tên2 thắng 11-3 Tên3 - Tên4 50k</code><br>
+        <span style="font-size:10px;color:var(--muted);">• <b>thắng/thua</b> = kết quả đội trước<br>• <b>11-3</b> = tỉ số · <b>50k</b> = ủng hộ (không bắt buộc)<br>• Hỗ trợ cả cú pháp <b>vs</b> · Có thể giữ nguyên <b>@</b><br>• 🔄 Tự phân loại Đôi Nam/Nữ/Mix theo giới tính</span>
       </div>
-      <textarea id="quickInputText" rows="6" placeholder="Hùng, Minh vs Tùng, Long A 100k&#10;Hải, Bình vs Nam, Đức B 3-1&#10;An, Bảo vs Cường, Duy" style="width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
+      <textarea id="quickInputText" rows="6" placeholder="Bigbear - Quyên Bệu thắng 11-3 Phạm Hải Ninh - Trịnh Quốc Hiếu 50k&#10;Tung - Trần Hải Dương thua Tép - Trần Đức Vượng 8-11&#10;Tuan Tran - Trần Hải Dương thắng Duong Thanh Tung - Trần Đức Vượng 11-2" style="width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
       <div id="quickInputPreview" style="margin-top:8px;font-size:12px;"></div>
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button onclick="previewQuickInput()" style="flex:1;padding:10px;background:var(--s2);color:var(--text);border:1.5px solid var(--bdr);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">👁 Xem trước</button>
@@ -4796,46 +4796,87 @@ function _fuzzyMatchMember(input){
   }
   return null;
 }
+function _detectCat(players){
+  // Auto-detect category from player genders
+  const genders=players.map(p=>{
+    if(!p.name) return null;
+    const mb=mbOf(p.name);
+    return mb?mb.gender:null;
+  }).filter(Boolean);
+  if(genders.length===0) return cat; // fallback to current selection
+  const males=genders.filter(g=>g==='m').length;
+  const females=genders.filter(g=>g==='f').length;
+  if(females===0) return 'nam';
+  if(males===0) return 'nu';
+  if(males>0&&females>0){
+    // Mix = mỗi đội 1 nam 1 nữ, Hỗn hợp = lẫn lộn
+    return males===females?'mix':'hon';
+  }
+  return cat;
+}
 function _parseQuickLine(line){
   line=line.trim();
   if(!line) return null;
-  // Pattern: TeamA vs TeamB [winner] [score] [bet]
-  const vsParts=line.split(/\s+vs\.?\s+/i);
-  if(vsParts.length!==2) return {error:'Thiếu "vs" phân cách 2 đội',raw:line};
-  const teamANames=vsParts[0].split(/[,&]+/).map(s=>s.trim()).filter(Boolean);
-  // Parse teamB + extras (winner, score, bet)
-  let rest=vsParts[1];
-  // Extract bet (e.g. 100k, 200k, 50000)
+  // Remove @ prefix from names
+  line=line.replace(/@/g,'');
+  // Extract bet (e.g. 50k, 100k, 200000)
   let bet=0;
-  const betMatch=rest.match(/\b(\d+)k\b/i);
-  if(betMatch){ bet=parseInt(betMatch[1])*1000; rest=rest.replace(betMatch[0],'').trim(); }
+  const betMatch=line.match(/\b(\d+)k\b/i);
+  if(betMatch){ bet=parseInt(betMatch[1])*1000; line=line.replace(betMatch[0],'').trim(); }
   else{
-    const betMatch2=rest.match(/\b(\d{5,})\b/);
-    if(betMatch2){ bet=parseInt(betMatch2[1]); rest=rest.replace(betMatch2[0],'').trim(); }
+    const betMatch2=line.match(/\b(\d{5,})\b/);
+    if(betMatch2){
+      // Only treat as bet if not part of a score pattern
+      const before=line.slice(0,betMatch2.index);
+      if(!before.match(/\d\s*[-:]\s*$/)){
+        bet=parseInt(betMatch2[1]); line=line.replace(betMatch2[0],'').trim();
+      }
+    }
   }
-  // Extract score (e.g. 3-1, 3:1)
+  // Extract score (e.g. 11-3, 8:11, 11 - 7)
   let s1='',s2='';
-  const scoreMatch=rest.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
-  if(scoreMatch){ s1=scoreMatch[1]; s2=scoreMatch[2]; rest=rest.replace(scoreMatch[0],'').trim(); }
-  // Extract winner (A or B at end or standalone)
+  const scoreMatch=line.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
+  if(scoreMatch){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
+  // Split by "thắng" or "thua" or "vs"
   let winner='';
-  const winMatch=rest.match(/\b([AB])\s*$/i);
-  if(winMatch){ winner=winMatch[1].toUpperCase(); rest=rest.replace(winMatch[0],'').trim(); }
-  const teamBNames=rest.split(/[,&]+/).map(s=>s.trim()).filter(Boolean);
-  // Fuzzy match names — result: {input, name, ambiguous}
+  let parts;
+  const thangMatch=line.match(/^(.+?)\s+thắng\s+(.+)$/i);
+  const thuaMatch=line.match(/^(.+?)\s+thua\s+(.+)$/i);
+  const vsMatch=line.match(/^(.+?)\s+vs\.?\s+(.+)$/i);
+  if(thangMatch){
+    parts=[thangMatch[1],thangMatch[2]];
+    winner='A';
+  } else if(thuaMatch){
+    parts=[thuaMatch[1],thuaMatch[2]];
+    winner='B'; // Team A thua → Team B thắng
+  } else if(vsMatch){
+    parts=[vsMatch[1],vsMatch[2]];
+    // Check for trailing A/B
+    const winEnd=parts[1].match(/\b([AB])\s*$/i);
+    if(winEnd){ winner=winEnd[1].toUpperCase(); parts[1]=parts[1].replace(winEnd[0],'').trim(); }
+  } else {
+    return {error:'Thiếu "thắng/thua/vs" phân cách 2 đội',raw:line};
+  }
+  // Parse team names: split by - , & or multiple spaces between names
+  const parseNames=(str)=>str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
+  const teamANames=parseNames(parts[0]);
+  const teamBNames=parseNames(parts[1]);
+  // Fuzzy match
   const t1=teamANames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
   const t2=teamBNames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
-  // Auto-detect winner from score
+  // Auto-detect winner from score if not set
   if(!winner&&s1!==''&&s2!==''){
     if(+s1>+s2) winner='A';
     else if(+s2>+s1) winner='B';
   }
-  // Default score from winner
+  // Default score from winner if no score given
   if(winner&&s1===''&&s2===''){
     s1=winner==='A'?'1':'0';
     s2=winner==='B'?'1':'0';
   }
-  return {t1,t2,winner,s1,s2,bet,raw:line};
+  // Auto-detect category
+  const detectedCat=_detectCat([...t1,...t2]);
+  return {t1,t2,winner,s1,s2,bet,cat:detectedCat,raw:line};
 }
 function previewQuickInput(){
   const ta=document.getElementById('quickInputText');
@@ -4857,10 +4898,11 @@ function previewQuickInput(){
     };
     const tA=p.t1.map(fmtName).join(' & ');
     const tB=p.t2.map(fmtName).join(' & ');
-    const winTxt=p.winner?` · 🏆${p.winner}`:'';
+    const catLabel=CL[p.cat]||p.cat;
+    const winTxt=p.winner==='A'?' · 🏆A thắng':p.winner==='B'?' · 🏆B thắng':'';
     const scoreTxt=(p.s1!==''&&p.s2!=='')?` · ${p.s1}:${p.s2}`:'';
     const betTxt=p.bet>0?` · ${p.bet>=1000?(p.bet/1000)+'k':p.bet}🍃`:'';
-    html+=`<div style="padding:4px 0;border-bottom:1px solid var(--bdr);">✅ ${tA} <span style="color:var(--muted);font-weight:800;">vs</span> ${tB}${winTxt}${scoreTxt}${betTxt}</div>`;
+    html+=`<div style="padding:4px 0;border-bottom:1px solid var(--bdr);">✅ <span class="cbadge ${CB[p.cat]}" style="font-size:9px;padding:2px 6px;">${catLabel}</span> ${tA} <span style="color:var(--muted);font-weight:800;">vs</span> ${tB}${winTxt}${scoreTxt}${betTxt}</div>`;
   });
   preview.innerHTML=html;
 }
@@ -4885,7 +4927,7 @@ function submitQuickInput(){
     if(!t1p1||!t2p1){ errors++; return; }
     const saved=!!(p.winner);
     matches.push({
-      id:matchUid++, cat, tgt, date:sessionDate,
+      id:matchUid++, cat:p.cat||cat, tgt, date:sessionDate,
       t1p1, t1p2:t1p2||'', t2p1, t2p2:t2p2||'',
       s1:p.s1||'', s2:p.s2||'',
       winner:p.winner||'',
