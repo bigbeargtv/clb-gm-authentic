@@ -4784,6 +4784,19 @@ function toggleQuickInput(){
 function _stripDiacritics(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/gi,'d').toLowerCase();
 }
+function _isBan(name){ return /\bban\b/i.test(_stripDiacritics(name)); }
+function _preferNonBan(arr){
+  // When multiple matches, prefer members without "bạn" in name
+  if(arr.length<=1) return arr;
+  const real=arr.filter(m=>!_isBan(typeof m==='string'?m:m.name));
+  return real.length>=1?real:arr;
+}
+function _resolveAmbiguous(candidates){
+  // candidates: array of member objects or names
+  const preferred=_preferNonBan(candidates);
+  if(preferred.length===1) return {name:preferred[0].name||preferred[0]};
+  return {name:preferred[0].name||preferred[0], ambiguous:candidates.map(m=>m.name||m)};
+}
 function _fuzzyMatchMember(input){
   if(!input) return null;
   const q=input.trim().toLowerCase();
@@ -4799,22 +4812,22 @@ function _fuzzyMatchMember(input){
   // 2. Exact name match (with + without diacritics)
   let found=members.filter(m=>m.name.toLowerCase()===q||_stripDiacritics(m.name)===qNorm);
   if(found.length===1) return {name:found[0].name};
-  if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
+  if(found.length>1) return _resolveAmbiguous(found);
   // 3. Nickname starts with
   const nickStarts=new Set();
   _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q)||_stripDiacritics(nick).startsWith(qNorm))nickStarts.add(m);});
   if(nickStarts.size===1) return {name:[...nickStarts][0].name};
-  if(nickStarts.size>1){const a=[...nickStarts]; return {name:a[0].name,ambiguous:a.map(m=>m.name)};}
+  if(nickStarts.size>1) return _resolveAmbiguous([...nickStarts]);
   // 4. Name starts with
   found=members.filter(m=>m.name.toLowerCase().startsWith(q)||_stripDiacritics(m.name).startsWith(qNorm));
   if(found.length===1) return {name:found[0].name};
-  if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
+  if(found.length>1) return _resolveAmbiguous(found);
   // 5. Name/nickname contains
   const contains=new Set();
   members.forEach(m=>{if(m.name.toLowerCase().includes(q)||_stripDiacritics(m.name).includes(qNorm)) contains.add(m);});
   _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||_stripDiacritics(nick).includes(qNorm)) contains.add(m);});
   if(contains.size===1) return {name:[...contains][0].name};
-  if(contains.size>1){const a=[...contains]; return {name:a[0].name,ambiguous:a.map(m=>m.name)};}
+  if(contains.size>1) return _resolveAmbiguous([...contains]);
   // 6. Last word match — only for SINGLE word input (e.g. "Tùng" → "Nguyễn Văn Tùng")
   const qWords=qNorm.split(/\s+/);
   const qLast=qWords[qWords.length-1];
@@ -4824,7 +4837,7 @@ function _fuzzyMatchMember(input){
       return mLast===qLast;
     });
     if(candidates.length===1) return {name:candidates[0].name};
-    if(candidates.length>1) return {name:candidates[0].name,ambiguous:candidates.map(m=>m.name)};
+    if(candidates.length>1) return _resolveAmbiguous(candidates);
   }
   return null;
 }
