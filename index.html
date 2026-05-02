@@ -4836,19 +4836,42 @@ function _detectCat(players){
   }
   return cat;
 }
+function _greedyMatchNames(str){
+  // Try to greedily match names from left to right against members + nicknames
+  str=str.trim();
+  if(!str) return [];
+  const words=str.split(/\s+/);
+  const results=[];
+  let i=0;
+  while(i<words.length){
+    let bestMatch=null, bestLen=0;
+    // Try longest possible name first (up to 4 words)
+    for(let len=Math.min(4,words.length-i);len>=1;len--){
+      const candidate=words.slice(i,i+len).join(' ');
+      const r=_fuzzyMatchMember(candidate);
+      if(r&&r.name){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous||null}; bestLen=len; break; }
+    }
+    if(bestMatch){ results.push(bestMatch); i+=bestLen; }
+    else{
+      // Single word unmatched
+      results.push({input:words[i],name:null,ambiguous:null});
+      i++;
+    }
+  }
+  return results;
+}
 function _parseQuickLine(line){
   line=line.trim();
   if(!line) return null;
-  // Remove @ prefix from names
-  line=line.replace(/@/g,'');
-  // Extract bet (e.g. 50k, 100k, 200000)
+  // Remember if @ was used as separator
+  const hasAt=line.includes('@');
+  // Extract bet (e.g. 50k, 100k, 200000) — before removing @
   let bet=0;
   const betMatch=line.match(/\b(\d+)k\b/i);
   if(betMatch){ bet=parseInt(betMatch[1])*1000; line=line.replace(betMatch[0],'').trim(); }
   else{
     const betMatch2=line.match(/\b(\d{5,})\b/);
     if(betMatch2){
-      // Only treat as bet if not part of a score pattern
       const before=line.slice(0,betMatch2.index);
       if(!before.match(/\d\s*[-:]\s*$/)){
         bet=parseInt(betMatch2[1]); line=line.replace(betMatch2[0],'').trim();
@@ -4859,6 +4882,8 @@ function _parseQuickLine(line){
   let s1='',s2='';
   const scoreMatch=line.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
   if(scoreMatch){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
+  // Remove @ now (after extracting score/bet)
+  line=line.replace(/@/g,' ').replace(/\s+/g,' ').trim();
   // Split by "thắng" or "thua" or "vs"
   let winner='';
   let parts;
@@ -4870,26 +4895,45 @@ function _parseQuickLine(line){
     winner='A';
   } else if(thuaMatch){
     parts=[thuaMatch[1],thuaMatch[2]];
-    winner='B'; // Team A thua → Team B thắng
+    winner='B';
   } else if(vsMatch){
     parts=[vsMatch[1],vsMatch[2]];
-    // Check for trailing A/B
     const winEnd=parts[1].match(/\b([AB])\s*$/i);
     if(winEnd){ winner=winEnd[1].toUpperCase(); parts[1]=parts[1].replace(winEnd[0],'').trim(); }
   } else {
     return {error:'Thiếu "thắng/thua/vs" phân cách 2 đội',raw:line};
   }
-  // Parse team names: split by - , & or multiple spaces between names
-  const parseNames=(str)=>str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
-  const teamANames=parseNames(parts[0]);
-  const teamBNames=parseNames(parts[1]);
-  // Fuzzy match
-  const t1=teamANames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
-  const t2=teamBNames.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
+  // Parse team names
+  const parseNames=(str)=>{
+    str=str.trim();
+    // If has separators (- , &), split by them
+    if(/[-,&]/.test(str)){
+      return str.split(/\s*[-,&]\s*/).map(s=>s.trim()).filter(Boolean);
+    }
+    // No separator — use greedy matching
+    return null; // signal to use greedy
+  };
+  const aNamesRaw=parseNames(parts[0]);
+  const bNamesRaw=parseNames(parts[1]);
+  // Fuzzy match or greedy match
+  const matchNames=(raw,str)=>{
+    if(raw){
+      return raw.map(n=>{const r=_fuzzyMatchMember(n); return {input:n, name:r?r.name:null, ambiguous:r?r.ambiguous:null};});
+    }
+    return _greedyMatchNames(str);
+  };
+  const t1=matchNames(aNamesRaw,parts[0]);
+  const t2=matchNames(bNamesRaw,parts[1]);
   // Auto-detect winner from score if not set
   if(!winner&&s1!==''&&s2!==''){
     if(+s1>+s2) winner='A';
     else if(+s2>+s1) winner='B';
+  }
+  // If winner is set and score contradicts, swap score
+  // e.g. "thắng 3-11" → Team A won, so A=11 B=3
+  if(winner&&s1!==''&&s2!==''){
+    if(winner==='A'&&+s1<+s2){ const tmp=s1; s1=s2; s2=tmp; }
+    if(winner==='B'&&+s1>+s2){ const tmp=s1; s1=s2; s2=tmp; }
   }
   // Default score from winner if no score given
   if(winner&&s1===''&&s2===''){
