@@ -1886,12 +1886,12 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
 
 <!-- MATCHES -->
 <div class="pg" id="pg-matches">
-  <div class="admin-only" style="margin-bottom:8px;">
-    <div class="session-date-banner" id="sessionDateBanner" onclick="document.getElementById('sessionDate').showPicker?document.getElementById('sessionDate').showPicker():document.getElementById('sessionDate').focus()">
+  <div class="admin-only" style="margin-bottom:8px;position:relative;">
+    <div class="session-date-banner" id="sessionDateBanner" onclick="openSessionDatePicker()">
       <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Buổi thi đấu</div>
       <div id="sessionDateDisplay" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:.5px;line-height:1.1;">—</div>
     </div>
-    <input type="date" class="date-inp" id="sessionDate" style="position:absolute;opacity:0;pointer-events:none;height:0;width:0;">
+    <input type="date" class="date-inp" id="sessionDate" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="sessionDate=this.value;_updateDateDisplay();debounceSave();">
   </div>
 
   <div class="cats admin-only-flex" style="margin-top:4px;">
@@ -2445,6 +2445,12 @@ function fmtDate(str){
 function _updateDateDisplay(){
   const el=document.getElementById('sessionDateDisplay');
   if(el) el.textContent=sessionDate?fmtDate(sessionDate):'Chưa chọn ngày';
+}
+function openSessionDatePicker(){
+  const inp=document.getElementById('sessionDate');
+  if(!inp) return;
+  if(inp.showPicker) try{inp.showPicker();}catch(e){inp.click();}
+  else inp.click();
 }
 
 // ─── MEMBERS ───
@@ -7465,7 +7471,6 @@ try{
   sessionDate=todayStr();
   dateEl.value=sessionDate;
   _updateDateDisplay();
-  dateEl.addEventListener('change',()=>{sessionDate=dateEl.value;_updateDateDisplay();debounceSave();});
   // Set cat/tgt buttons
   ['nam','mix','nu','hon','team'].forEach(v=>{document.getElementById('cp-'+v).className='cpill '+v+(v===cat?' on':'');});
   renderMembers();
