@@ -2449,9 +2449,11 @@ if(id==='pg-funstats')renderFunStats();
 
 // ─── DATE ───
 function vnDateStr(date){
-  // Chuyển sang giờ Việt Nam (UTC+7) và trả về 'YYYY-MM-DD'
-  const vn = new Date(date.getTime() + 7*60*60*1000);
-  return vn.toISOString().slice(0,10);
+  // Trả về 'YYYY-MM-DD' theo giờ local (máy user ở VN = UTC+7)
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,'0');
+  const d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
 }
 function todayStr(){
   return vnDateStr(new Date());
