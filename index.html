@@ -4825,21 +4825,6 @@ function _fuzzyMatchMember(input){
     if(candidates.length===1) return {name:candidates[0].name};
     if(candidates.length>1) return {ambiguous:candidates.map(m=>m.name)};
   }
-  // 7. Input ends with member name (e.g. "Phạm Hải Ninh" → "Hải Ninh")
-  // Only when member name has ≥2 words (avoid single-word suffix match like "Len Bigbear" → "Bigbear")
-  found=members.filter(m=>{
-    const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
-    const mnWords=mn.split(/\s+/).length;
-    return mnWords>=2&&(q.endsWith(mn)||qNorm.endsWith(mnN))&&q!==mn&&qNorm!==mnN;
-  });
-  if(found.length===1) return {name:found[0].name};
-  // 8. Input starts with member name (e.g. "Hoài Thu Trần" → "Hoài Thu")
-  found=members.filter(m=>{
-    const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
-    const mnWords=mn.split(/\s+/).length;
-    return mnWords>=2&&(q.startsWith(mn)||qNorm.startsWith(mnN))&&q!==mn&&qNorm!==mnN;
-  });
-  if(found.length===1) return {name:found[0].name};
   return null;
 }
 function _detectCat(players){
