@@ -4772,7 +4772,13 @@ function delMatch(id){
 }
 
 // ── Quick Batch Input ──
+const _qiOverrides=new Map(); // user picks for ambiguous names: inputKey → chosen name
+function _qiPickName(inputKey, chosenName){
+  _qiOverrides.set(inputKey.toLowerCase(), chosenName);
+  previewQuickInput(); // re-preview with the choice applied
+}
 function toggleQuickInput(){
+  _qiOverrides.clear();
   const box=document.getElementById('quickInputBox');
   if(!box)return;
   box.style.display=box.style.display==='none'?'block':'none';
@@ -4802,6 +4808,9 @@ function _fuzzyMatchMember(input){
   const q=input.trim().toLowerCase();
   const qNorm=_stripDiacritics(input);
   if(!q) return null;
+  // 0. Check user override (from clicking ambiguous in preview)
+  const override=_qiOverrides.get(q);
+  if(override) return {name:override};
   // 1. Exact nickname match
   const byNick=_nicknameCache.get(q)||_nicknameCache.get(qNorm);
   if(byNick) return {name:byNick.name};
@@ -4862,9 +4871,10 @@ function _detectCat(players){
 function _cleanTeamStr(str){
   return str.replace(/[@,&]/g,' ').replace(/\s*-\s*/g,' ').replace(/\s+/g,' ').trim();
 }
-function _greedyMatchNames(str){
+function _greedyMatchNames(str, excludeNames){
   str=_cleanTeamStr(str);
   if(!str) return [];
+  const exclude=excludeNames||new Set();
   const words=str.split(/\s+/);
   const results=[];
   let i=0;
@@ -4874,6 +4884,7 @@ function _greedyMatchNames(str){
     for(let len=Math.min(5,words.length-i);len>=1;len--){
       const candidate=words.slice(i,i+len).join(' ');
       const r=_fuzzyMatchMember(candidate);
+      if(r&&r.name&&exclude.has(r.name)) continue; // skip names already used
       if(r&&r.name&&!r.ambiguous){ bestMatch={input:candidate,name:r.name,ambiguous:null}; bestLen=len; break; }
       if(r&&r.name&&!bestMatch){ bestMatch={input:candidate,name:r.name,ambiguous:r.ambiguous}; bestLen=len; }
     }
@@ -4970,7 +4981,9 @@ function _parseQuickLine(line){
   }
   // Always use greedy matching — handles @, -, comma, no separator uniformly
   const t1=_greedyMatchNames(sideA);
-  const t2=_greedyMatchNames(sideB);
+  // For team B, exclude names already used in team A to avoid duplicates
+  const usedNames=new Set(t1.filter(n=>n.name).map(n=>n.name));
+  const t2=_greedyMatchNames(sideB, usedNames);
   // Filter out empty/noise results (single unmatched short words like "tép" that didn't match)
   // Score logic
   if(!winner&&s1!==''&&s2!==''){
@@ -5015,7 +5028,15 @@ function previewQuickInput(){
   parsed.forEach((p,i)=>{
     if(p.error){ html+=`<div style="color:#e55;padding:4px 0;">❌ ${p.error}</div>`; hasError=true; return; }
     const fmtName=(n)=>{
-      if(n.ambiguous){ hasError=true; return `<span style="color:#f5a623;font-weight:700;">${xe(n.input)}⚠️<span style="font-size:10px;">(${n.ambiguous.join('/')})</span></span>`; }
+      if(n.ambiguous){
+        hasError=true;
+        const buttons=n.ambiguous.map(name=>{
+          const mb=mbOf(name);
+          const av=mb&&mb.photo?`<img src="${mb.photo}" style="width:14px;height:14px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:2px;">`:'';
+          return `<span onclick="_qiPickName('${xe(n.input)}','${xe(name)}')" style="cursor:pointer;padding:2px 6px;border-radius:6px;border:1.5px solid #f5a623;background:#f5a62315;margin:1px;display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--text);font-weight:700;white-space:nowrap;" title="Chọn ${xe(name)}">${av}${xe(name)}</span>`;
+        }).join('');
+        return `<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px;"><span style="color:#f5a623;font-size:10px;font-weight:700;">${xe(n.input)}→</span>${buttons}</span>`;
+      }
       if(n.name){
         const mb=mbOf(n.name);
         const av=mb&&mb.photo?`<img src="${mb.photo}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:2px;">`:``;
