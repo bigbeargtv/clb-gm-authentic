@@ -4814,9 +4814,10 @@ function _fuzzyMatchMember(input){
   _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||_stripDiacritics(nick).includes(qNorm)) contains.add(m);});
   if(contains.size===1) return {name:[...contains][0].name};
   if(contains.size>1) return {ambiguous:[...contains].map(m=>m.name)};
-  // 6. Last word match (Vietnamese: last word = first name)
-  const qLast=qNorm.split(/\s+/).pop();
-  if(qLast.length>=2){
+  // 6. Last word match — only for SINGLE word input (e.g. "Tùng" → "Nguyễn Văn Tùng")
+  const qWords=qNorm.split(/\s+/);
+  const qLast=qWords[qWords.length-1];
+  if(qWords.length===1&&qLast.length>=2){
     const candidates=members.filter(m=>{
       const mLast=_stripDiacritics(m.name).split(/\s+/).pop();
       return mLast===qLast;
@@ -4824,16 +4825,19 @@ function _fuzzyMatchMember(input){
     if(candidates.length===1) return {name:candidates[0].name};
     if(candidates.length>1) return {ambiguous:candidates.map(m=>m.name)};
   }
-  // 7. Input ends with member name (handles "Phạm Hải Ninh" → match "Hải Ninh")
+  // 7. Input ends with member name (e.g. "Phạm Hải Ninh" → "Hải Ninh")
+  // Only when member name has ≥2 words (avoid single-word suffix match like "Len Bigbear" → "Bigbear")
   found=members.filter(m=>{
     const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
-    return (q.endsWith(mn)||qNorm.endsWith(mnN))&&mn.length>=3;
+    const mnWords=mn.split(/\s+/).length;
+    return mnWords>=2&&(q.endsWith(mn)||qNorm.endsWith(mnN))&&q!==mn&&qNorm!==mnN;
   });
   if(found.length===1) return {name:found[0].name};
-  // 8. Input starts with member name (handles "Hoài Thu Trần" → match "Hoài Thu")
+  // 8. Input starts with member name (e.g. "Hoài Thu Trần" → "Hoài Thu")
   found=members.filter(m=>{
     const mn=m.name.toLowerCase(), mnN=_stripDiacritics(m.name);
-    return (q.startsWith(mn)||qNorm.startsWith(mnN))&&mn.length>=3;
+    const mnWords=mn.split(/\s+/).length;
+    return mnWords>=2&&(q.startsWith(mn)||qNorm.startsWith(mnN))&&q!==mn&&qNorm!==mnN;
   });
   if(found.length===1) return {name:found[0].name};
   return null;
