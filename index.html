@@ -1906,6 +1906,22 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
     <div class="cpill team" id="cp-team" onclick="setCat('team')"><span class="cp-icon">⚔️</span><span class="cp-label">Đấu Team</span></div>
   </div>
   <button class="add-btn admin-only" onclick="addMatch()">＋ Thêm trận đấu</button>
+  <button class="add-btn admin-only" onclick="toggleQuickInput()" style="background:var(--s2);color:var(--text);border:1.5px solid var(--bdr);font-size:12px;padding:8px 16px;margin-top:4px;">📋 Nhập nhanh nhiều trận</button>
+  <div id="quickInputBox" class="admin-only" style="display:none;margin-top:8px;">
+    <div style="background:var(--s1);border:1.5px solid var(--bdr);border-radius:14px;padding:14px;box-shadow:0 2px 8px #0001;">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;line-height:1.6;">
+        📝 Mỗi dòng 1 trận · Cú pháp:<br>
+        <code style="background:var(--s2);padding:2px 6px;border-radius:4px;font-size:11px;">Tên1, Tên2 vs Tên3, Tên4 A 100k</code><br>
+        <span style="font-size:10px;color:var(--muted);">• <b>A</b> hoặc <b>B</b> = đội thắng (bỏ qua = chưa có kết quả)<br>• <b>100k</b> = tiền ủng hộ (không bắt buộc)<br>• <b>3-1</b> = tỉ số (không bắt buộc)</span>
+      </div>
+      <textarea id="quickInputText" rows="6" placeholder="Hùng, Minh vs Tùng, Long A 100k&#10;Hải, Bình vs Nam, Đức B 3-1&#10;An, Bảo vs Cường, Duy" style="width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
+      <div id="quickInputPreview" style="margin-top:8px;font-size:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="previewQuickInput()" style="flex:1;padding:10px;background:var(--s2);color:var(--text);border:1.5px solid var(--bdr);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">👁 Xem trước</button>
+        <button onclick="submitQuickInput()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;">✅ Tạo trận</button>
+      </div>
+    </div>
+  </div>
   <div id="teamBattleForm" class="admin-only" style="display:none;">
     <div class="tb-form">
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Bấm chọn thành viên: <span style="color:#4a90e2;">●1 lần = Đội A</span> · <span style="color:#e55;">●2 lần = Đội B</span> · <span>●3 lần = Bỏ chọn</span></div>
@@ -4738,6 +4754,141 @@ function delMatch(id){
   matches=matches.filter(m=>m.id!==id&&m.teamBattleParentId!==id);
   renderMatches();
   debounceSave();
+}
+
+// ── Quick Batch Input ──
+function toggleQuickInput(){
+  const box=document.getElementById('quickInputBox');
+  if(!box)return;
+  box.style.display=box.style.display==='none'?'block':'none';
+  if(box.style.display!=='none'){
+    const ta=document.getElementById('quickInputText');
+    if(ta) ta.focus();
+  }
+}
+function _fuzzyMatchMember(input){
+  if(!input) return null;
+  const q=input.trim().toLowerCase();
+  if(!q) return null;
+  // exact match first
+  let found=members.find(m=>m.name.toLowerCase()===q);
+  if(found) return found.name;
+  // starts with
+  found=members.find(m=>m.name.toLowerCase().startsWith(q));
+  if(found) return found.name;
+  // contains
+  found=members.find(m=>m.name.toLowerCase().includes(q));
+  if(found) return found.name;
+  // last word match (Vietnamese names: last word is first name)
+  const qLast=q.split(/\s+/).pop();
+  if(qLast.length>=2){
+    const candidates=members.filter(m=>{
+      const mLast=m.name.toLowerCase().split(/\s+/).pop();
+      return mLast===qLast;
+    });
+    if(candidates.length===1) return candidates[0].name;
+  }
+  return null;
+}
+function _parseQuickLine(line){
+  line=line.trim();
+  if(!line) return null;
+  // Pattern: TeamA vs TeamB [winner] [score] [bet]
+  const vsParts=line.split(/\s+vs\.?\s+/i);
+  if(vsParts.length!==2) return {error:'Thiếu "vs" phân cách 2 đội',raw:line};
+  const teamANames=vsParts[0].split(/[,&]+/).map(s=>s.trim()).filter(Boolean);
+  // Parse teamB + extras (winner, score, bet)
+  let rest=vsParts[1];
+  // Extract bet (e.g. 100k, 200k, 50000)
+  let bet=0;
+  const betMatch=rest.match(/\b(\d+)k\b/i);
+  if(betMatch){ bet=parseInt(betMatch[1])*1000; rest=rest.replace(betMatch[0],'').trim(); }
+  else{
+    const betMatch2=rest.match(/\b(\d{5,})\b/);
+    if(betMatch2){ bet=parseInt(betMatch2[1]); rest=rest.replace(betMatch2[0],'').trim(); }
+  }
+  // Extract score (e.g. 3-1, 3:1)
+  let s1='',s2='';
+  const scoreMatch=rest.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
+  if(scoreMatch){ s1=scoreMatch[1]; s2=scoreMatch[2]; rest=rest.replace(scoreMatch[0],'').trim(); }
+  // Extract winner (A or B at end or standalone)
+  let winner='';
+  const winMatch=rest.match(/\b([AB])\s*$/i);
+  if(winMatch){ winner=winMatch[1].toUpperCase(); rest=rest.replace(winMatch[0],'').trim(); }
+  const teamBNames=rest.split(/[,&]+/).map(s=>s.trim()).filter(Boolean);
+  // Fuzzy match names
+  const t1=teamANames.map(n=>({input:n,match:_fuzzyMatchMember(n)}));
+  const t2=teamBNames.map(n=>({input:n,match:_fuzzyMatchMember(n)}));
+  // Auto-detect winner from score
+  if(!winner&&s1!==''&&s2!==''){
+    if(+s1>+s2) winner='A';
+    else if(+s2>+s1) winner='B';
+  }
+  // Default score from winner
+  if(winner&&s1===''&&s2===''){
+    s1=winner==='A'?'1':'0';
+    s2=winner==='B'?'1':'0';
+  }
+  return {t1,t2,winner,s1,s2,bet,raw:line};
+}
+function previewQuickInput(){
+  const ta=document.getElementById('quickInputText');
+  const preview=document.getElementById('quickInputPreview');
+  if(!ta||!preview) return;
+  const lines=ta.value.split('\n').filter(l=>l.trim());
+  if(!lines.length){ preview.innerHTML='<span style="color:var(--muted);">Chưa có dữ liệu</span>'; return; }
+  let html='';
+  lines.forEach((line,i)=>{
+    const p=_parseQuickLine(line);
+    if(!p||p.error){
+      html+=`<div style="color:#e55;padding:4px 0;">❌ Dòng ${i+1}: ${p?p.error:'Không đọc được'}</div>`;
+      return;
+    }
+    const fmtName=(n)=>n.match?`<span style="color:var(--green);font-weight:700;">${xe(n.match)}</span>`:`<span style="color:#e55;text-decoration:line-through;">${xe(n.input)}?</span>`;
+    const tA=p.t1.map(fmtName).join(' & ');
+    const tB=p.t2.map(fmtName).join(' & ');
+    const winTxt=p.winner?` · 🏆${p.winner}`:'';
+    const scoreTxt=(p.s1!==''&&p.s2!=='')?` · ${p.s1}:${p.s2}`:'';
+    const betTxt=p.bet>0?` · ${p.bet>=1000?(p.bet/1000)+'k':p.bet}🍃`:'';
+    html+=`<div style="padding:4px 0;border-bottom:1px solid var(--bdr);">✅ ${tA} <span style="color:var(--muted);font-weight:800;">vs</span> ${tB}${winTxt}${scoreTxt}${betTxt}</div>`;
+  });
+  preview.innerHTML=html;
+}
+function submitQuickInput(){
+  if(!isAdmin) return;
+  const ta=document.getElementById('quickInputText');
+  if(!ta) return;
+  const lines=ta.value.split('\n').filter(l=>l.trim());
+  if(!lines.length){ showToast('Chưa có dữ liệu','error'); return; }
+  if(!sessionDate) sessionDate=todayStr();
+  let created=0, errors=0;
+  lines.forEach(line=>{
+    const p=_parseQuickLine(line);
+    if(!p||p.error){ errors++; return; }
+    const t1p1=p.t1[0]?p.t1[0].match:'';
+    const t1p2=p.t1[1]?p.t1[1].match:'';
+    const t2p1=p.t2[0]?p.t2[0].match:'';
+    const t2p2=p.t2[1]?p.t2[1].match:'';
+    if(!t1p1||!t2p1){ errors++; return; }
+    const saved=!!(p.winner);
+    matches.push({
+      id:matchUid++, cat, tgt, date:sessionDate,
+      t1p1, t1p2:t1p2||'', t2p1, t2p2:t2p2||'',
+      s1:p.s1||'', s2:p.s2||'',
+      winner:p.winner||'',
+      bet:p.bet, saved
+    });
+    created++;
+  });
+  if(created>0){
+    renderMatches(); save();
+    showToast(`Đã tạo ${created} trận${errors>0?' ('+errors+' lỗi)':''}`, created>0?'success':'error');
+    ta.value='';
+    document.getElementById('quickInputPreview').innerHTML='';
+    document.getElementById('quickInputBox').style.display='none';
+  } else {
+    showToast('Không tạo được trận nào. Kiểm tra lại tên thành viên.','error');
+  }
 }
 
 function delDay(date){
