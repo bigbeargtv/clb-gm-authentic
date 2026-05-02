@@ -2149,8 +2149,8 @@ body.admin-mode .i-feat{outline:1px dashed rgba(240,180,41,0.15);border-radius:1
     <div class="em-title">✏️ Chỉnh sửa thành viên</div>
     <div class="em-label">Tên</div>
     <input class="em-inp" id="em-name" placeholder="Tên thành viên...">
-    <div class="em-label" style="margin-top:10px;">Bí danh <span style="font-size:11px;color:var(--muted);font-weight:600;">(không bắt buộc)</span></div>
-    <input class="em-inp" id="em-nickname" placeholder="Nickname, biệt danh...">
+    <div class="em-label" style="margin-top:10px;">Bí danh <span style="font-size:11px;color:var(--muted);font-weight:600;">(nhiều tên cách bằng dấu phẩy)</span></div>
+    <input class="em-inp" id="em-nickname" placeholder="VD: Tép, Bear, Anh Tùng...">
     <div class="em-label">Giới tính</div>
     <div class="em-gender-row">
       <button class="em-gender-btn on-m" id="em-gm" onclick="setEditGender('m')">👨 Nam</button>
@@ -4549,7 +4549,18 @@ function rSavedWithDel(m){
 }
 
 let _mbCache=new Map();
-function _rebuildMbCache(){_mbCache=new Map(members.map(m=>[m.name,m]));}
+let _nicknameCache=new Map(); // nickname lowercase → member
+function _rebuildMbCache(){
+  _mbCache=new Map(members.map(m=>[m.name,m]));
+  _nicknameCache=new Map();
+  members.forEach(m=>{
+    if(m.nickname){
+      m.nickname.split(/[,;，]+/).map(s=>s.trim().toLowerCase()).filter(Boolean).forEach(nick=>{
+        _nicknameCache.set(nick,m);
+      });
+    }
+  });
+}
 function mbOf(name){return _mbCache.get(name);}
 
 function slot(matchId,field,name){
@@ -4772,19 +4783,30 @@ function _fuzzyMatchMember(input){
   if(!input) return null;
   const q=input.trim().toLowerCase();
   if(!q) return null;
-  // exact match first
+  // 1. Exact nickname match (highest priority)
+  const byNick=_nicknameCache.get(q);
+  if(byNick) return {name:byNick.name};
+  // 2. Exact name match
   let found=members.filter(m=>m.name.toLowerCase()===q);
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return {name:found[0].name,ambiguous:found.map(m=>m.name)};
-  // starts with
+  // 3. Nickname starts with
+  const nickStarts=[];
+  _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q))nickStarts.push(m);});
+  if(nickStarts.length===1) return {name:nickStarts[0].name};
+  // 4. Name starts with
   found=members.filter(m=>m.name.toLowerCase().startsWith(q));
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return {ambiguous:found.map(m=>m.name)};
-  // contains
+  // 5. Nickname contains
+  const nickContains=[];
+  _nicknameCache.forEach((m,nick)=>{if(nick.includes(q))nickContains.push(m);});
+  if(nickContains.length===1) return {name:nickContains[0].name};
+  // 6. Name contains
   found=members.filter(m=>m.name.toLowerCase().includes(q));
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return {ambiguous:found.map(m=>m.name)};
-  // last word match (Vietnamese names: last word is first name)
+  // 7. Last word match (Vietnamese: last word = first name)
   const qLast=q.split(/\s+/).pop();
   if(qLast.length>=2){
     const candidates=members.filter(m=>{
