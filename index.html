@@ -4551,13 +4551,18 @@ let _mbCache=new Map();
 let _nicknameCache=new Map(); // nickname lowercase → member
 function _rebuildMbCache(){
   _mbCache=new Map(members.map(m=>[m.name,m]));
+  // Pre-compute stripped names for fast diacritic-insensitive matching
+  members.forEach(m=>{
+    m._lo=m.name.toLowerCase();
+    m._norm=(typeof _stripDiacritics==='function')?_stripDiacritics(m.name):m._lo;
+    m._normLast=m._norm.split(/\s+/).pop();
+  });
   _nicknameCache=new Map();
   members.forEach(m=>{
     if(m.nickname){
       m.nickname.split(/[,;，]+/).map(s=>s.trim()).filter(Boolean).forEach(nick=>{
         _nicknameCache.set(nick.toLowerCase(),m);
-        // Also index without diacritics
-        const stripped=typeof _stripDiacritics==='function'?_stripDiacritics(nick):nick.toLowerCase();
+        const stripped=(typeof _stripDiacritics==='function')?_stripDiacritics(nick):nick.toLowerCase();
         if(stripped!==nick.toLowerCase()) _nicknameCache.set(stripped,m);
       });
     }
@@ -4818,33 +4823,30 @@ function _fuzzyMatchMember(input){
   let nickFound=null;
   _nicknameCache.forEach((m,nick)=>{if(_stripDiacritics(nick)===qNorm) nickFound=m;});
   if(nickFound) return {name:nickFound.name};
-  // 2. Exact name match (with + without diacritics)
-  let found=members.filter(m=>m.name.toLowerCase()===q||_stripDiacritics(m.name)===qNorm);
+  // 2. Exact name match (with + without diacritics) — uses pre-computed m._lo, m._norm
+  let found=members.filter(m=>m._lo===q||m._norm===qNorm);
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return _resolveAmbiguous(found);
   // 3. Nickname starts with
   const nickStarts=new Set();
-  _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q)||_stripDiacritics(nick).startsWith(qNorm))nickStarts.add(m);});
+  _nicknameCache.forEach((m,nick)=>{if(nick.startsWith(q)||nick.startsWith(qNorm))nickStarts.add(m);});
   if(nickStarts.size===1) return {name:[...nickStarts][0].name};
   if(nickStarts.size>1) return _resolveAmbiguous([...nickStarts]);
   // 4. Name starts with
-  found=members.filter(m=>m.name.toLowerCase().startsWith(q)||_stripDiacritics(m.name).startsWith(qNorm));
+  found=members.filter(m=>m._lo.startsWith(q)||m._norm.startsWith(qNorm));
   if(found.length===1) return {name:found[0].name};
   if(found.length>1) return _resolveAmbiguous(found);
   // 5. Name/nickname contains
   const contains=new Set();
-  members.forEach(m=>{if(m.name.toLowerCase().includes(q)||_stripDiacritics(m.name).includes(qNorm)) contains.add(m);});
-  _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||_stripDiacritics(nick).includes(qNorm)) contains.add(m);});
+  members.forEach(m=>{if(m._lo.includes(q)||m._norm.includes(qNorm)) contains.add(m);});
+  _nicknameCache.forEach((m,nick)=>{if(nick.includes(q)||nick.includes(qNorm)) contains.add(m);});
   if(contains.size===1) return {name:[...contains][0].name};
   if(contains.size>1) return _resolveAmbiguous([...contains]);
   // 6. Last word match — only for SINGLE word input (e.g. "Tùng" → "Nguyễn Văn Tùng")
   const qWords=qNorm.split(/\s+/);
   const qLast=qWords[qWords.length-1];
   if(qWords.length===1&&qLast.length>=2){
-    const candidates=members.filter(m=>{
-      const mLast=_stripDiacritics(m.name).split(/\s+/).pop();
-      return mLast===qLast;
-    });
+    const candidates=members.filter(m=>m._normLast===qLast);
     if(candidates.length===1) return {name:candidates[0].name};
     if(candidates.length>1) return _resolveAmbiguous(candidates);
   }
@@ -4901,7 +4903,7 @@ function _greedyMatchNames(str, excludeNames){
       // Try combined
       const combined=buf.map(b=>b.input).join(' ');
       const r=_fuzzyMatchMember(combined);
-      if(r&&r.name){ merged.push({input:combined,name:r.name,ambiguous:r.ambiguous||null}); buf=[]; return; }
+      if(r&&r.name&&!exclude.has(r.name)){ merged.push({input:combined,name:r.name,ambiguous:r.ambiguous||null}); buf=[]; return; }
       // Try attaching to adjacent matched name
       // e.g. "Phạm" unmatched + "Hải Ninh" matched → try "Phạm Hải Ninh"
       buf.forEach(b=>merged.push(b));
@@ -4920,14 +4922,13 @@ function _greedyMatchNames(str, excludeNames){
         // Unmatched before matched: try combining
         const combo=merged[j].input+' '+merged[j+1].input;
         const r=_fuzzyMatchMember(combo);
-        if(r&&r.name===merged[j+1].name){ merged[j+1].input=combo; continue; } // absorbed
+        if(r&&r.name===merged[j+1].name&&!exclude.has(r.name)){ merged[j+1].input=combo; continue; }
       }
       if(!merged[j].name && j>0 && final.length>0 && final[final.length-1].name){
-        // Unmatched after matched: try combining
         const prev=final[final.length-1];
         const combo=prev.input+' '+merged[j].input;
         const r=_fuzzyMatchMember(combo);
-        if(r&&r.name===prev.name){ prev.input=combo; continue; } // absorbed
+        if(r&&r.name===prev.name&&!exclude.has(r.name)){ prev.input=combo; continue; }
       }
       final.push(merged[j]);
     }
@@ -4957,13 +4958,15 @@ function _parseQuickLine(line){
     const betMatch2=line.match(/(?<!\d[-:])\b(\d{5,})\b(?![-:]\d)/);
     if(betMatch2){ bet=parseInt(betMatch2[1]); line=line.replace(betMatch2[0],'').trim(); }
   }
-  // Extract score (11-3, 8:11, 11 - 7) — only match realistic pickleball scores
+  // Extract score (11-3, 8-11) — scan right to left, skip timestamps (HH:MM)
   let s1='',s2='';
-  const scoreMatch=line.match(/\b(\d{1,2})\s*[-:]\s*(\d{1,2})\b/);
-  if(scoreMatch){
-    const a=parseInt(scoreMatch[1]),b=parseInt(scoreMatch[2]);
-    // Validate: at least one side ≥ 5 to avoid matching random number pairs
-    if(a>=5||b>=5){ s1=scoreMatch[1]; s2=scoreMatch[2]; line=line.replace(scoreMatch[0],'').trim(); }
+  const scoreAll=[...line.matchAll(/\b(\d{1,2})\s*([-:])\s*(\d{1,2})\b/g)];
+  for(let si=scoreAll.length-1;si>=0;si--){
+    const sm=scoreAll[si];
+    const a=parseInt(sm[1]),b=parseInt(sm[3]),sep=sm[2];
+    // Skip if looks like timestamp: colon + valid time range
+    if(sep===':'&&a<24&&b<60&&a>=1) continue;
+    if(a>=5||b>=5){ s1=sm[1]; s2=sm[3]; line=line.replace(sm[0],'').trim(); break; }
   }
   // Split by thắng/thua/vs
   let winner='', sideA='', sideB='';
@@ -7786,7 +7789,7 @@ function getHistFilterLabel(){
 // ─── UTILS ───
 function fmtNum(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function ini(name){if(!name)return'?';const p=name.trim().split(' ');return(p.length>1?p[p.length-1][0]:name[0]).toUpperCase();}
-function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function isImageUrl(u){if(!u||/^data:/.test(u))return false;return/\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(u)||/\/(photo|image|img|pic)\//i.test(u);}
 
 // ─── DARK MODE ───
