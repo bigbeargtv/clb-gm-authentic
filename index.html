@@ -4445,6 +4445,9 @@ function renderMatches(){
       const ms = byDate[d];
       const dayId = 'mday-'+d.replace(/-/g,'');
       const isOpen = window._openDays && window._openDays.has(dayId);
+      const editDayBtn = isAdmin
+        ? `<button class="edit-btn" onclick="event.stopPropagation();editDayDate('${d}')" style="font-size:11px;padding:3px 7px;margin-left:4px;" title="Đổi ngày" id="edb-${d}">📅✏️</button>`
+        : '';
       const delDayBtn = isAdmin
         ? `<button class="del-btn" onclick="event.stopPropagation();delDay('${d}')" style="font-size:12px;padding:3px 7px;margin-left:4px;" title="Xóa cả ngày">🗑</button>`
         : '';
@@ -4453,6 +4456,7 @@ function renderMatches(){
           <span>📅</span>
           <span style="flex:1;">${fmtDate(d)} · ${ms.length} trận</span>
           <span style="font-size:11px;color:var(--muted);" id="${dayId}-arrow">${isOpen?'▲':'▼'}</span>
+          ${editDayBtn}
           ${delDayBtn}
         </div>
         <div id="${dayId}" style="display:${isOpen?'block':'none'};">
@@ -4686,12 +4690,9 @@ function rSaved(m){
       <span style="font-size:9px;color:var(--muted);line-height:1;">:</span>
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:${!w1?'var(--green)':'var(--text)'};">${m.s2}</span>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
-      <div style="display:flex;gap:4px;">
-        <button class="edit-btn" style="padding:4px 8px;font-size:11px;" onclick="editMatch(${m.id})">✏️</button>
-        <button class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
-      </div>
-      ${isAdmin?`<span id="md${m.id}" style="font-size:9px;color:var(--muted);cursor:pointer;white-space:nowrap;" onclick="editMatchDate(${m.id})" title="Đổi ngày">📅</span>`:''}
+    <div style="display:flex;gap:4px;flex-shrink:0;">
+      <button class="edit-btn" style="padding:4px 8px;font-size:11px;" onclick="editMatch(${m.id})">✏️</button>
+      <button class="del-btn admin-only" style="padding:4px 8px;font-size:11px;" onclick="delMatch(${m.id})" title="Xóa">🗑</button>
     </div>
   </div>`;
 }
@@ -4701,40 +4702,50 @@ function setMatchDate(id, val){
   const m=matches.find(m=>m.id===id); if(!m) return;
   m.date=val; debounceSave();
 }
-function editMatchDate(id){
+function editDayDate(oldDate){
   if(!isAdmin) return;
-  const m=matches.find(m=>m.id===id); if(!m) return;
-  const el=document.getElementById('md'+id); if(!el) return;
-  // Tạo date input inline thay thế icon 📅
+  const btn=document.getElementById('edb-'+oldDate);
+  if(!btn) return;
+  // Thay nút bằng date input
   const inp=document.createElement('input');
   inp.type='date';
-  inp.value=m.date||todayStr();
-  inp.style.cssText='font-size:11px;font-weight:700;padding:2px 4px;border:1.5px solid var(--bdr2);border-radius:6px;background:var(--s2);color:var(--text);cursor:pointer;width:120px;';
-  el.innerHTML='';
-  el.style.cursor='default';
-  el.onclick=null;
-  el.appendChild(inp);
-  inp.focus();
-  inp.showPicker&&inp.showPicker();
+  inp.value=oldDate;
+  inp.style.cssText='font-size:12px;font-weight:700;padding:3px 6px;border:1.5px solid var(--bdr2);border-radius:6px;background:var(--s1);color:var(--text);cursor:pointer;';
+  inp.onclick=function(e){ e.stopPropagation(); };
+  btn.replaceWith(inp);
+  // Delay để DOM ổn định, tránh blur fire ngay
+  let done=false;
+  let ready=false;
+  setTimeout(()=>{
+    ready=true;
+    inp.focus();
+    try{ inp.showPicker(); }catch(e){}
+  },100);
   function commit(){
+    if(done||!ready) return; done=true;
     const newDate=inp.value;
-    if(newDate && newDate!==m.date){
-      m.date=newDate;
-      debounceSave();
-      renderMatches(); // Re-render vì nhóm ngày thay đổi
+    if(newDate && newDate!==oldDate){
+      let count=0;
+      matches.forEach(m=>{
+        if(m.saved && m.date===oldDate){
+          m.date=newDate;
+          count++;
+        }
+      });
+      if(count>0){
+        const newDayId='mday-'+newDate.replace(/-/g,'');
+        if(!window._openDays) window._openDays=new Set();
+        window._openDays.add(newDayId);
+        debounceSave();
+        renderMatches();
+      }
     } else {
-      // Không đổi → khôi phục lại icon
-      el.innerHTML='📅';
-      el.style.cursor='pointer';
-      el.onclick=function(){editMatchDate(id);};
+      renderMatches();
     }
   }
   inp.addEventListener('change', commit);
   inp.addEventListener('blur', function(){
-    // Delay nhỏ để change event kịp fire trước
-    setTimeout(()=>{
-      if(el.contains(inp)) commit();
-    },150);
+    setTimeout(()=>{ if(!done) commit(); },200);
   });
 }
 function setWinner(id, side){
