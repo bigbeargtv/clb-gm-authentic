@@ -7847,9 +7847,9 @@ try{
   window.addEventListener('beforeunload', function(e){
     if(saveTimer){ e.preventDefault(); e.returnValue='Dữ liệu chưa được lưu. Bạn có chắc muốn thoát?'; return e.returnValue; }
   });
-  // Set date input — luôn mặc định ngày hôm nay khi F5/load
+  // Set date input — giữ ngày đã lưu từ Firebase, chỉ mặc định hôm nay nếu chưa có
   const dateEl=document.getElementById('sessionDate');
-  sessionDate=todayStr();
+  if(!sessionDate) sessionDate=todayStr();
   dateEl.value=sessionDate;
   _updateDateDisplay();
   // Set cat/tgt buttons
