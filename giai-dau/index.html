@@ -1,1 +1,354 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiết Canh vs Lòng Lợn — Giao hữu CLB GM Authentic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12161C;
+  --ink-soft:#4A525E;
+  --paper:#F6F3EC;
+  --paper-2:#FFFFFF;
+  --line:#DCD6C8;
+  --red:#B93229;
+  --red-soft:#FBEDEB;
+  --blue:#1D5B87;
+  --blue-soft:#EAF1F7;
+  --gold:#9A6B14;
+  --disp:'Oswald',sans-serif;
+  --body:'Be Vietnam Pro',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--body);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.6;
+  padding-bottom:56px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
 
+/* ---------- hero ---------- */
+.hero{padding:44px 0 32px;text-align:center;position:relative}
+.eyebrow{
+  font-family:var(--disp);font-weight:500;font-size:12px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
+}
+.matchup{
+  display:flex;align-items:stretch;justify-content:center;
+  margin:22px 0 26px;
+}
+.side{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 10px}
+.side .kicker{
+  font-family:var(--disp);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:2px;
+}
+.side h1{
+  font-family:var(--disp);font-weight:600;
+  font-size:clamp(30px,9vw,54px);line-height:1;letter-spacing:.01em;
+  text-transform:uppercase;
+}
+.side.red .kicker{color:var(--red)}
+.side.red h1{color:var(--red)}
+.side.blue .kicker{color:var(--blue)}
+.side.blue h1{color:var(--blue)}
+/* the net: signature element */
+.net{
+  width:2px;background:
+    repeating-linear-gradient(to bottom,var(--ink) 0 7px,transparent 7px 14px);
+  opacity:.5;flex:none;position:relative;
+}
+.net::after{
+  content:"VS";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:var(--paper);padding:5px 3px;
+  font-family:var(--disp);font-size:13px;letter-spacing:.04em;
+  color:var(--ink-soft);
+}
+.facts{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.fact{padding:12px 18px;text-align:center;flex:1;min-width:80px}
+.fact + .fact{border-left:1px solid var(--line)}
+.fact b{display:block;font-family:var(--disp);font-size:22px;font-weight:500;line-height:1.1}
+.fact span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+
+/* ---------- section ---------- */
+section{padding:38px 0 0}
+.shead{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.shead h2{
+  font-family:var(--disp);font-weight:600;font-size:20px;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.shead .rule{flex:1;height:1px;background:var(--line)}
+.shead .note{font-size:12px;color:var(--ink-soft)}
+
+/* ---------- roster ---------- */
+.roster{
+  display:grid;grid-template-columns:1fr 1fr;
+  background:var(--paper-2);border:1px solid var(--line);border-radius:3px;
+  overflow:hidden;
+}
+.rcol{padding:0}
+.rcol + .rcol{border-left:1px solid var(--line)}
+.rtop{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
+.rcol.red .rtop{background:var(--red-soft)}
+.rcol.blue .rtop{background:var(--blue-soft)}
+.rtop .nm{font-family:var(--disp);font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.05em}
+.rcol.red .nm{color:var(--red)}
+.rcol.blue .nm{color:var(--blue)}
+.rtop .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
+.grp{padding:11px 14px}
+.grp + .grp{border-top:1px dashed var(--line)}
+.grp h4{
+  font-family:var(--disp);font-weight:500;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;
+}
+.grp li{list-style:none;font-size:14.5px;line-height:1.75}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tab{
+  font-family:var(--disp);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--line);background:transparent;
+  color:var(--ink-soft);cursor:pointer;border-radius:2px;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.tab:hover{border-color:var(--ink-soft)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- match blocks ---------- */
+.blk{margin-bottom:22px}
+.blk-h{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:6px;margin-bottom:0;border-bottom:2px solid var(--ink);
+}
+.blk-h .t{font-family:var(--disp);font-weight:500;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
+.blk-h .c{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
+
+.mt{
+  display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;
+  border-bottom:1px solid var(--line);
+  padding:11px 0;position:relative;
+}
+.mt .p{font-size:15px;line-height:1.4}
+.mt .p.r{text-align:right;color:var(--red)}
+.mt .p.b{text-align:left;color:var(--blue)}
+.mt .mid{
+  text-align:center;font-family:var(--disp);font-size:10.5px;
+  color:var(--ink-soft);letter-spacing:.06em;
+  border-left:1px dashed var(--line);border-right:1px dashed var(--line);
+  align-self:stretch;display:flex;align-items:center;justify-content:center;
+}
+.mt.empty{color:var(--ink-soft);font-size:13.5px;text-align:center;display:block;padding:14px 0;font-style:italic}
+
+/* ---------- format ---------- */
+.fmt{
+  background:var(--ink);color:var(--paper);border-radius:3px;
+  padding:22px 22px 24px;margin-top:8px;
+}
+.fmt h3{font-family:var(--disp);font-weight:500;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#9AA3AF;margin-bottom:14px}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2A313B;border-radius:2px;overflow:hidden;margin-bottom:22px}
+.cats div{background:var(--ink);padding:12px 8px;text-align:center}
+.cats b{display:block;font-family:var(--disp);font-size:26px;font-weight:500;line-height:1.05;color:#E8B84B}
+.cats span{font-size:10.5px;color:#B3BCC7;letter-spacing:.04em;display:block;margin-top:2px}
+.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2A313B;border-radius:2px;overflow:hidden;margin-bottom:18px}
+.tl div{background:var(--ink);padding:10px 8px;text-align:center}
+.tl b{display:block;font-family:var(--disp);font-size:15px;font-weight:500}
+.tl span{font-size:10.5px;color:#8B95A3;letter-spacing:.06em}
+.rules{list-style:none;font-size:14px;line-height:1.9;color:#D7DCE3}
+.rules li{padding-left:16px;position:relative}
+.rules li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:1px;background:#6C7684}
+.rules b{color:#fff;font-weight:500}
+
+footer{
+  margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+
+@media (max-width:560px){
+  .wrap{padding:0 15px}
+  .roster{grid-template-columns:1fr}
+  .rcol + .rcol{border-left:none;border-top:1px solid var(--line)}
+  .mt{grid-template-columns:1fr 30px 1fr}
+  .mt .p{font-size:14px}
+  .tl{grid-template-columns:repeat(2,1fr)}
+  .cats{grid-template-columns:repeat(2,1fr)}
+  .cats b{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff}
+  .tabs{display:none}
+  .pane{display:block!important}
+  .fmt{background:#fff;color:#000;border:1px solid #000}
+  .rules{color:#000}.fmt h3{color:#000}
+  .cats,.tl{background:#000}
+  .cats div,.tl div{background:#fff}
+  .cats b{color:#000}.cats span,.tl span{color:#333}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">CLB GM Authentic · Giao hữu 30 người</p>
+    <div class="matchup">
+      <div class="side red">
+        <span class="kicker">Đội đỏ</span>
+        <h1>Tiết<br>Canh</h1>
+      </div>
+      <div class="net"></div>
+      <div class="side blue">
+        <span class="kicker">Đội xanh</span>
+        <h1>Lòng<br>Lợn</h1>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact"><b>30</b><span>Vận động viên</span></div>
+      <div class="fact"><b>15</b><span>Trận</span></div>
+      <div class="fact"><b>4</b><span>Sân</span></div>
+      <div class="fact"><b>2h</b><span>Thi đấu</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="shead"><h2>Đội hình</h2><span class="rule"></span><span class="note">15 người mỗi đội</span></div>
+    <div class="roster" id="roster"></div>
+  </section>
+
+  <section>
+    <div class="shead"><h2>Thể thức</h2><span class="rule"></span><span class="note">15 trận · 15 điểm</span></div>
+    <div class="fmt">
+      <h3>Sáu nội dung thi đấu</h3>
+      <div class="cats">
+        <div><b>2</b><span>Đôi nam A</span></div>
+        <div><b>3</b><span>Đôi nam B</span></div>
+        <div><b>4</b><span>Đôi nam AB</span></div>
+        <div><b>2</b><span>Đôi nữ</span></div>
+        <div><b>2</b><span>Nam nữ AB</span></div>
+        <div><b>2</b><span>Nam nữ BB</span></div>
+      </div>
+
+      <h3>Khung giờ</h3>
+      <div class="tl">
+        <div><b>Vòng 1</b><span>0 – 20'</span></div>
+        <div><b>Vòng 2</b><span>25 – 45'</span></div>
+        <div><b>Vòng 3</b><span>50 – 70'</span></div>
+        <div><b>Vòng 4</b><span>75 – 95'</span></div>
+      </div>
+
+      <ul class="rules">
+        <li>Đánh tới <b>11 điểm, cách 2</b>.</li>
+        <li>Mỗi trận thắng được <b>1 điểm</b>. Tổng cả giải <b>15 điểm</b>, đội nào tới 8 điểm trước là vô địch.</li>
+        <li>Mỗi người đúng <b>2 trận</b>, ở <b>2 nội dung khác nhau</b>. Không cặp nào lặp lại.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="shead"><h2>Bảng đấu</h2><span class="rule"></span><span class="note">V = vòng · S = sân</span></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-view="cat">Theo nội dung</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="rnd">Theo vòng</button>
+    </div>
+    <div id="board"></div>
+  </section>
+
+  <footer>
+    <span>CLB GM Authentic · Hà Nội</span>
+    <span>Bốc thăm ngẫu nhiên, cân bằng theo trình</span>
+  </footer>
+</div>
+
+<script>
+const TEAMS = {
+  red:  { name:"Tiết Canh", tag:"Đội đỏ", A:["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần"],
+          M:["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng"], F:["Huyền","Hiền Kun","Nhi","Lan"] },
+  blue: { name:"Lòng Lợn", tag:"Đội xanh", A:["Bigbear","San","Tú","Vượng","Tép"],
+          M:["Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"], F:["Hương","Huế","Thu","Len"] }
+};
+
+const M = [
+  {c:"Đôi nam A",  r:"Trung Béo · Cường",  b:"Vượng · Bigbear",  v:1, s:1},
+  {c:"Nam nữ AB",  r:"Hiếu · Lan",         b:"Tú · Huế",         v:1, s:2},
+  {c:"Nam nữ BB",  r:"Dũng · Huyền",       b:"Vũ · Len",         v:1, s:3},
+  {c:"Đôi nam AB", r:"Tuấn Trần · Sang",   b:"San · Dương",      v:1, s:4},
+  {c:"Đôi nam B",  r:"Chiến · Ninh",       b:"Lê Trung · Vũ",    v:2, s:1},
+  {c:"Nam nữ AB",  r:"Cường · Nhi",        b:"Vượng · Thu",      v:2, s:2},
+  {c:"Đôi nam A",  r:"Tuấn Trần · Đức",    b:"Tép · San",        v:2, s:3},
+  {c:"Đôi nam B",  r:"Dũng · Hoàng",       b:"Thiện · Dương",    v:2, s:4},
+  {c:"Đôi nam AB", r:"Hiếu · Chiến",       b:"Bigbear · Thiện",  v:3, s:1},
+  {c:"Đôi nữ",     r:"Hiền Kun · Nhi",     b:"Len · Hương",      v:3, s:2},
+  {c:"Đôi nam B",  r:"Thạnh · Sang",       b:"Biên · Hiền",      v:3, s:3},
+  {c:"Đôi nam AB", r:"Đức · Ninh",         b:"Tú · Lê Trung",    v:3, s:4},
+  {c:"Đôi nam AB", r:"Trung Béo · Thạnh",  b:"Tép · Biên",       v:4, s:1},
+  {c:"Nam nữ BB",  r:"Hoàng · Hiền Kun",   b:"Hiền · Hương",     v:4, s:2},
+  {c:"Đôi nữ",     r:"Lan · Huyền",        b:"Thu · Huế",        v:4, s:3}
+];
+
+const ORDER = ["Đôi nam A","Đôi nam B","Đôi nam AB","Đôi nữ","Nam nữ AB","Nam nữ BB"];
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+function col(k){
+  const t = TEAMS[k];
+  const g = (h,arr) => `<div class="grp"><h4>${h}</h4><ul>${arr.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;
+  return `<div class="rcol ${k}">
+    <div class="rtop"><div class="nm">${t.name}</div><div class="sub">${t.tag} · 15 người</div></div>
+    ${g("Trình A · 5", t.A)}${g("Trình B nam · 6", t.M)}${g("Trình B nữ · 4", t.F)}
+  </div>`;
+}
+document.getElementById("roster").innerHTML = col("red") + col("blue");
+
+const row = m => `<div class="mt">
+  <div class="p r">${esc(m.r)}</div>
+  <div class="mid">V${m.v}<br>S${m.s}</div>
+  <div class="p b">${esc(m.b)}</div>
+</div>`;
+
+function byCat(){
+  return ORDER.map(c=>{
+    const ms = M.filter(m=>m.c===c);
+    return `<div class="blk">
+      <div class="blk-h"><span class="t">${c}</span><span class="c">${ms.length} trận</span></div>
+      ${ms.sort((a,b)=>a.v-b.v||a.s-b.s).map(row).join("")}
+    </div>`;
+  }).join("");
+}
+
+function byRound(){
+  return [1,2,3,4].map(v=>{
+    const ms = M.filter(m=>m.v===v).sort((a,b)=>a.s-b.s);
+    const rows = ms.map(m=>`<div class="mt">
+      <div class="p r">${esc(m.r)}</div>
+      <div class="mid">S${m.s}<br>${m.c.replace("Đôi ","").replace("Nam nữ ","N/N ")}</div>
+      <div class="p b">${esc(m.b)}</div>
+    </div>`).join("");
+    const gap = v===4 ? `<div class="mt empty">Sân 4 — trống</div>` : "";
+    const time = {1:"0 – 20'",2:"25 – 45'",3:"50 – 70'",4:"75 – 95'"}[v];
+    return `<div class="blk">
+      <div class="blk-h"><span class="t">Vòng ${v}</span><span class="c">${time}</span></div>
+      ${rows}${gap}
+    </div>`;
+  }).join("");
+}
+
+const board = document.getElementById("board");
+const tabs = [...document.querySelectorAll(".tab")];
+function render(view){
+  board.innerHTML = view === "cat" ? byCat() : byRound();
+  tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === view)));
+}
+tabs.forEach(t => t.addEventListener("click", () => render(t.dataset.view)));
+render("cat");
+</script>
+</body>
+</html>
