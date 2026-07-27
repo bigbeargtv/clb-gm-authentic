@@ -3,352 +3,518 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tiết Canh vs Lòng Lợn — Giao hữu CLB GM Authentic</title>
+<title>Showmatch giao hữu — CLB GM Authentic × CLB Westpoint</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;800&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#12161C;
-  --ink-soft:#4A525E;
-  --paper:#F6F3EC;
-  --paper-2:#FFFFFF;
-  --line:#DCD6C8;
-  --red:#B93229;
-  --red-soft:#FBEDEB;
-  --blue:#1D5B87;
-  --blue-soft:#EAF1F7;
-  --gold:#9A6B14;
-  --disp:'Oswald',sans-serif;
-  --body:'Be Vietnam Pro',system-ui,sans-serif;
+  --ink:#101317; --soft:#5A6270; --paper:#FFFFFF; --wash:#F3F3F0; --hair:#D5D5CE;
+  --red:#BE2A21; --red-bg:#FAE8E6; --blue:#124F7C; --blue-bg:#E6EEF5;
+  --title:'Anton',sans-serif; --disp:'Archivo',sans-serif;
+  --body:'Be Vietnam Pro',system-ui,sans-serif; --mono:'Roboto Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{
-  font-family:var(--body);
-  background:var(--paper);
-  color:var(--ink);
-  line-height:1.6;
-  padding-bottom:56px;
-}
-.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+body{font-family:var(--body);background:var(--wash);color:var(--ink);line-height:1.55}
+.sheet{max-width:760px;margin:0 auto;background:var(--paper);border-left:1px solid var(--hair);border-right:1px solid var(--hair);min-height:100vh}
+.pad{padding:0 22px}
 
-/* ---------- hero ---------- */
-.hero{padding:44px 0 32px;text-align:center;position:relative}
-.eyebrow{
-  font-family:var(--disp);font-weight:500;font-size:12px;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
+/* ---- masthead ---- */
+.mast{padding:26px 22px 0}
+.mast .lbl{
+  font-family:var(--disp);font-weight:800;font-size:clamp(15px,4.2vw,24px);
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink);margin-bottom:14px;
+  border-bottom:2px solid var(--ink);padding-bottom:10px;
 }
-.matchup{
-  display:flex;align-items:stretch;justify-content:center;
-  margin:22px 0 26px;
+.mast h1{font-family:var(--title);font-weight:400;font-size:clamp(34px,10.5vw,68px);line-height:.94;text-transform:uppercase}
+.mast h1 .a{color:var(--red);display:block}
+.mast h1 .b{color:var(--blue);display:block}
+.mast h1 .x{font-family:var(--disp);font-weight:800;font-size:.4em;color:var(--ink);display:block;padding:6px 0 6px 3px}
+.mast .when{
+  margin-top:18px;border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);
+  padding:12px 0;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;
 }
-.side{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 10px}
-.side .kicker{
-  font-family:var(--disp);font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;margin-bottom:2px;
-}
-.side h1{
-  font-family:var(--disp);font-weight:600;
-  font-size:clamp(30px,9vw,54px);line-height:1;letter-spacing:.01em;
-  text-transform:uppercase;
-}
-.side.red .kicker{color:var(--red)}
-.side.red h1{color:var(--red)}
-.side.blue .kicker{color:var(--blue)}
-.side.blue h1{color:var(--blue)}
-/* the net: signature element */
-.net{
-  width:2px;background:
-    repeating-linear-gradient(to bottom,var(--ink) 0 7px,transparent 7px 14px);
-  opacity:.5;flex:none;position:relative;
-}
-.net::after{
-  content:"VS";position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:var(--paper);padding:5px 3px;
-  font-family:var(--disp);font-size:13px;letter-spacing:.04em;
-  color:var(--ink-soft);
-}
-.facts{
-  display:flex;justify-content:center;flex-wrap:wrap;gap:0;
-  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-}
-.fact{padding:12px 18px;text-align:center;flex:1;min-width:80px}
-.fact + .fact{border-left:1px solid var(--line)}
-.fact b{display:block;font-family:var(--disp);font-size:22px;font-weight:500;line-height:1.1}
-.fact span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.mast .when .d{font-family:var(--disp);font-weight:800;font-size:clamp(17px,4.6vw,25px);letter-spacing:.01em}
+.mast .when .v{font-family:var(--disp);font-weight:600;font-size:clamp(14px,3.6vw,19px);color:var(--soft);text-transform:uppercase;letter-spacing:.05em}
 
-/* ---------- section ---------- */
-section{padding:38px 0 0}
-.shead{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
-.shead h2{
-  font-family:var(--disp);font-weight:600;font-size:20px;
-  letter-spacing:.08em;text-transform:uppercase;
-}
-.shead .rule{flex:1;height:1px;background:var(--line)}
-.shead .note{font-size:12px;color:var(--ink-soft)}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--ink)}
+.facts div{padding:12px 6px;text-align:center}
+.facts div + div{border-left:1px solid var(--hair)}
+.facts b{display:block;font-family:var(--disp);font-weight:800;font-size:23px;line-height:1}
+.facts span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
 
-/* ---------- roster ---------- */
-.roster{
-  display:grid;grid-template-columns:1fr 1fr;
-  background:var(--paper-2);border:1px solid var(--line);border-radius:3px;
-  overflow:hidden;
-}
-.rcol{padding:0}
-.rcol + .rcol{border-left:1px solid var(--line)}
-.rtop{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
-.rcol.red .rtop{background:var(--red-soft)}
-.rcol.blue .rtop{background:var(--blue-soft)}
-.rtop .nm{font-family:var(--disp);font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.05em}
-.rcol.red .nm{color:var(--red)}
-.rcol.blue .nm{color:var(--blue)}
-.rtop .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
-.grp{padding:11px 14px}
-.grp + .grp{border-top:1px dashed var(--line)}
-.grp h4{
-  font-family:var(--disp);font-weight:500;font-size:11px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;
-}
-.grp li{list-style:none;font-size:14.5px;line-height:1.75}
+.sh{display:flex;align-items:baseline;gap:10px;padding:26px 0 12px}
+.sh h2{font-family:var(--disp);font-weight:800;font-size:16px;letter-spacing:.14em;text-transform:uppercase}
+.sh .ln{flex:1;height:2px;background:var(--ink)}
+.sh .n{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--soft);text-transform:uppercase}
 
-/* ---------- tabs ---------- */
-.tabs{display:flex;gap:6px;margin-bottom:16px}
-.tab{
-  font-family:var(--disp);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;
-  padding:8px 14px;border:1px solid var(--line);background:transparent;
-  color:var(--ink-soft);cursor:pointer;border-radius:2px;
-  transition:background .15s,color .15s,border-color .15s;
-}
-.tab:hover{border-color:var(--ink-soft)}
-.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.roster{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink)}
+.tcol + .tcol{border-left:2px solid var(--ink)}
+.thead{padding:11px 13px 10px;color:#fff}
+.tcol.red .thead{background:var(--red)}
+.tcol.blue .thead{background:var(--blue)}
+.thead .club{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.thead .nm{font-family:var(--title);font-size:22px;letter-spacing:.02em;text-transform:uppercase;line-height:1.15}
+.tier{display:flex;align-items:center;justify-content:space-between;padding:6px 13px;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.tcol.red .tier{background:var(--red-bg)}
+.tcol.blue .tier{background:var(--blue-bg)}
+.tier .tn{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.tcol.red .tier .tn{color:var(--red)}
+.tcol.blue .tier .tn{color:var(--blue)}
+.tier .tc{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--soft)}
+.plist{padding:8px 13px 10px;list-style:none}
+.plist li{font-size:15px;font-weight:500;line-height:1.72}
 
-/* ---------- match blocks ---------- */
-.blk{margin-bottom:22px}
-.blk-h{
-  display:flex;align-items:center;justify-content:space-between;
-  padding-bottom:6px;margin-bottom:0;border-bottom:2px solid var(--ink);
-}
-.blk-h .t{font-family:var(--disp);font-weight:500;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
-.blk-h .c{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
+.fbox{border:2px solid var(--ink)}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hair)}
+.frow .fn,.frow .fc{font-family:var(--disp);font-weight:800;font-size:16.5px}
+.frow .fc{white-space:nowrap}
+.frow.tot{background:var(--ink);color:#fff;border-bottom:none}
+.frow.tot .fn,.frow.tot .fc{font-size:17px}
+.hours{display:grid;grid-template-columns:repeat(4,1fr);border:2px solid var(--ink);border-top:none}
+.hours div{padding:10px 5px;text-align:center}
+.hours div + div{border-left:1px solid var(--hair)}
+.hours b{display:block;font-family:var(--disp);font-weight:800;font-size:14px;text-transform:uppercase}
+.hours span{font-family:var(--mono);font-size:11px;color:var(--soft)}
+.rules{list-style:none;margin-top:14px}
+.rules li{font-size:15px;line-height:1.7;padding:7px 0 7px 20px;position:relative;border-bottom:1px solid var(--hair)}
+.rules li:last-child{border-bottom:none}
+.rules li::before{content:"";position:absolute;left:0;top:16px;width:11px;height:2px;background:var(--ink)}
+.rules b{font-weight:700}
 
-.mt{
-  display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;
-  border-bottom:1px solid var(--line);
-  padding:11px 0;position:relative;
-}
-.mt .p{font-size:15px;line-height:1.4}
-.mt .p.r{text-align:right;color:var(--red)}
+.tally{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border:2px solid var(--ink);border-bottom:none;background:var(--wash)}
+.tally .side{padding:9px 13px;font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.tally .side.r{color:var(--red)}
+.tally .side.b{color:var(--blue);text-align:right}
+.tally .num{font-family:var(--title);font-size:27px;line-height:1;padding:0 14px}
+.tally .num .rs{color:var(--red)}
+.tally .num .bs{color:var(--blue)}
+.tally .num .dash{color:var(--soft);padding:0 4px}
+
+.ctl{display:flex;border:2px solid var(--ink);border-bottom:none}
+.tab{flex:1;font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;border:none;background:var(--paper);color:var(--soft);cursor:pointer}
+.tab + .tab{border-left:2px solid var(--ink)}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.adm{display:flex;border:2px solid var(--ink);border-bottom:none;border-top:none}
+.adm button{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;border:none;cursor:pointer;background:var(--paper);color:var(--soft)}
+.adm button + button{border-left:2px solid var(--ink)}
+.adm .go{flex:1;background:var(--red);color:#fff}
+.adm .go:hover{background:#9E211A}
+.adm .undo{flex:1}
+.adm .undo:hover{background:var(--wash)}
+.adm .undo:disabled{color:#B5BAC2;cursor:default}
+.adm .lock{flex:0 0 auto}
+.adm .lock:hover{background:var(--wash)}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
+
+.statusbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:7px 2px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);min-height:20px}
+.dotc{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:0;background:#B5BAC2}
+.dotc.on{background:#1E7A46}
+.dotc.off{background:#C08A1E}
+
+.board{border:2px solid var(--ink)}
+.bh{display:flex;align-items:center;justify-content:space-between;background:var(--wash);padding:6px 12px;border-bottom:1px solid var(--ink);border-top:1px solid var(--ink)}
+.board > .blk:first-child .bh{border-top:none}
+.bh .t{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+.bh .c{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--soft);text-transform:uppercase}
+.mt{display:grid;grid-template-columns:30px 1fr 74px 1fr;align-items:stretch;border-bottom:1px solid var(--hair)}
+.blk:last-child .mt:last-child{border-bottom:none}
+.mt .code{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--soft);display:flex;align-items:center;justify-content:center;border-right:1px solid var(--hair);letter-spacing:.02em}
+.mt .p{font-size:14.5px;font-weight:500;padding:7px 10px;line-height:1.35;display:flex;align-items:center}
+.mt .p.r{text-align:right;color:var(--red);justify-content:flex-end}
 .mt .p.b{text-align:left;color:var(--blue)}
-.mt .mid{
-  text-align:center;font-family:var(--disp);font-size:10.5px;
-  color:var(--ink-soft);letter-spacing:.06em;
-  border-left:1px dashed var(--line);border-right:1px dashed var(--line);
-  align-self:stretch;display:flex;align-items:center;justify-content:center;
-}
-.mt.empty{color:var(--ink-soft);font-size:13.5px;text-align:center;display:block;padding:14px 0;font-style:italic}
+.mt .p.win{font-weight:700}
+.mt .mid{background:var(--wash);border-left:1px solid var(--hair);border-right:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:3px;padding:4px 2px}
+.mid input{width:27px;height:26px;text-align:center;font-family:var(--mono);font-size:13.5px;font-weight:700;border:1px solid var(--hair);background:#fff;color:var(--ink);border-radius:2px;padding:0}
+.mid input:focus{outline:none;border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.mid b{color:var(--soft);font-weight:500;font-size:12px}
+.mt.empty{grid-template-columns:1fr;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--soft);padding:8px;text-transform:uppercase}
 
-/* ---------- format ---------- */
-.fmt{
-  background:var(--ink);color:var(--paper);border-radius:3px;
-  padding:22px 22px 24px;margin-top:8px;
-}
-.fmt h3{font-family:var(--disp);font-weight:500;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#9AA3AF;margin-bottom:14px}
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2A313B;border-radius:2px;overflow:hidden;margin-bottom:22px}
-.cats div{background:var(--ink);padding:12px 8px;text-align:center}
-.cats b{display:block;font-family:var(--disp);font-size:26px;font-weight:500;line-height:1.05;color:#E8B84B}
-.cats span{font-size:10.5px;color:#B3BCC7;letter-spacing:.04em;display:block;margin-top:2px}
-.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2A313B;border-radius:2px;overflow:hidden;margin-bottom:18px}
-.tl div{background:var(--ink);padding:10px 8px;text-align:center}
-.tl b{display:block;font-family:var(--disp);font-size:15px;font-weight:500}
-.tl span{font-size:10.5px;color:#8B95A3;letter-spacing:.06em}
-.rules{list-style:none;font-size:14px;line-height:1.9;color:#D7DCE3}
-.rules li{padding-left:16px;position:relative}
-.rules li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:1px;background:#6C7684}
-.rules b{color:#fff;font-weight:500}
-
-footer{
-  margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
-  font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
-}
+footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 
 @media (max-width:560px){
-  .wrap{padding:0 15px}
+  .pad{padding:0 15px}
+  .mast{padding:20px 15px 0}
   .roster{grid-template-columns:1fr}
-  .rcol + .rcol{border-left:none;border-top:1px solid var(--line)}
-  .mt{grid-template-columns:1fr 30px 1fr}
-  .mt .p{font-size:14px}
-  .tl{grid-template-columns:repeat(2,1fr)}
-  .cats{grid-template-columns:repeat(2,1fr)}
-  .cats b{font-size:23px}
+  .tcol + .tcol{border-left:none;border-top:2px solid var(--ink)}
+  .hours{grid-template-columns:repeat(2,1fr)}
+  .hours div:nth-child(3){border-left:none}
+  .hours div:nth-child(n+3){border-top:1px solid var(--hair)}
+  .mt{grid-template-columns:26px 1fr 70px 1fr}
+  .mt .p{font-size:13.5px;padding:6px 7px}
+  .frow .fn,.frow .fc{font-size:15px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media print{
   body{background:#fff}
-  .tabs{display:none}
-  .pane{display:block!important}
-  .fmt{background:#fff;color:#000;border:1px solid #000}
-  .rules{color:#000}.fmt h3{color:#000}
-  .cats,.tl{background:#000}
-  .cats div,.tl div{background:#fff}
-  .cats b{color:#000}.cats span,.tl span{color:#333}
+  .ctl,.adm,.statusbar{display:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="sheet">
 
-  <header class="hero">
-    <p class="eyebrow">CLB GM Authentic · Giao hữu 30 người</p>
-    <div class="matchup">
-      <div class="side red">
-        <span class="kicker">Đội đỏ</span>
-        <h1>Tiết<br>Canh</h1>
-      </div>
-      <div class="net"></div>
-      <div class="side blue">
-        <span class="kicker">Đội xanh</span>
-        <h1>Lòng<br>Lợn</h1>
-      </div>
-    </div>
-    <div class="facts">
-      <div class="fact"><b>30</b><span>Vận động viên</span></div>
-      <div class="fact"><b>15</b><span>Trận</span></div>
-      <div class="fact"><b>4</b><span>Sân</span></div>
-      <div class="fact"><b>2h</b><span>Thi đấu</span></div>
-    </div>
-  </header>
+  <div class="mast">
+    <p class="lbl">Showmatch giao hữu</p>
+    <h1>
+      <span class="a">CLB GM Authentic</span>
+      <span class="x">&times;</span>
+      <span class="b">CLB Westpoint</span>
+    </h1>
+    <p class="when"><span class="d">18 – 20h · 28.07.2026</span><span class="v">Ocean Pickleball</span></p>
+  </div>
 
-  <section>
-    <div class="shead"><h2>Đội hình</h2><span class="rule"></span><span class="note">15 người mỗi đội</span></div>
+  <div class="facts">
+    <div><b>15</b><span>Trận</span></div>
+    <div><b>6</b><span>Nội dung</span></div>
+    <div><b>4</b><span>Vòng</span></div>
+    <div><b>4</b><span>Sân</span></div>
+  </div>
+
+  <div class="pad">
+
+    <div class="sh"><h2>Đội hình</h2><span class="ln"></span><span class="n">15 người mỗi đội</span></div>
     <div class="roster" id="roster"></div>
-  </section>
 
-  <section>
-    <div class="shead"><h2>Thể thức</h2><span class="rule"></span><span class="note">15 trận · 15 điểm</span></div>
-    <div class="fmt">
-      <h3>Sáu nội dung thi đấu</h3>
-      <div class="cats">
-        <div><b>2</b><span>Đôi nam A</span></div>
-        <div><b>3</b><span>Đôi nam B</span></div>
-        <div><b>4</b><span>Đôi nam AB</span></div>
-        <div><b>2</b><span>Đôi nữ</span></div>
-        <div><b>2</b><span>Nam nữ AB</span></div>
-        <div><b>2</b><span>Nam nữ BB</span></div>
-      </div>
-
-      <h3>Khung giờ</h3>
-      <div class="tl">
-        <div><b>Vòng 1</b><span>0 – 20'</span></div>
-        <div><b>Vòng 2</b><span>25 – 45'</span></div>
-        <div><b>Vòng 3</b><span>50 – 70'</span></div>
-        <div><b>Vòng 4</b><span>75 – 95'</span></div>
-      </div>
-
-      <ul class="rules">
-        <li>Đánh tới <b>11 điểm, cách 2</b>.</li>
-        <li>Mỗi trận thắng được <b>1 điểm</b>. Tổng cả giải <b>15 điểm</b>, đội nào tới 8 điểm trước là vô địch.</li>
-        <li>Mỗi người đúng <b>2 trận</b>, ở <b>2 nội dung khác nhau</b>. Không cặp nào lặp lại.</li>
-      </ul>
+    <div class="sh"><h2>Thể thức</h2><span class="ln"></span><span class="n">Sáu nội dung</span></div>
+    <div class="fbox">
+      <div class="frow"><span class="fn">Đôi nam trình A</span><span class="fc">2 trận</span></div>
+      <div class="frow"><span class="fn">Đôi nam trình B</span><span class="fc">3 trận</span></div>
+      <div class="frow"><span class="fn">Đôi nam A + B</span><span class="fc">4 trận</span></div>
+      <div class="frow"><span class="fn">Đôi nữ</span><span class="fc">2 trận</span></div>
+      <div class="frow"><span class="fn">Đôi nam nữ A + B</span><span class="fc">2 trận</span></div>
+      <div class="frow"><span class="fn">Đôi nam nữ B + B</span><span class="fc">2 trận</span></div>
+      <div class="frow tot"><span class="fn">Tổng cộng</span><span class="fc">15 trận</span></div>
     </div>
-  </section>
+    <div class="hours">
+      <div><b>Vòng 1</b><span>18:00</span></div>
+      <div><b>Vòng 2</b><span>18:30</span></div>
+      <div><b>Vòng 3</b><span>19:00</span></div>
+      <div><b>Vòng 4</b><span>19:30</span></div>
+    </div>
+    <ul class="rules">
+      <li>Đánh tới <b>11 điểm, cách 2, chạm 13 là kết thúc</b>.</li>
+      <li>Mỗi trận thắng được <b>1 điểm</b>. Tổng cả giải <b>15 điểm</b>, đội nào tới 8 điểm trước là vô địch.</li>
+      <li>Mỗi người đánh đúng <b>2 trận</b>, ở <b>2 nội dung khác nhau</b>. Không cặp nào lặp lại.</li>
+    </ul>
 
-  <section>
-    <div class="shead"><h2>Bảng đấu</h2><span class="rule"></span><span class="note">V = vòng · S = sân</span></div>
-    <div class="tabs" role="tablist">
+    <div class="sh"><h2>Bảng đấu</h2><span class="ln"></span><span class="n">V = vòng · S = sân</span></div>
+
+    <div class="tally">
+      <span class="side r">Đội đỏ</span>
+      <span class="num"><b class="rs" id="tr">0</b><span class="dash">–</span><b class="bs" id="tb">0</b></span>
+      <span class="side b">Đội xanh</span>
+    </div>
+
+    <div class="ctl">
       <button class="tab" role="tab" aria-selected="true" data-view="cat">Theo nội dung</button>
       <button class="tab" role="tab" aria-selected="false" data-view="rnd">Theo vòng</button>
     </div>
-    <div id="board"></div>
-  </section>
+    <div class="adm" id="adm"></div>
 
-  <footer>
-    <span>CLB GM Authentic · Hà Nội</span>
-    <span>Bốc thăm ngẫu nhiên, cân bằng theo trình</span>
-  </footer>
+    <div class="board" id="board"></div>
+    <div class="statusbar"><span id="conn"><span class="dotc"></span>Đang kết nối…</span><span id="stamp"></span></div>
+
+    <footer>
+      <span>CLB GM Authentic · Hà Nội</span>
+      <span>Bốc thăm ngẫu nhiên</span>
+    </footer>
+  </div>
 </div>
 
-<script>
+<script type="module">
+/* ═══════════════════════════════════════════════════════════
+   PHẦN CẦN ĐIỀN — dán cấu hình Firebase của CLB vào đây.
+   Lấy ở Firebase Console → Project settings → Your apps → SDK setup.
+   Để trống thì trang vẫn chạy, nhưng tỉ số chỉ lưu trên máy này.
+   ═══════════════════════════════════════════════════════════ */
+const FIREBASE = {
+  apiKey:            "",
+  authDomain:        "",
+  databaseURL:       "",
+  projectId:         "",
+  storageBucket:     "",
+  messagingSenderId: "",
+  appId:             ""
+};
+const ROOM = "showmatch/2026-07-28";   // đổi nếu tổ chức trận khác
+const ADMIN_CODE = "gm2026";           // mã mở nút bốc lại
+/* ═══════════════════════════════════════════════════════════ */
+
 const TEAMS = {
-  red:  { name:"Tiết Canh", tag:"Đội đỏ", A:["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần"],
-          M:["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng"], F:["Huyền","Hiền Kun","Nhi","Lan"] },
-  blue: { name:"Lòng Lợn", tag:"Đội xanh", A:["Bigbear","San","Tú","Vượng","Tép"],
-          M:["Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"], F:["Hương","Huế","Thu","Len"] }
+  red:  { tag:"Đội đỏ",  name:"Tiết Canh",
+          A:["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần"],
+          M:["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng"],
+          F:["Huyền","Hiền Kun","Nhi","Lan"] },
+  blue: { tag:"Đội xanh", name:"Lòng Lợn",
+          A:["Bigbear","San","Tú","Vượng","Tép"],
+          M:["Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"],
+          F:["Hương","Huế","Thu","Len"] }
 };
 
-const M = [
+const ORDER = ["Đôi nam A","Đôi nam B","Đôi nam AB","Đôi nữ","Nam nữ AB","Nam nữ BB"];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+const DEFAULT_M = [
   {c:"Đôi nam A",  r:"Trung Béo · Cường",  b:"Vượng · Bigbear",  v:1, s:1},
   {c:"Nam nữ AB",  r:"Hiếu · Lan",         b:"Tú · Huế",         v:1, s:2},
   {c:"Nam nữ BB",  r:"Dũng · Huyền",       b:"Vũ · Len",         v:1, s:3},
-  {c:"Đôi nam AB", r:"Tuấn Trần · Sang",   b:"San · Dương",      v:1, s:4},
+  {c:"Đôi nam AB", r:"Tuấn Trần · Sang",   b:"San · Lê Trung",   v:1, s:4},
   {c:"Đôi nam B",  r:"Chiến · Ninh",       b:"Lê Trung · Vũ",    v:2, s:1},
   {c:"Nam nữ AB",  r:"Cường · Nhi",        b:"Vượng · Thu",      v:2, s:2},
   {c:"Đôi nam A",  r:"Tuấn Trần · Đức",    b:"Tép · San",        v:2, s:3},
   {c:"Đôi nam B",  r:"Dũng · Hoàng",       b:"Thiện · Dương",    v:2, s:4},
-  {c:"Đôi nam AB", r:"Hiếu · Chiến",       b:"Bigbear · Thiện",  v:3, s:1},
+  {c:"Đôi nam AB", r:"Hiếu · Chiến",       b:"Tú · Thiện",       v:3, s:1},
   {c:"Đôi nữ",     r:"Hiền Kun · Nhi",     b:"Len · Hương",      v:3, s:2},
   {c:"Đôi nam B",  r:"Thạnh · Sang",       b:"Biên · Hiền",      v:3, s:3},
-  {c:"Đôi nam AB", r:"Đức · Ninh",         b:"Tú · Lê Trung",    v:3, s:4},
+  {c:"Đôi nam AB", r:"Đức · Ninh",         b:"Bigbear · Dương",  v:3, s:4},
   {c:"Đôi nam AB", r:"Trung Béo · Thạnh",  b:"Tép · Biên",       v:4, s:1},
   {c:"Nam nữ BB",  r:"Hoàng · Hiền Kun",   b:"Hiền · Hương",     v:4, s:2},
   {c:"Đôi nữ",     r:"Lan · Huyền",        b:"Thu · Huế",        v:4, s:3}
-];
+].map(m=>({...m, rs:"", bs:""}));
 
-const ORDER = ["Đôi nam A","Đôi nam B","Đôi nam AB","Đôi nữ","Nam nữ AB","Nam nữ BB"];
-const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let M = JSON.parse(JSON.stringify(DEFAULT_M));
+let history = [];
+let unlocked = false;
+let dbRef = null, remoteOn = false, muteRemote = false;
+const snap = () => JSON.parse(JSON.stringify(M));
 
+/* ---------- lưu trữ ---------- */
+async function initStore(){
+  const conn = document.getElementById("conn");
+  if(FIREBASE.databaseURL){
+    try{
+      const [{initializeApp},{getDatabase,ref,onValue,set}] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
+      ]);
+      const db = getDatabase(initializeApp(FIREBASE));
+      dbRef = { ref: ref(db, ROOM), set };
+      onValue(dbRef.ref, snapshot=>{
+        const val = snapshot.val();
+        if(val && Array.isArray(val.M) && val.M.length===15){
+          muteRemote = true; M = val.M; render(); muteRemote = false;
+        }
+      });
+      remoteOn = true;
+      conn.innerHTML = `<span class="dotc on"></span>Đã kết nối · mọi người cùng xem một bảng`;
+      return;
+    }catch(e){
+      conn.innerHTML = `<span class="dotc off"></span>Không nối được máy chủ · lưu tạm trên máy này`;
+    }
+  }else{
+    conn.innerHTML = `<span class="dotc off"></span>Chưa cấu hình máy chủ · lưu tạm trên máy này`;
+  }
+  const cached = localStorage.getItem(ROOM);
+  if(cached){
+    try{ const v=JSON.parse(cached); if(Array.isArray(v)&&v.length===15){ M=v; render(); } }catch(e){}
+  }
+}
+
+function save(){
+  if(muteRemote) return;
+  if(remoteOn && dbRef){
+    dbRef.set(dbRef.ref, { M, at: Date.now() }).catch(()=>{
+      document.getElementById("conn").innerHTML = `<span class="dotc off"></span>Mất kết nối · thử lại sau`;
+    });
+  }else{
+    try{ localStorage.setItem(ROOM, JSON.stringify(M)); }catch(e){}
+  }
+}
+
+/* ---------- bốc thăm ---------- */
+function assign(names, cats){
+  for(let t=0;t<4000;t++){
+    let pool=[]; names.forEach(n=>pool.push(n,n));
+    const keys=Object.keys(cats).sort((a,b)=>cats[a]-cats[b]);
+    const out={}; let ok=true;
+    for(const k of keys){
+      out[k]=[];
+      for(let i=0;i<cats[k];i++){
+        const cand=pool.filter(x=>!out[k].includes(x));
+        if(!cand.length){ok=false;break}
+        const c=pick(cand); pool.splice(pool.indexOf(c),1); out[k].push(c);
+      }
+      if(!ok) break;
+    }
+    if(ok) return out;
+  }
+  return null;
+}
+
+function schedule(list){
+  const idx=list.map((_,i)=>i);
+  for(let t=0;t<4000;t++){
+    for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
+    const rounds=[[],[],[],[]], used=[new Set(),new Set(),new Set(),new Set()];
+    let ok=true;
+    for(const i of idx){
+      const ppl=[...list[i].rp,...list[i].bp];
+      let placed=false;
+      for(let r=0;r<4;r++){
+        if(rounds[r].length<4 && !ppl.some(p=>used[r].has(p))){
+          rounds[r].push(i); ppl.forEach(p=>used[r].add(p)); placed=true; break;
+        }
+      }
+      if(!placed){ok=false;break}
+    }
+    if(!ok) continue;
+    const res=[];
+    rounds.forEach((rd,r)=>rd.forEach((i,c)=>{
+      res.push({c:list[i].c, r:list[i].rp.join(" · "), b:list[i].bp.join(" · "), v:r+1, s:c+1, rs:"", bs:""});
+    }));
+    return res;
+  }
+  return null;
+}
+
+function draw(){
+  for(let t=0;t<400;t++){
+    const rA=assign(TEAMS.red.A ,{NamA:4,NamAB:4,NamNuAB:2});
+    const rM=assign(TEAMS.red.M ,{NamB:6,NamAB:4,NamNuBB:2});
+    const rF=assign(TEAMS.red.F ,{Nu:4,NamNuAB:2,NamNuBB:2});
+    const bA=assign(TEAMS.blue.A,{NamA:4,NamAB:4,NamNuAB:2});
+    const bM=assign(TEAMS.blue.M,{NamB:6,NamAB:4,NamNuBB:2});
+    const bF=assign(TEAMS.blue.F,{Nu:4,NamNuAB:2,NamNuBB:2});
+    if(!rA||!rM||!rF||!bA||!bM||!bF) continue;
+    const out=[];
+    for(let i=0;i<2;i++) out.push({c:"Đôi nam A", rp:[rA.NamA[2*i],rA.NamA[2*i+1]], bp:[bA.NamA[2*i],bA.NamA[2*i+1]]});
+    for(let i=0;i<3;i++) out.push({c:"Đôi nam B", rp:[rM.NamB[2*i],rM.NamB[2*i+1]], bp:[bM.NamB[2*i],bM.NamB[2*i+1]]});
+    for(let i=0;i<4;i++) out.push({c:"Đôi nam AB",rp:[rA.NamAB[i],rM.NamAB[i]],     bp:[bA.NamAB[i],bM.NamAB[i]]});
+    for(let i=0;i<2;i++) out.push({c:"Đôi nữ",    rp:[rF.Nu[2*i],rF.Nu[2*i+1]],     bp:[bF.Nu[2*i],bF.Nu[2*i+1]]});
+    for(let i=0;i<2;i++) out.push({c:"Nam nữ AB", rp:[rA.NamNuAB[i],rF.NamNuAB[i]], bp:[bA.NamNuAB[i],bF.NamNuAB[i]]});
+    for(let i=0;i<2;i++) out.push({c:"Nam nữ BB", rp:[rM.NamNuBB[i],rF.NamNuBB[i]], bp:[bM.NamNuBB[i],bF.NamNuBB[i]]});
+    const keys=[];
+    out.forEach(m=>keys.push(m.rp.slice().sort().join("|"),m.bp.slice().sort().join("|")));
+    if(new Set(keys).size!==keys.length) continue;
+    const sch=schedule(out);
+    if(sch) return sch;
+  }
+  return null;
+}
+
+/* ---------- render ---------- */
 function col(k){
-  const t = TEAMS[k];
-  const g = (h,arr) => `<div class="grp"><h4>${h}</h4><ul>${arr.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;
-  return `<div class="rcol ${k}">
-    <div class="rtop"><div class="nm">${t.name}</div><div class="sub">${t.tag} · 15 người</div></div>
-    ${g("Trình A · 5", t.A)}${g("Trình B nam · 6", t.M)}${g("Trình B nữ · 4", t.F)}
+  const t=TEAMS[k];
+  const tier=(label,arr)=>
+    `<div class="tier"><span class="tn">${label}</span><span class="tc">${arr.length} người</span></div>
+     <ul class="plist">${arr.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`;
+  return `<div class="tcol ${k}">
+    <div class="thead"><div class="club">${t.tag}</div><div class="nm">${t.name}</div></div>
+    ${tier("Trình A",t.A)}${tier("Trình B nam",t.M)}${tier("Trình B nữ",t.F)}
   </div>`;
 }
-document.getElementById("roster").innerHTML = col("red") + col("blue");
+document.getElementById("roster").innerHTML = col("red")+col("blue");
 
-const row = m => `<div class="mt">
-  <div class="p r">${esc(m.r)}</div>
-  <div class="mid">V${m.v}<br>S${m.s}</div>
-  <div class="p b">${esc(m.b)}</div>
-</div>`;
+function row(m,i,code){
+  const done = m.rs!=="" && m.bs!=="";
+  const rw = done && +m.rs > +m.bs ? " win":"";
+  const bw = done && +m.bs > +m.rs ? " win":"";
+  return `<div class="mt">
+    <div class="code">${code}</div>
+    <div class="p r${rw}">${esc(m.r)}</div>
+    <div class="mid">
+      <input inputmode="numeric" maxlength="2" data-i="${i}" data-f="rs" value="${esc(m.rs)}" aria-label="Điểm đội đỏ">
+      <b>–</b>
+      <input inputmode="numeric" maxlength="2" data-i="${i}" data-f="bs" value="${esc(m.bs)}" aria-label="Điểm đội xanh">
+    </div>
+    <div class="p b${bw}">${esc(m.b)}</div>
+  </div>`;
+}
 
 function byCat(){
   return ORDER.map(c=>{
-    const ms = M.filter(m=>m.c===c);
-    return `<div class="blk">
-      <div class="blk-h"><span class="t">${c}</span><span class="c">${ms.length} trận</span></div>
-      ${ms.sort((a,b)=>a.v-b.v||a.s-b.s).map(row).join("")}
-    </div>`;
+    const ms=M.map((m,i)=>({m,i})).filter(o=>o.m.c===c).sort((x,y)=>x.m.v-y.m.v||x.m.s-y.m.s);
+    return `<div class="blk"><div class="bh"><span class="t">${c}</span><span class="c">${ms.length} trận</span></div>
+      ${ms.map(o=>row(o.m,o.i,`V${o.m.v}<br>S${o.m.s}`)).join("")}</div>`;
   }).join("");
 }
-
 function byRound(){
+  const time={1:"18:00",2:"18:30",3:"19:00",4:"19:30"};
   return [1,2,3,4].map(v=>{
-    const ms = M.filter(m=>m.v===v).sort((a,b)=>a.s-b.s);
-    const rows = ms.map(m=>`<div class="mt">
-      <div class="p r">${esc(m.r)}</div>
-      <div class="mid">S${m.s}<br>${m.c.replace("Đôi ","").replace("Nam nữ ","N/N ")}</div>
-      <div class="p b">${esc(m.b)}</div>
-    </div>`).join("");
-    const gap = v===4 ? `<div class="mt empty">Sân 4 — trống</div>` : "";
-    const time = {1:"0 – 20'",2:"25 – 45'",3:"50 – 70'",4:"75 – 95'"}[v];
-    return `<div class="blk">
-      <div class="blk-h"><span class="t">Vòng ${v}</span><span class="c">${time}</span></div>
-      ${rows}${gap}
-    </div>`;
+    const ms=M.map((m,i)=>({m,i})).filter(o=>o.m.v===v).sort((x,y)=>x.m.s-y.m.s);
+    const gap=ms.length<4?`<div class="mt empty">Sân ${ms.length+1} — trống</div>`:"";
+    return `<div class="blk"><div class="bh"><span class="t">Vòng ${v}</span><span class="c">${time[v]}</span></div>
+      ${ms.map(o=>row(o.m,o.i,`S${o.m.s}`)).join("")}${gap}</div>`;
   }).join("");
 }
 
-const board = document.getElementById("board");
-const tabs = [...document.querySelectorAll(".tab")];
-function render(view){
-  board.innerHTML = view === "cat" ? byCat() : byRound();
-  tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === view)));
+const board=document.getElementById("board");
+const stamp=document.getElementById("stamp");
+const adm=document.getElementById("adm");
+const tabs=[...document.querySelectorAll(".tab")];
+let view="cat";
+
+function tally(){
+  let r=0,b=0;
+  M.forEach(m=>{
+    if(m.rs===""||m.bs==="") return;
+    if(+m.rs>+m.bs) r++; else if(+m.bs>+m.rs) b++;
+  });
+  document.getElementById("tr").textContent=r;
+  document.getElementById("tb").textContent=b;
 }
-tabs.forEach(t => t.addEventListener("click", () => render(t.dataset.view)));
-render("cat");
+
+function controls(){
+  adm.innerHTML = unlocked
+    ? `<button class="go" id="shuf">Bốc lại</button>
+       <button class="undo" id="undo" ${history.length?"":"disabled"}>Hoàn tác${history.length?` (${history.length})`:""}</button>
+       <button class="lock" id="lock">Khoá</button>`
+    : `<button class="lock" id="unlock" style="flex:1">Mở khoá bốc thăm</button>`;
+  const $=id=>document.getElementById(id);
+  if(unlocked){
+    $("shuf").onclick=()=>{
+      const res=draw();
+      if(!res){stamp.textContent="Bốc không ra, bấm lại lần nữa";return}
+      history.push(snap()); if(history.length>20) history.shift();
+      M=res;
+      const d=new Date(),p=n=>String(n).padStart(2,"0");
+      stamp.textContent=`Đã bốc lại lúc ${p(d.getHours())}:${p(d.getMinutes())}`;
+      render(); save();
+    };
+    $("undo").onclick=()=>{
+      if(!history.length) return;
+      M=history.pop();
+      stamp.textContent="Đã quay về lượt bốc trước";
+      render(); save();
+    };
+    $("lock").onclick=()=>{unlocked=false;render()};
+  }else{
+    $("unlock").onclick=()=>{
+      const v=prompt("Nhập mã quản trị để bốc lại:");
+      if(v===null) return;
+      if(v.trim()===ADMIN_CODE){unlocked=true;render()}
+      else{stamp.textContent="Mã không đúng"}
+    };
+  }
+}
+
+function render(){
+  const act=document.activeElement;
+  const keep = act && act.tagName==="INPUT" ? {i:act.dataset.i,f:act.dataset.f} : null;
+  board.innerHTML = view==="cat" ? byCat() : byRound();
+  tabs.forEach(t=>t.setAttribute("aria-selected", String(t.dataset.view===view)));
+  controls(); tally();
+  board.querySelectorAll("input").forEach(inp=>{
+    inp.addEventListener("input",e=>{
+      const el=e.target, val=el.value.replace(/\D/g,"").slice(0,2);
+      if(el.value!==val) el.value=val;
+      M[+el.dataset.i][el.dataset.f]=val;
+      tally(); save();
+    });
+    inp.addEventListener("blur",()=>render());
+  });
+  if(keep){
+    const back=board.querySelector(`input[data-i="${keep.i}"][data-f="${keep.f}"]`);
+    if(back){ back.focus(); back.setSelectionRange(back.value.length,back.value.length); }
+  }
+}
+
+tabs.forEach(t=>t.addEventListener("click",()=>{view=t.dataset.view;render()}));
+render();
+initStore();
 </script>
 </body>
 </html>
