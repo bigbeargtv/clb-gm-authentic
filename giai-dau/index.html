@@ -96,12 +96,14 @@ body{font-family:var(--body);background:var(--wash);color:var(--ink);line-height
 .tab{flex:1;font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;border:none;background:var(--paper);color:var(--soft);cursor:pointer}
 .tab + .tab{border-left:2px solid var(--ink)}
 .tab[aria-selected="true"]{background:var(--ink);color:#fff}
-.adm{display:flex;border:2px solid var(--ink);border-bottom:none;border-top:none}
-.adm button{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;border:none;cursor:pointer;background:var(--paper);color:var(--soft)}
+.adm{display:flex;flex-wrap:wrap;border:2px solid var(--ink);border-bottom:none;border-top:none}
+.adm button{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:8px 9px;border:none;cursor:pointer;background:var(--paper);color:var(--soft)}
 .adm button + button{border-left:2px solid var(--ink)}
-.adm .go{flex:1;background:var(--red);color:#fff}
+.adm .go{flex:1 1 auto;background:var(--red);color:#fff;white-space:nowrap}
 .adm .go:hover{background:#9E211A}
-.adm .undo{flex:1}
+.adm .go.alt{background:var(--blue)}
+.adm .go.alt:hover{background:#0D3D61}
+.adm .undo{flex:1 1 auto;white-space:nowrap}
 .adm .undo:hover{background:var(--wash)}
 .adm .undo:disabled{color:#B5BAC2;cursor:default}
 .adm .lock{flex:0 0 auto}
@@ -241,7 +243,13 @@ const ROOM = "showmatch/2026-07-28";   // đổi nếu tổ chức trận khác
 const ADMIN_CODE = "gm2026";           // mã mở nút bốc lại
 /* ═══════════════════════════════════════════════════════════ */
 
-const TEAMS = {
+const POOL = {
+  A: ["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần","Bigbear","San","Tú","Vượng","Tép"],
+  M: ["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng","Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"],
+  F: ["Huyền","Hiền Kun","Nhi","Lan","Hương","Huế","Thu","Len"]
+};
+
+let TEAMS = {
   red:  { tag:"Đội đỏ",  name:"Tiết Canh",
           A:["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần"],
           M:["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng"],
@@ -278,7 +286,20 @@ let M = JSON.parse(JSON.stringify(DEFAULT_M));
 let history = [];
 let unlocked = false;
 let dbRef = null, remoteOn = false, muteRemote = false;
-const snap = () => JSON.parse(JSON.stringify(M));
+const snap = () => JSON.parse(JSON.stringify({teams:TEAMS, M}));
+const restore = st => { TEAMS = st.teams; M = st.M; };
+
+function shuffle(a){
+  const x=a.slice();
+  for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}
+  return x;
+}
+function drawTeams(){
+  const a=shuffle(POOL.A), m=shuffle(POOL.M), f=shuffle(POOL.F);
+  TEAMS.red.A=a.slice(0,5);  TEAMS.blue.A=a.slice(5);
+  TEAMS.red.M=m.slice(0,6);  TEAMS.blue.M=m.slice(6);
+  TEAMS.red.F=f.slice(0,4);  TEAMS.blue.F=f.slice(4);
+}
 
 /* ---------- lưu trữ ---------- */
 async function initStore(){
@@ -294,7 +315,10 @@ async function initStore(){
       onValue(dbRef.ref, snapshot=>{
         const val = snapshot.val();
         if(val && Array.isArray(val.M) && val.M.length===15){
-          muteRemote = true; M = val.M; render(); muteRemote = false;
+          muteRemote = true;
+          if(val.teams) TEAMS = val.teams;
+          M = val.M;
+          render(); muteRemote = false;
         }
       });
       remoteOn = true;
@@ -308,18 +332,25 @@ async function initStore(){
   }
   const cached = localStorage.getItem(ROOM);
   if(cached){
-    try{ const v=JSON.parse(cached); if(Array.isArray(v)&&v.length===15){ M=v; render(); } }catch(e){}
+    try{
+      const v=JSON.parse(cached);
+      if(v && Array.isArray(v.M) && v.M.length===15){
+        if(v.teams) TEAMS=v.teams;
+        M=v.M; render();
+      }
+    }catch(e){}
   }
 }
 
 function save(){
   if(muteRemote) return;
+  const payload = { teams: TEAMS, M, at: Date.now() };
   if(remoteOn && dbRef){
-    dbRef.set(dbRef.ref, { M, at: Date.now() }).catch(()=>{
+    dbRef.set(dbRef.ref, payload).catch(()=>{
       document.getElementById("conn").innerHTML = `<span class="dotc off"></span>Mất kết nối · thử lại sau`;
     });
   }else{
-    try{ localStorage.setItem(ROOM, JSON.stringify(M)); }catch(e){}
+    try{ localStorage.setItem(ROOM, JSON.stringify(payload)); }catch(e){}
   }
 }
 
@@ -405,7 +436,9 @@ function col(k){
     ${tier("Trình A",t.A)}${tier("Trình B nam",t.M)}${tier("Trình B nữ",t.F)}
   </div>`;
 }
-document.getElementById("roster").innerHTML = col("red")+col("blue");
+function renderRoster(){
+  document.getElementById("roster").innerHTML = col("red")+col("blue");
+}
 
 function row(m,i,code){
   const done = m.rs!=="" && m.bs!=="";
@@ -458,24 +491,35 @@ function tally(){
 
 function controls(){
   adm.innerHTML = unlocked
-    ? `<button class="go" id="shuf">Bốc lại</button>
+    ? `<button class="go" id="shufT">Bốc đội hình</button>
+       <button class="go alt" id="shufM">Bốc bảng đấu</button>
        <button class="undo" id="undo" ${history.length?"":"disabled"}>Hoàn tác${history.length?` (${history.length})`:""}</button>
        <button class="lock" id="lock">Khoá</button>`
     : `<button class="lock" id="unlock" style="flex:1">Mở khoá bốc thăm</button>`;
   const $=id=>document.getElementById(id);
+  const now=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${p(d.getHours())}:${p(d.getMinutes())}`};
   if(unlocked){
-    $("shuf").onclick=()=>{
+    $("shufT").onclick=()=>{
+      const before=snap();
+      drawTeams();
+      const res=draw();
+      if(!res){ restore(before); stamp.textContent="Bốc không ra, bấm lại lần nữa"; return; }
+      history.push(before); if(history.length>20) history.shift();
+      M=res;
+      stamp.textContent=`Đã bốc lại đội hình lúc ${now()}`;
+      render(); save();
+    };
+    $("shufM").onclick=()=>{
       const res=draw();
       if(!res){stamp.textContent="Bốc không ra, bấm lại lần nữa";return}
       history.push(snap()); if(history.length>20) history.shift();
       M=res;
-      const d=new Date(),p=n=>String(n).padStart(2,"0");
-      stamp.textContent=`Đã bốc lại lúc ${p(d.getHours())}:${p(d.getMinutes())}`;
+      stamp.textContent=`Đã bốc lại bảng đấu lúc ${now()}`;
       render(); save();
     };
     $("undo").onclick=()=>{
       if(!history.length) return;
-      M=history.pop();
+      restore(history.pop());
       stamp.textContent="Đã quay về lượt bốc trước";
       render(); save();
     };
@@ -494,6 +538,7 @@ function render(){
   const act=document.activeElement;
   const keep = act && act.tagName==="INPUT" ? {i:act.dataset.i,f:act.dataset.f} : null;
   board.innerHTML = view==="cat" ? byCat() : byRound();
+  renderRoster();
   tabs.forEach(t=>t.setAttribute("aria-selected", String(t.dataset.view===view)));
   controls(); tally();
   board.querySelectorAll("input").forEach(inp=>{
