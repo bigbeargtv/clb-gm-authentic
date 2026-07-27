@@ -225,18 +225,17 @@ footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-
 
 <script type="module">
 /* ═══════════════════════════════════════════════════════════
-   PHẦN CẦN ĐIỀN — dán cấu hình Firebase của CLB vào đây.
-   Lấy ở Firebase Console → Project settings → Your apps → SDK setup.
-   Để trống thì trang vẫn chạy, nhưng tỉ số chỉ lưu trên máy này.
+   Cấu hình Firebase của project clb-gm-authentic — đã điền sẵn.
+   Cần thêm quyền đọc ghi cho node "showmatch" trong Rules.
    ═══════════════════════════════════════════════════════════ */
 const FIREBASE = {
-  apiKey:            "",
-  authDomain:        "",
-  databaseURL:       "",
-  projectId:         "",
-  storageBucket:     "",
-  messagingSenderId: "",
-  appId:             ""
+  apiKey:            "AIzaSyCv-21K9XwhCuKx2qGqhXJbAzGZKSZC_9k",
+  authDomain:        "clb-gm-authentic.firebaseapp.com",
+  databaseURL:       "https://clb-gm-authentic-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "clb-gm-authentic",
+  storageBucket:     "clb-gm-authentic.firebasestorage.app",
+  messagingSenderId: "1038922504595",
+  appId:             "1:1038922504595:web:1ad47a64a4573e44c8b066"
 };
 const ROOM = "showmatch/2026-07-28";   // đổi nếu tổ chức trận khác
 const ADMIN_CODE = "gm2026";           // mã mở nút bốc lại
