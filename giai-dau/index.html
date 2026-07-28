@@ -63,7 +63,7 @@ body{font-family:var(--body);background:var(--wash);color:var(--ink);line-height
 .tcol.red .tier .tn{color:var(--red)}
 .tcol.blue .tier .tn{color:var(--blue)}
 .tier .tc{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--soft)}
-.plist{padding:8px 13px 10px;list-style:none}
+.plist{padding:8px 13px 10px;list-style:none;min-height:calc(var(--rows,1) * 25.8px + 18px)}
 .plist li{font-size:15px;font-weight:500;line-height:1.72}
 
 .fbox{border:2px solid var(--ink)}
@@ -96,7 +96,7 @@ body{font-family:var(--body);background:var(--wash);color:var(--ink);line-height
 .tab{flex:1;font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;border:none;background:var(--paper);color:var(--soft);cursor:pointer}
 .tab + .tab{border-left:2px solid var(--ink)}
 .tab[aria-selected="true"]{background:var(--ink);color:#fff}
-.adm{display:flex;flex-wrap:wrap;border:2px solid var(--ink);border-bottom:none;border-top:none}
+.adm{display:flex;flex-wrap:wrap;border:2px solid var(--ink);margin-top:24px}
 .adm button{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:8px 9px;border:none;cursor:pointer;background:var(--paper);color:var(--soft)}
 .adm button + button{border-left:2px solid var(--ink)}
 .adm .go{flex:1 1 auto;background:var(--red);color:#fff;white-space:nowrap}
@@ -110,7 +110,7 @@ body{font-family:var(--body);background:var(--wash);color:var(--ink);line-height
 .adm .lock:hover{background:var(--wash)}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
 
-.statusbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:7px 2px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);min-height:20px}
+.statusbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:6px 2px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);min-height:20px}
 .dotc{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:0;background:#B5BAC2}
 .dotc.on{background:#1E7A46}
 .dotc.off{background:#C08A1E}
@@ -133,13 +133,52 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
 .mid b{color:var(--soft);font-weight:500;font-size:12px}
 .mt.empty{grid-template-columns:1fr;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--soft);padding:8px;text-transform:uppercase}
 
+
+
+/* ---- danh sách vận động viên theo trình ---- */
+.qhead{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);padding:10px 22px 6px;background:var(--wash)}
+.quick{border-bottom:2px solid var(--ink)}
+.quick .qr{display:flex;gap:10px;align-items:baseline;padding:9px 22px;background:var(--wash)}
+.quick .qr + .qr{border-top:1px solid var(--hair)}
+.quick .qn{font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;flex:0 0 auto;color:var(--ink);min-width:86px}
+.quick .ql{font-size:13px;line-height:1.62;font-weight:500}
+.quick .ql i{color:var(--soft);font-style:normal;padding:0 3px}
+.quick .qc{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--soft);flex:0 0 auto;margin-left:auto;white-space:nowrap}
+.blankname{color:#C6C9CE;letter-spacing:.14em}
+
+/* ---- hiệu ứng bốc thăm ---- */
+.roster{position:relative;overflow:hidden}
+.roster.drawing::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:linear-gradient(100deg,transparent 42%,rgba(16,19,23,.07) 50%,transparent 58%);
+  background-size:240% 100%;animation:sweep 1.9s linear infinite;
+}
+@keyframes sweep{from{background-position:130% 0}to{background-position:-130% 0}}
+.plist li{transition:color .18s}
+.plist li.spin{color:#BFC3C9}
+@keyframes lockR{0%{color:#BFC3C9;transform:scale(1.18);opacity:.3}28%{color:var(--red)}100%{color:var(--ink);transform:scale(1);opacity:1}}
+@keyframes lockB{0%{color:#BFC3C9;transform:scale(1.18);opacity:.3}28%{color:var(--blue)}100%{color:var(--ink);transform:scale(1);opacity:1}}
+.tcol.red  .plist li.lock{animation:lockR .62s cubic-bezier(.16,.9,.22,1) both}
+.tcol.blue .plist li.lock{animation:lockB .62s cubic-bezier(.16,.9,.22,1) both}
+.adm.busy button{opacity:.45;pointer-events:none}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.mt.reveal{animation:rise .42s ease both}
+@media (prefers-reduced-motion:reduce){
+  .roster.drawing::after,.plist li.lock,.mt.reveal{animation:none}
+}
+
 footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 
 @media (max-width:560px){
   .pad{padding:0 15px}
+  .qhead{padding:9px 15px 5px}
+  .quick .qr{padding:8px 15px;flex-wrap:wrap;gap:4px 8px}
+  .quick .qn{min-width:0}
+  .quick .qc{margin-left:0}
   .mast{padding:20px 15px 0}
   .roster{grid-template-columns:1fr}
   .tcol + .tcol{border-left:none;border-top:2px solid var(--ink)}
+  .plist{min-height:0}
   .hours{grid-template-columns:repeat(2,1fr)}
   .hours div:nth-child(3){border-left:none}
   .hours div:nth-child(n+3){border-top:1px solid var(--hair)}
@@ -174,9 +213,15 @@ footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-
     <div><b>4</b><span>Sân</span></div>
   </div>
 
+  <div class="qhead">Danh sách vận động viên</div>
+  <div class="quick" id="quick"></div>
+
   <div class="pad">
 
-    <div class="sh"><h2>Đội hình</h2><span class="ln"></span><span class="n">15 người mỗi đội</span></div>
+    <div class="adm" id="adm"></div>
+    <div class="statusbar"><span id="conn"><span class="dotc"></span>Đang kết nối…</span><span id="stamp"></span></div>
+
+    <div class="sh"><h2>Đội hình</h2><span class="ln"></span><span class="n" id="sqn">29 vận động viên</span></div>
     <div class="roster" id="roster"></div>
 
     <div class="sh"><h2>Thể thức</h2><span class="ln"></span><span class="n">Sáu nội dung</span></div>
@@ -198,7 +243,7 @@ footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-
     <ul class="rules">
       <li>Đánh tới <b>11 điểm, cách 2, chạm 13 là kết thúc</b>.</li>
       <li>Mỗi trận thắng được <b>1 điểm</b>. Tổng cả giải <b>15 điểm</b>, đội nào tới 8 điểm trước là vô địch.</li>
-      <li>Mỗi người đánh đúng <b>2 trận</b>, ở <b>2 nội dung khác nhau</b>. Không cặp nào lặp lại.</li>
+      <li>Mỗi người đánh <b>2 trận</b> ở hai nội dung khác nhau. Đội thiếu trình A sẽ có <b>2 người đánh 3 trận</b>. Không cặp nào lặp lại.</li>
     </ul>
 
     <div class="sh"><h2>Bảng đấu</h2><span class="ln"></span><span class="n">V = vòng · S = sân</span></div>
@@ -213,10 +258,7 @@ footer{margin-top:26px;border-top:2px solid var(--ink);padding:12px 0 30px;font-
       <button class="tab" role="tab" aria-selected="true" data-view="cat">Theo nội dung</button>
       <button class="tab" role="tab" aria-selected="false" data-view="rnd">Theo vòng</button>
     </div>
-    <div class="adm" id="adm"></div>
-
     <div class="board" id="board"></div>
-    <div class="statusbar"><span id="conn"><span class="dotc"></span>Đang kết nối…</span><span id="stamp"></span></div>
 
     <footer>
       <span>CLB GM Authentic · Hà Nội</span>
@@ -241,23 +283,40 @@ const FIREBASE = {
 };
 const ROOM = "showmatch/2026-07-28";   // đổi nếu tổ chức trận khác
 const ADMIN_CODE = "gm2026";           // mã mở nút bốc lại
+
+/* Tốc độ hiệu ứng bốc thăm — số càng lớn càng chậm (đơn vị mili giây) */
+const SPEED = {
+  quayDau:   2500,   // thời gian tên chạy loạn trước khi chốt người đầu tiên
+  moiNguoi:  3000,   // khoảng cách giữa hai người được chốt
+  sauCung:   4000,   // riêng mấy người cuối, chốt chậm hơn cho hồi hộp
+  soNguoiCuoi:  4,   // số người cuối được kéo chậm
+  nhipQuay:    35    // tên đổi nhanh hay chậm trong lúc quay
+};
 /* ═══════════════════════════════════════════════════════════ */
 
 const POOL = {
-  A: ["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần","Bigbear","San","Tú","Vượng","Tép"],
+  A: ["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần","Bigbear","Tú","Vượng","Tép"],
   M: ["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng","Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"],
   F: ["Huyền","Hiền Kun","Nhi","Lan","Hương","Huế","Thu","Len"]
 };
 
+/* Những nhóm buộc phải chia đều hai đội khi bốc đội hình */
+const BALANCE = {
+  A: [["Bigbear","Tép","Đức","Tú","Trung Béo","Vượng"]],   // 3 – 3
+  M: [["Biên","Dũng","Sang","Vũ"],                          // 2 – 2
+      ["Ninh","Dương"]],                                    // 1 – 1
+  F: [["Len","Thu","Hiền Kun","Huyền"]]                     // 2 – 2
+};
+
 let TEAMS = {
   red:  { tag:"Đội đỏ",  name:"Tiết Canh",
-          A:["Hiếu","Cường","Trung Béo","Đức","Tuấn Trần"],
-          M:["Sang","Dũng","Chiến","Ninh","Thạnh","Hoàng"],
-          F:["Huyền","Hiền Kun","Nhi","Lan"] },
+          A:["Trung Béo","Tuấn Trần","Vượng","Bigbear"],
+          M:["Biên","Lê Trung","Chiến","Hoàng","Dương","Vũ"],
+          F:["Lan","Hương","Huyền","Thu"] },
   blue: { tag:"Đội xanh", name:"Lòng Lợn",
-          A:["Bigbear","San","Tú","Vượng","Tép"],
-          M:["Biên","Vũ","Lê Trung","Dương","Hiền","Thiện"],
-          F:["Hương","Huế","Thu","Len"] }
+          A:["Tép","Hiếu","Tú","Cường","Đức"],
+          M:["Thiện","Ninh","Dũng","Sang","Thạnh","Hiền"],
+          F:["Hiền Kun","Huế","Len","Nhi"] }
 };
 
 const ORDER = ["Đôi nam A","Đôi nam B","Đôi nam AB","Đôi nữ","Nam nữ AB","Nam nữ BB"];
@@ -265,27 +324,29 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const pick = a => a[Math.floor(Math.random()*a.length)];
 
 const DEFAULT_M = [
-  {c:"Đôi nam A",  r:"Trung Béo · Cường",  b:"Vượng · Bigbear",  v:1, s:1},
-  {c:"Nam nữ AB",  r:"Hiếu · Lan",         b:"Tú · Huế",         v:1, s:2},
-  {c:"Nam nữ BB",  r:"Dũng · Huyền",       b:"Vũ · Len",         v:1, s:3},
-  {c:"Đôi nam AB", r:"Tuấn Trần · Sang",   b:"San · Lê Trung",   v:1, s:4},
-  {c:"Đôi nam B",  r:"Chiến · Ninh",       b:"Lê Trung · Vũ",    v:2, s:1},
-  {c:"Nam nữ AB",  r:"Cường · Nhi",        b:"Vượng · Thu",      v:2, s:2},
-  {c:"Đôi nam A",  r:"Tuấn Trần · Đức",    b:"Tép · San",        v:2, s:3},
-  {c:"Đôi nam B",  r:"Dũng · Hoàng",       b:"Thiện · Dương",    v:2, s:4},
-  {c:"Đôi nam AB", r:"Hiếu · Chiến",       b:"Tú · Thiện",       v:3, s:1},
-  {c:"Đôi nữ",     r:"Hiền Kun · Nhi",     b:"Len · Hương",      v:3, s:2},
-  {c:"Đôi nam B",  r:"Thạnh · Sang",       b:"Biên · Hiền",      v:3, s:3},
-  {c:"Đôi nam AB", r:"Đức · Ninh",         b:"Bigbear · Dương",  v:3, s:4},
-  {c:"Đôi nam AB", r:"Trung Béo · Thạnh",  b:"Tép · Biên",       v:4, s:1},
-  {c:"Nam nữ BB",  r:"Hoàng · Hiền Kun",   b:"Hiền · Hương",     v:4, s:2},
-  {c:"Đôi nữ",     r:"Lan · Huyền",        b:"Thu · Huế",        v:4, s:3}
+  {c:"Đôi nam A",   r:"Bigbear · Tuấn Trần",   b:"Tép · Tú",              v:1, s:1},
+  {c:"Nam nữ AB",   r:"Vượng · Thu",           b:"Đức · Len",             v:1, s:2},
+  {c:"Đôi nam B",   r:"Lê Trung · Biên",       b:"Thiện · Ninh",          v:1, s:3},
+  {c:"Đôi nữ",      r:"Huyền · Hương",         b:"Hiền Kun · Huế",        v:1, s:4},
+  {c:"Nam nữ BB",   r:"Biên · Hương",          b:"Ninh · Huế",            v:2, s:1},
+  {c:"Đôi nam AB",  r:"Tuấn Trần · Hoàng",     b:"Tép · Sang",            v:2, s:2},
+  {c:"Nam nữ AB",   r:"Bigbear · Lan",         b:"Cường · Hiền Kun",      v:2, s:3},
+  {c:"Đôi nam AB",  r:"Vượng · Chiến",         b:"Hiếu · Hiền",           v:2, s:4},
+  {c:"Đôi nam B",   r:"Dương · Vũ",            b:"Thạnh · Sang",          v:3, s:1},
+  {c:"Đôi nữ",      r:"Lan · Thu",             b:"Nhi · Len",             v:3, s:2},
+  {c:"Đôi nam A",   r:"Vượng · Trung Béo",     b:"Hiếu · Cường",          v:3, s:3},
+  {c:"Đôi nam B",   r:"Chiến · Hoàng",         b:"Dũng · Hiền",           v:3, s:4},
+  {c:"Đôi nam AB",  r:"Bigbear · Dương",       b:"Đức · Thiện",           v:4, s:1},
+  {c:"Đôi nam AB",  r:"Trung Béo · Lê Trung",  b:"Tú · Dũng",             v:4, s:2},
+  {c:"Nam nữ BB",   r:"Vũ · Huyền",            b:"Thạnh · Nhi",           v:4, s:3}
 ].map(m=>({...m, rs:"", bs:""}));
 
 let M = JSON.parse(JSON.stringify(DEFAULT_M));
 let history = [];
 let unlocked = false;
 let dbRef = null, remoteOn = false, muteRemote = false;
+let blanked = false;   // true = giấu hết tên, dùng khi lên sóng trước lúc bốc
+const HIDDEN = "———";
 const snap = () => JSON.parse(JSON.stringify({teams:TEAMS, M}));
 const restore = st => { TEAMS = st.teams; M = st.M; };
 
@@ -294,11 +355,31 @@ function shuffle(a){
   for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}
   return x;
 }
+// Chia một nhóm trình thành hai đội, tôn trọng các cặp phải tách đều
+function splitPool(pool, groups, n1){
+  const t1=[], t2=[], used=new Set();
+  (groups||[]).forEach(g=>{
+    const gs=shuffle(g.filter(x=>pool.includes(x)));
+    const half=Math.floor(gs.length/2);
+    gs.slice(0,half).forEach(x=>{t1.push(x);used.add(x)});
+    gs.slice(half).forEach(x=>{t2.push(x);used.add(x)});
+  });
+  const rest=shuffle(pool.filter(x=>!used.has(x)));
+  let i=0;
+  while(t1.length<n1 && i<rest.length) t1.push(rest[i++]);
+  while(i<rest.length) t2.push(rest[i++]);
+  return [shuffle(t1), shuffle(t2)];
+}
+
 function drawTeams(){
-  const a=shuffle(POOL.A), m=shuffle(POOL.M), f=shuffle(POOL.F);
-  TEAMS.red.A=a.slice(0,5);  TEAMS.blue.A=a.slice(5);
-  TEAMS.red.M=m.slice(0,6);  TEAMS.blue.M=m.slice(6);
-  TEAMS.red.F=f.slice(0,4);  TEAMS.blue.F=f.slice(4);
+  const big=Math.ceil(POOL.A.length/2), small=POOL.A.length-big;
+  const redBig=Math.random()<0.5;
+  const [ra,ba]=splitPool(POOL.A, BALANCE.A, redBig?big:small);
+  const [rm,bm]=splitPool(POOL.M, BALANCE.M, 6);
+  const [rf,bf]=splitPool(POOL.F, BALANCE.F, 4);
+  TEAMS.red.A=ra;  TEAMS.blue.A=ba;
+  TEAMS.red.M=rm;  TEAMS.blue.M=bm;
+  TEAMS.red.F=rf;  TEAMS.blue.F=bf;
 }
 
 /* ---------- lưu trữ ---------- */
@@ -317,6 +398,7 @@ async function initStore(){
         if(val && Array.isArray(val.M) && val.M.length===15){
           muteRemote = true;
           if(val.teams) TEAMS = val.teams;
+          blanked = !!val.blanked;
           M = val.M;
           render(); muteRemote = false;
         }
@@ -336,6 +418,7 @@ async function initStore(){
       const v=JSON.parse(cached);
       if(v && Array.isArray(v.M) && v.M.length===15){
         if(v.teams) TEAMS=v.teams;
+        blanked = !!v.blanked;
         M=v.M; render();
       }
     }catch(e){}
@@ -344,7 +427,7 @@ async function initStore(){
 
 function save(){
   if(muteRemote) return;
-  const payload = { teams: TEAMS, M, at: Date.now() };
+  const payload = { teams: TEAMS, M, blanked, at: Date.now() };
   if(remoteOn && dbRef){
     dbRef.set(dbRef.ref, payload).catch(()=>{
       document.getElementById("conn").innerHTML = `<span class="dotc off"></span>Mất kết nối · thử lại sau`;
@@ -356,8 +439,13 @@ function save(){
 
 /* ---------- bốc thăm ---------- */
 function assign(names, cats){
-  for(let t=0;t<4000;t++){
+  const total = Object.values(cats).reduce((a,b)=>a+b,0);
+  for(let t=0;t<6000;t++){
     let pool=[]; names.forEach(n=>pool.push(n,n));
+    // nhóm thiếu người thì bốc ngẫu nhiên ai gánh thêm lượt thứ ba
+    const extra = shuffle(names); let ei=0;
+    while(pool.length<total && ei<extra.length) pool.push(extra[ei++]);
+    if(pool.length!==total) continue;
     const keys=Object.keys(cats).sort((a,b)=>cats[a]-cats[b]);
     const out={}; let ok=true;
     for(const k of keys){
@@ -426,19 +514,41 @@ function draw(){
 }
 
 /* ---------- render ---------- */
-function col(k){
+function col(k, rows){
   const t=TEAMS[k];
-  const tier=(label,arr)=>
+  const tier=(label,arr,n)=>
     `<div class="tier"><span class="tn">${label}</span><span class="tc">${arr.length} người</span></div>
-     <ul class="plist">${arr.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`;
+     <ul class="plist" style="--rows:${n}">${arr.map(x=>blanked?`<li class="blankname">${HIDDEN}</li>`:`<li>${esc(x)}</li>`).join("")}</ul>`;
   return `<div class="tcol ${k}">
-    <div class="thead"><div class="club">${t.tag}</div><div class="nm">${t.name}</div></div>
-    ${tier("Trình A",t.A)}${tier("Trình B nam",t.M)}${tier("Trình B nữ",t.F)}
+    <div class="thead"><div class="club">${t.tag} · ${t.A.length+t.M.length+t.F.length} người</div><div class="nm">${t.name}</div></div>
+    ${tier("Trình A",t.A,rows.A)}${tier("Trình B nam",t.M,rows.M)}${tier("Trình B nữ",t.F,rows.F)}
   </div>`;
 }
-function renderRoster(){
-  document.getElementById("roster").innerHTML = col("red")+col("blue");
+// Danh sách toàn bộ người chơi theo trình — luôn hiện, không bị nút Ẩn tên tác động
+function renderQuick(){
+  const line = (label, arr) => `<div class="qr">
+      <span class="qn">${label}</span>
+      <span class="ql">${arr.map(n=>esc(n)).join('<i>·</i>')}</span>
+      <span class="qc">${arr.length}</span>
+    </div>`;
+  document.getElementById("quick").innerHTML =
+    line("Trình A", POOL.A) + line("Trình B nam", POOL.M) + line("Trình B nữ", POOL.F);
 }
+
+function renderRoster(){
+  // mỗi nhóm cao bằng cột đông người hơn để hai bên thẳng hàng
+  const rows = {
+    A: Math.max(TEAMS.red.A.length, TEAMS.blue.A.length),
+    M: Math.max(TEAMS.red.M.length, TEAMS.blue.M.length),
+    F: Math.max(TEAMS.red.F.length, TEAMS.blue.F.length)
+  };
+  document.getElementById("roster").innerHTML = col("red",rows)+col("blue",rows);
+  renderQuick();
+  const n=["red","blue"].reduce((a,k)=>a+TEAMS[k].A.length+TEAMS[k].M.length+TEAMS[k].F.length,0);
+  const el=document.getElementById("sqn"); if(el) el.textContent=n+" vận động viên";
+}
+
+function nm(v){ return blanked ? `<span class="blankname">${HIDDEN}</span>` : esc(v); }
 
 function row(m,i,code){
   const done = m.rs!=="" && m.bs!=="";
@@ -446,13 +556,13 @@ function row(m,i,code){
   const bw = done && +m.bs > +m.rs ? " win":"";
   return `<div class="mt">
     <div class="code">${code}</div>
-    <div class="p r${rw}">${esc(m.r)}</div>
+    <div class="p r${rw}">${nm(m.r)}</div>
     <div class="mid">
       <input inputmode="numeric" maxlength="2" data-i="${i}" data-f="rs" value="${esc(m.rs)}" aria-label="Điểm đội đỏ">
       <b>–</b>
       <input inputmode="numeric" maxlength="2" data-i="${i}" data-f="bs" value="${esc(m.bs)}" aria-label="Điểm đội xanh">
     </div>
-    <div class="p b${bw}">${esc(m.b)}</div>
+    <div class="p b${bw}">${nm(m.b)}</div>
   </div>`;
 }
 
@@ -489,10 +599,74 @@ function tally(){
   document.getElementById("tb").textContent=b;
 }
 
+
+/* ---------- hiệu ứng bốc thăm ---------- */
+const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const BAG = [...POOL.A, ...POOL.M, ...POOL.F];
+
+function setBusy(on){
+  adm.classList.toggle("busy", on);
+}
+
+function spinRoster(done){
+  const box = document.getElementById("roster");
+  // mỗi cột có 3 nhóm theo thứ tự A, B nam, B nữ — đảo lại để trình A lộ diện cuối
+  const rG = [...box.querySelectorAll(".tcol.red  .plist")];
+  const bG = [...box.querySelectorAll(".tcol.blue .plist")];
+  const order = [];
+  [2,1,0].forEach(g=>{
+    const r = rG[g] ? [...rG[g].children] : [];
+    const b = bG[g] ? [...bG[g].children] : [];
+    for(let i=0;i<Math.max(r.length,b.length);i++){
+      if(r[i]) order.push(r[i]);
+      if(b[i]) order.push(b[i]);
+    }
+  });
+  if(REDUCE || !order.length){ done && done(); return; }
+
+  const finals = order.map(el => el.textContent);
+  order.forEach(el => el.classList.add("spin"));
+  box.classList.add("drawing");
+
+  let locked = 0;
+  const tick = setInterval(()=>{
+    for(let i=locked;i<order.length;i++){
+      order[i].textContent = BAG[Math.floor(Math.random()*BAG.length)];
+    }
+  }, SPEED.nhipQuay);
+
+  const step = ()=>{
+    if(locked >= order.length){
+      clearInterval(tick);
+      box.classList.remove("drawing");
+      done && done();
+      return;
+    }
+    const el = order[locked];
+    el.textContent = finals[locked];
+    el.classList.remove("spin");
+    el.classList.add("lock");
+    locked++;
+    stamp.textContent = `Đang bốc thăm… ${locked}/${order.length}`;
+    const conLai = order.length - locked;
+    setTimeout(step, conLai <= SPEED.soNguoiCuoi ? SPEED.sauCung : SPEED.moiNguoi);
+  };
+  setTimeout(step, SPEED.quayDau);
+}
+
+function revealBoard(){
+  if(REDUCE) return;
+  [...board.querySelectorAll(".mt")].forEach((el,i)=>{
+    el.style.animationDelay = (i*55)+"ms";
+    el.classList.add("reveal");
+  });
+}
+
 function controls(){
   adm.innerHTML = unlocked
     ? `<button class="go" id="shufT">Bốc đội hình</button>
        <button class="go alt" id="shufM">Bốc bảng đấu</button>
+       <button class="undo" id="hide">${blanked?"Hiện tên":"Ẩn tên"}</button>
        <button class="undo" id="undo" ${history.length?"":"disabled"}>Hoàn tác${history.length?` (${history.length})`:""}</button>
        <button class="lock" id="lock">Khoá</button>`
     : `<button class="lock" id="unlock" style="flex:1">Mở khoá bốc thăm</button>`;
@@ -506,8 +680,15 @@ function controls(){
       if(!res){ restore(before); stamp.textContent="Bốc không ra, bấm lại lần nữa"; return; }
       history.push(before); if(history.length>20) history.shift();
       M=res;
-      stamp.textContent=`Đã bốc lại đội hình lúc ${now()}`;
+      blanked=false;          // mở lại để tên hiện dần trong lúc quay
       render(); save();
+      setBusy(true);
+      stamp.textContent="Đang bốc thăm…";
+      spinRoster(()=>{
+        setBusy(false);
+        stamp.textContent=`Đã bốc lại đội hình lúc ${now()}`;
+        revealBoard();
+      });
     };
     $("shufM").onclick=()=>{
       const res=draw();
@@ -516,11 +697,17 @@ function controls(){
       M=res;
       stamp.textContent=`Đã bốc lại bảng đấu lúc ${now()}`;
       render(); save();
+      revealBoard();
     };
     $("undo").onclick=()=>{
       if(!history.length) return;
       restore(history.pop());
       stamp.textContent="Đã quay về lượt bốc trước";
+      render(); save();
+    };
+    $("hide").onclick=()=>{
+      blanked=!blanked;
+      stamp.textContent = blanked ? "Đã giấu tên, sẵn sàng lên sóng" : "Đã hiện lại tên";
       render(); save();
     };
     $("lock").onclick=()=>{unlocked=false;render()};
